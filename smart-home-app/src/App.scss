@@ -1,0 +1,251 @@
+@import './reset.scss';
+
+@font-face {
+  font-family: Inter UI Regular;
+  src: url(fonts/Inter-UI-Regular.ttf);
+}
+
+html {
+  font-size: 62.5%;
+  font-family: Inter UI Regular, sans-serif;
+  color: #3b3460;
+}
+
+body {
+  background-color: #e3dfec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.app {
+  background-color: #fff;
+  border-radius: 3rem;
+  width: 90vw;
+  max-width: 110rem;
+  height: 70vh;
+  box-shadow: 0 1.5rem 3.5rem hsla(0, 0%, 0%, 0.2);
+  display: grid;
+  grid-template-columns: 10rem 1fr 25rem;
+  overflow: hidden;
+  padding: 3rem 0;
+}
+
+.menu {
+  border-right: 0.2rem solid #f6f5fa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-items: center;
+
+  &-item {
+    font-size: 2rem;
+    color: #b8b4cc;
+    width: 4.5rem;
+    height: 4.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+
+    &__section {
+      margin-top: 5rem;
+    }
+
+    &--active {
+      border-radius: 1.5rem;
+      background-color: #fff;
+      box-shadow: 0 0.5rem 1.5rem hsla(0, 0%, 0%, 0.2);
+      color: #ff9066;
+    }
+  }
+
+  &__avatar {
+    border-radius: 1.5rem;
+    width: 4.5rem;
+    height: 4.5rem;
+    overflow: hidden;
+    margin-top: auto;
+
+    img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+  }
+}
+
+h2 {
+  color: #a6a2ba;
+  text-transform: uppercase;
+  font-size: 1rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.btn {
+  appearance: none;
+  border-radius: 1.5rem;
+  width: 4.5rem;
+  height: 4.5rem;
+  border: none;
+  box-shadow: 0 0.4rem 0.6rem hsla(0, 0%, 0%, 0.1);
+
+  svg {
+    color: white;
+    font-size: 1.5rem;
+  }
+
+  &--1 {
+    background-color: #6f32ff;
+  }
+  &--2 {
+    background-color: #ff9066;
+  }
+  &--3 {
+    background-color: #ffcd41;
+  }
+  &--plus {
+    border: 1px dashed #b8b4cc;
+    background-color: transparent;
+    box-shadow: none;
+
+    svg {
+      color: #b8b4cc !important;
+    }
+  }
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+
+  .header {
+    grid-row: 1;
+    display: grid;
+    grid-template-rows: 2rem 2rem;
+    grid-template-columns: 1.5rem auto 1fr auto auto;
+    align-items: center;
+    grid-gap: 1rem;
+    padding: 5rem 4rem;
+
+    &__back {
+      grid-row: 1;
+      grid-column: 1;
+      color: #b4b1c8;
+      font-size: 1.5rem;
+    }
+
+    &__subtitle {
+      grid-row: 1;
+      grid-column: 2;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #b4b1c8;
+    }
+
+    &__title {
+      grid-row: 2;
+      grid-column: 2;
+      font-size: 2rem;
+    }
+
+    &__humidity {
+      grid-row: 2;
+      grid-column: 4;
+    }
+
+    &__ac {
+      grid-row: 2;
+      grid-column: 5;
+    }
+
+    &__more {
+      grid-row: 1;
+      grid-column: 5;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    &__control {
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      margin-left: 1rem;
+
+      svg {
+        color: #b8b4cc;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+
+        &.fa-toggle-on {
+          font-size: 2.3rem;
+        }
+      }
+    }
+  }
+
+  .control {
+    grid-row: 2;
+  }
+
+  .history {
+    grid-row: 3;
+  }
+}
+
+.sidebar {
+  background-color: #f6f5fa;
+  margin: -3rem 0;
+
+  padding: 8rem 3rem;
+  display: flex;
+  flex-direction: column;
+
+  h2 {
+    margin-bottom: 2rem;
+
+    &:not(:first-of-type) {
+      margin-top: 3rem;
+    }
+  }
+
+  .shortcut {
+    height: auto;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    gap: 1rem;
+
+    &:not(:first-of-type) {
+      margin-top: 2rem;
+    }
+
+    .btn {
+      grid-column: 1 / 1;
+      grid-row: 1 / span 2;
+    }
+
+    .title {
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .text {
+      color: #45c97f;
+    }
+  }
+
+  .devices {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 1.5rem;
+
+    svg {
+      color: #6f32ff;
+    }
+  }
+}

@@ -24,7 +24,7 @@ body {
   border-radius: 3rem;
   width: 90vw;
   max-width: 110rem;
-  height: 70vh;
+  height: 90vh;
   box-shadow: 0 1.5rem 3.5rem hsla(0, 0%, 0%, 0.2);
   display: grid;
   grid-template-columns: 10rem 1fr 25rem;
@@ -121,6 +121,7 @@ h2 {
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: auto 1fr auto;
+  padding: 0 4rem;
 
   .header {
     grid-row: 1;
@@ -129,7 +130,7 @@ h2 {
     grid-template-columns: 1.5rem auto 1fr auto auto;
     align-items: center;
     grid-gap: 1rem;
-    padding: 5rem 4rem;
+    padding: 5rem 0;
 
     &__back {
       grid-row: 1;
@@ -193,6 +194,43 @@ h2 {
 
   .history {
     grid-row: 3;
+    height: 200px;
+
+    h2 {
+      margin-bottom: 2rem;
+    }
+
+    .bar-chart {
+      display: grid;
+      grid-auto-columns: 1fr;
+      grid-auto-flow: column;
+      grid-gap: 0.5rem;
+      align-items: flex-end;
+
+      &__bar {
+        background-color: #f1f0f5;
+        animation-name: animatebar;
+        animation-duration: 150ms;
+        animation-timing-function: ease-out;
+        transform-origin: bottom;
+        border-radius: 0.5rem 0.5rem 0 0;
+
+        &__label {
+          grid-row: 2;
+          text-align: center;
+          color: #9c98ae;
+        }
+      }
+    }
+  }
+}
+
+@keyframes animatebar {
+  0% {
+    transform: scaleY(0);
+  }
+  100% {
+    transform: scaleY(1);
   }
 }
 

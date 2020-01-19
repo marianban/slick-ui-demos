@@ -209,28 +209,41 @@ h2 {
 
       &__bar {
         background-color: #f1f0f5;
+        transform: scaleY(0);
         animation-name: animatebar;
         animation-duration: 150ms;
         animation-timing-function: ease-out;
         transform-origin: bottom;
+        animation-fill-mode: forwards;
         border-radius: 0.5rem 0.5rem 0 0;
+
+        @keyframes animatebar {
+          0% {
+            transform: scaleY(0);
+          }
+          100% {
+            transform: scaleY(1);
+          }
+        }
 
         &__label {
           grid-row: 2;
           text-align: center;
           color: #9c98ae;
+          opacity: 0;
+          animation-name: animate-label;
+          animation-duration: 150ms;
+          animation-timing-function: ease-out;
+          animation-fill-mode: forwards;
+        }
+
+        @keyframes animate-label {
+          100% {
+            opacity: 1;
+          }
         }
       }
     }
-  }
-}
-
-@keyframes animatebar {
-  0% {
-    transform: scaleY(0);
-  }
-  100% {
-    transform: scaleY(1);
   }
 }
 

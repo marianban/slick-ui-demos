@@ -43,17 +43,23 @@ export const History = () => {
     <div className="history">
       <h2>Last Days</h2>
       <div className="bar-chart">
-        {data.map(d => (
+        {data.map((d, i) => (
           <>
             <div
               key={d.id}
               className="bar-chart__bar"
               style={{
                 height: yScale(yAccessor(d)),
-                backgroundColor: barColorScale(d)
+                backgroundColor: barColorScale(d),
+                animationDelay: `${60 * i}ms`
               }}
             />
-            <div className="bar-chart__bar__label">{d.day}</div>
+            <div
+              className="bar-chart__bar__label"
+              style={{ animationDelay: `${60 * i}ms` }}
+            >
+              {d.day}
+            </div>
           </>
         ))}
       </div>

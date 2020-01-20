@@ -55,6 +55,7 @@ export const History = () => {
               }}
             />
             <div
+              key={`label-${d.id}`}
               className="bar-chart__bar__label"
               style={{ animationDelay: `${60 * i}ms` }}
             >

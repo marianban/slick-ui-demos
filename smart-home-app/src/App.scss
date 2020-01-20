@@ -190,6 +190,54 @@ h2 {
 
   .control {
     grid-row: 2;
+    display: flex;
+    .gauge {
+      position: relative;
+      &__tick {
+        stroke: #dcd9e7;
+      }
+
+      .area {
+        transform: rotate(0.5turn);
+      }
+      &__circle {
+        position: absolute;
+        transform-origin: center center;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        background-color: #fff;
+        box-shadow: 0 0.4rem 0.6rem rgba(0, 0, 0, 0.1),
+          0 4rem 5rem rgba(0, 0, 0, 0.07);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &__indicator {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        &__label {
+          color: #a29fb0;
+          line-height: 2em;
+        }
+
+        &__temp {
+          font-size: 2rem;
+          font-weight: bold;
+          sup {
+            display: inline-block;
+            vertical-align: top;
+            font-weight: normal;
+            font-size: 1.2rem;
+            transform: translateY(2px);
+          }
+        }
+      }
+    }
   }
 
   .history {

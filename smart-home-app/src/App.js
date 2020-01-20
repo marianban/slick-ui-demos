@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.scss';
 import { History } from './History';
+import { Gauge } from './Gauge';
 
 function App() {
   return (
@@ -50,7 +51,9 @@ function App() {
             <i className="fas fa-ellipsis-h"></i>
           </div>
         </div>
-        <div className="control"></div>
+        <div className="control">
+          <Gauge />
+        </div>
         <History />
       </div>
       <div className="sidebar">

@@ -1,5 +1,10 @@
 @import './reset.scss';
 
+:root {
+  --handle-x: 0px;
+  --handle-y: 0px;
+}
+
 @font-face {
   font-family: Inter UI Regular;
   src: url(fonts/Inter-UI-Regular.ttf);
@@ -115,6 +120,14 @@ h2 {
       color: #b8b4cc !important;
     }
   }
+  &--grey {
+    box-shadow: none;
+    background-color: #f2f1fa;
+    font-size: 1.8rem;
+    width: 4rem;
+    height: 4rem;
+    color: #b1abcd;
+  }
 }
 
 .main {
@@ -191,10 +204,60 @@ h2 {
   .control {
     grid-row: 2;
     display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    display: flex;
     .gauge {
       position: relative;
+      margin: 0 4rem;
+
+      #pause-icon {
+        color: #a6a2ba;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+      }
+
+      &__handle {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        border-radius: 0% 100% 45% 55% / 1% 55% 45% 100%;
+        background-color: #fff;
+        width: 2rem;
+        height: 2rem;
+        z-index: 100;
+        box-shadow: 0 0.1rem 0.3rem hsla(0, 0%, 0%, 0.2);
+        transform-origin: center center;
+        transform: rotate(-45deg)
+          translate(calc(-25% + var(--handle-x)), calc(-50% + var(--handle-y)));
+      }
+
       &__tick {
         stroke: #dcd9e7;
+
+        &__text {
+          fill: #a6a2ba;
+          &--1 {
+            text-anchor: end;
+            dominant-baseline: middle;
+          }
+          &--2 {
+            text-anchor: middle;
+          }
+          &--3 {
+            text-anchor: start;
+            dominant-baseline: middle;
+          }
+          &--4 {
+            text-anchor: middle;
+          }
+        }
+      }
+
+      svg {
+        overflow: visible;
       }
 
       .area {
@@ -226,14 +289,13 @@ h2 {
         }
 
         &__temp {
-          font-size: 2rem;
-          font-weight: bold;
+          font-size: 2.5rem;
           sup {
             display: inline-block;
             vertical-align: top;
             font-weight: normal;
             font-size: 1.2rem;
-            transform: translateY(2px);
+            transform: translateY(4px);
           }
         }
       }
@@ -243,6 +305,7 @@ h2 {
   .history {
     grid-row: 3;
     height: 200px;
+    margin-top: 3rem;
 
     h2 {
       margin-bottom: 2rem;

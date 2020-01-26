@@ -56,14 +56,19 @@ export const Gauge = () => {
     const quarter = Math.PI / 4;
     const angleScale = d3
       .scaleTime()
-      .domain(d3.extent(5, 35))
-      .range([quarter, Math.PI * 2 - quarter]);
+      .domain([0, 40])
+      .range([Math.PI, 3 * Math.PI]);
+
+    var thresholdScale = d3
+      .scaleThreshold()
+      .domain([0, 10, 20, 30, 40])
+      .range([-1, -1, 1, -1, 1, 1]);
 
     var arcGenerator = d3.arc();
 
     var pathData = arcGenerator({
-      startAngle: quarter,
-      endAngle: Math.PI * 2 - quarter,
+      startAngle: angleScale(5),
+      endAngle: angleScale(35),
       innerRadius: 60,
       outerRadius: 80
     });
@@ -79,8 +84,11 @@ export const Gauge = () => {
       .attr('d', pathData)
       .style('fill', '#F1F0F5');
 
+    const lowestTemp = 5;
+    const highestTemp = 35;
+    const step = (highestTemp - lowestTemp) / 24;
     const ticks = Array.from({ length: 25 }, (_, i) => ({
-      angle: i * (quarter / 4) + Math.PI + quarter,
+      angle: angleScale(lowestTemp + i * step),
       offset: [4, 12, 20].includes(i) ? 0.2 : 0.1
     }));
     const ticksGroup = bounds.append('g');
@@ -103,7 +111,7 @@ export const Gauge = () => {
       .data(
         ticks
           .filter((_, i) => [4, 12, 20].includes(i))
-          .concat([{ angle: Math.PI }])
+          .concat([{ angle: angleScale(0) }])
       )
       .enter()
       .append('text')
@@ -113,19 +121,38 @@ export const Gauge = () => {
       .text((_, i) => tickText[i]);
 
     const pauseIconOffset = tickTextOffset - 0.5;
-    const pauseIconX = getXFromAngle(Math.PI, pauseIconOffset);
-    const pauseIconY = getYFromAngle(Math.PI, pauseIconOffset);
+    const pauseIconX = getXFromAngle(angleScale(0), pauseIconOffset);
+    const pauseIconY = getYFromAngle(angleScale(0), pauseIconOffset);
 
     d3.select($pauseIcon.current).style(
       'transform',
       `translate(${pauseIconX}px, ${pauseIconY}px`
     );
 
-    const handleX = getXFromAngle(Math.PI - quarter, pauseIconOffset);
-    const handleY = getYFromAngle(Math.PI - quarter, pauseIconOffset);
+    const currentTemp = 30;
+    const handleAngle = angleScale(currentTemp);
+    const handleX = getXFromAngle(handleAngle, pauseIconOffset);
+    const handleY = getYFromAngle(handleAngle, pauseIconOffset);
+    const angleScaleRad = value => angleScale(value) * (180 / Math.PI);
+    const computeAngle = value => {
+      const r = angleScaleRad(value) % 90;
+      if (value >= 30) {
+        return r;
+      }
+      if (value >= 20) {
+        return -(90 - r);
+      }
+      if (value >= 10) {
+        return 185 + r;
+      }
+      return 180 - (90 - r);
+    };
+    const handleAngleDeg = computeAngle(currentTemp);
+    console.log(handleAngle, handleAngleDeg);
     d3.select($handle.current)
       .style('--handle-x', `${handleX}px`)
-      .style('--handle-y', `${handleY}px`);
+      .style('--handle-y', `${handleY}px`)
+      .style('--handle-angle', `${handleAngleDeg}deg`);
   }, []);
 
   return (

@@ -3,6 +3,7 @@
 :root {
   --handle-x: 0px;
   --handle-y: 0px;
+  --handle-deg: 0deg;
 }
 
 @font-face {
@@ -230,8 +231,11 @@ h2 {
         z-index: 100;
         box-shadow: 0 0.1rem 0.3rem hsla(0, 0%, 0%, 0.2);
         transform-origin: center center;
-        transform: rotate(-45deg)
-          translate(calc(-25% + var(--handle-x)), calc(-50% + var(--handle-y)));
+        transform: translate(
+            calc(-50% + var(--handle-x)),
+            calc(-50% + var(--handle-y))
+          )
+          rotate(calc(-45deg + var(--handle-angle)));
       }
 
       &__tick {
@@ -261,7 +265,6 @@ h2 {
       }
 
       .area {
-        transform: rotate(0.5turn);
       }
       &__circle {
         position: absolute;

@@ -53,16 +53,10 @@ export const Gauge = () => {
       );
 
     // this is in radians
-    const quarter = Math.PI / 4;
     const angleScale = d3
       .scaleTime()
       .domain([0, 40])
       .range([Math.PI, 3 * Math.PI]);
-
-    var thresholdScale = d3
-      .scaleThreshold()
-      .domain([0, 10, 20, 30, 40])
-      .range([-1, -1, 1, -1, 1, 1]);
 
     var arcGenerator = d3.arc();
 
@@ -78,7 +72,7 @@ export const Gauge = () => {
       .style('width', `${gaugeCircleRadius}px`)
       .style('height', `${gaugeCircleRadius}px`);
 
-    const area = bounds
+    bounds
       .append('path')
       .attr('class', 'area')
       .attr('d', pathData)

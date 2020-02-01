@@ -52,9 +52,7 @@ function App() {
           </div>
         </div>
         <div className="control">
-          <button className="btn btn--grey"> -</button>
           <Gauge />
-          <button className="btn btn--grey">+</button>
         </div>
         <History />
       </div>

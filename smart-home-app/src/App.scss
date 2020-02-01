@@ -224,7 +224,8 @@ h2 {
         position: absolute;
         left: 50%;
         top: 50%;
-        border-radius: 0% 100% 45% 55% / 1% 55% 45% 100%;
+        border-radius: 55% 45% 100% 0% / 100% 45% 55% 1%;
+        // border-radius: 0% 100% 45% 55% / 1% 55% 45% 100%;
         background-color: #fff;
         width: 2rem;
         height: 2rem;
@@ -235,7 +236,7 @@ h2 {
             calc(-50% + var(--handle-x)),
             calc(-50% + var(--handle-y))
           )
-          rotate(calc(-45deg + var(--handle-angle)));
+          rotate(calc(-90deg - 45deg + var(--handle-angle)));
       }
 
       &__tick {
@@ -264,8 +265,6 @@ h2 {
         overflow: visible;
       }
 
-      .area {
-      }
       &__circle {
         position: absolute;
         transform-origin: center center;

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
 export const Gauge = () => {
@@ -6,6 +6,9 @@ export const Gauge = () => {
   const $pauseIcon = useRef();
   const $handle = useRef();
   const width = 200;
+
+  const [desiredTemp, setDesiredTemp] = useState(30);
+  const currentTemp = 20;
 
   useEffect(() => {
     let dimensions = {
@@ -43,6 +46,32 @@ export const Gauge = () => {
       .attr('width', dimensions.width)
       .attr('height', dimensions.height);
 
+    const defs = wrapper.append('defs');
+    const tempGradientId = 'temp-gradient';
+
+    const sequentialScale = d3
+      .scaleSequential()
+      .domain([40, 0])
+      .interpolator(d3.interpolateRainbow);
+
+    const gradientStops = 40;
+    const tempDelta = Math.abs(currentTemp - desiredTemp);
+    const gradientTempStep = tempDelta / gradientStops;
+    defs
+      .append('linearGradient')
+      .attr('id', tempGradientId)
+      .selectAll('stop')
+      .data(
+        Array.from(
+          { length: gradientStops + 1 },
+          (v, i) => currentTemp + i * gradientTempStep
+        )
+      )
+      .enter()
+      .append('stop')
+      .attr('stop-color', d => sequentialScale(d))
+      .attr('offset', (d, i) => `${i * (100 / 40)}%`);
+
     const bounds = wrapper
       .append('g')
       .style(
@@ -51,6 +80,11 @@ export const Gauge = () => {
           dimensions.boundedRadius}px, ${dimensions.margin.top +
           dimensions.boundedRadius}px)`
       );
+
+    const gaugeCircleRadius = 122;
+    d3.select($gaugeCircle.current)
+      .style('width', `${gaugeCircleRadius}px`)
+      .style('height', `${gaugeCircleRadius}px`);
 
     // this is in radians
     const angleScale = d3
@@ -67,16 +101,22 @@ export const Gauge = () => {
       outerRadius: 80
     });
 
-    const gaugeCircleRadius = 122;
-    d3.select($gaugeCircle.current)
-      .style('width', `${gaugeCircleRadius}px`)
-      .style('height', `${gaugeCircleRadius}px`);
+    bounds
+      .append('path')
+      .attr('d', pathData)
+      .style('fill', '#F1F0F5');
+
+    var valueArc = arcGenerator({
+      startAngle: angleScale(currentTemp),
+      endAngle: angleScale(desiredTemp),
+      innerRadius: 80,
+      outerRadius: 82
+    });
 
     bounds
       .append('path')
-      .attr('class', 'area')
-      .attr('d', pathData)
-      .style('fill', '#F1F0F5');
+      .attr('d', valueArc)
+      .style('fill', `url(#${tempGradientId})`);
 
     const lowestTemp = 5;
     const highestTemp = 35;
@@ -123,8 +163,7 @@ export const Gauge = () => {
       `translate(${pauseIconX}px, ${pauseIconY}px`
     );
 
-    const currentTemp = 30;
-    const handleAngle = angleScale(currentTemp);
+    const handleAngle = angleScale(desiredTemp);
     const handleX = getXFromAngle(handleAngle, pauseIconOffset);
     const handleY = getYFromAngle(handleAngle, pauseIconOffset);
     const angleScaleRad = value => angleScale(value) * (180 / Math.PI);
@@ -141,28 +180,46 @@ export const Gauge = () => {
       }
       return 180 - (90 - r);
     };
-    const handleAngleDeg = computeAngle(currentTemp);
-    console.log(handleAngle, handleAngleDeg);
+    const handleAngleDeg = computeAngle(desiredTemp);
     d3.select($handle.current)
       .style('--handle-x', `${handleX}px`)
       .style('--handle-y', `${handleY}px`)
       .style('--handle-angle', `${handleAngleDeg}deg`);
-  }, []);
+  }, [desiredTemp]);
 
   return (
-    <div id="gauge" className="gauge" style={{ width, height: width }}>
-      <div className="gauge__circle" ref={$gaugeCircle}>
-        <div className="gauge__circle__indicator">
-          <div className="gauge__circle__label">Goal</div>
-          <div className="gauge__circle__temp">
-            30<sup>℃</sup>
+    <>
+      <button
+        className="btn btn--grey"
+        onClick={() => {
+          setDesiredTemp(desiredTemp => Math.max(5, desiredTemp - 1));
+        }}
+      >
+        {' '}
+        -
+      </button>
+      <div id="gauge" className="gauge" style={{ width, height: width }}>
+        <div className="gauge__circle" ref={$gaugeCircle}>
+          <div className="gauge__circle__indicator">
+            <div className="gauge__circle__label">Goal</div>
+            <div className="gauge__circle__temp">
+              30<sup>℃</sup>
+            </div>
           </div>
         </div>
+        <div id="pause-icon" ref={$pauseIcon}>
+          <i class="fas fa-pause"></i>
+        </div>
+        <div className="gauge__handle" ref={$handle}></div>
       </div>
-      <div id="pause-icon" ref={$pauseIcon}>
-        <i class="fas fa-pause"></i>
-      </div>
-      <div className="gauge__handle" ref={$handle}></div>
-    </div>
+      <button
+        className="btn btn--grey"
+        onClick={() => {
+          setDesiredTemp(desiredTemp => Math.min(35, desiredTemp + 1));
+        }}
+      >
+        +
+      </button>
+    </>
   );
 };

@@ -231,6 +231,7 @@ h2 {
         height: 2rem;
         z-index: 100;
         box-shadow: 0 0.1rem 0.3rem hsla(0, 0%, 0%, 0.2);
+        transition: all 250ms ease-in-out;
         transform-origin: center center;
         transform: translate(
             calc(-50% + var(--handle-x)),

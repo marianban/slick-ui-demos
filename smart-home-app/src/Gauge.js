@@ -6,7 +6,8 @@ function Handle({
   getXFromAngle,
   getYFromAngle,
   pauseIconOffset,
-  desiredTemp
+  desiredTemp,
+  sequentialScale
 }) {
   const handleAngle = angleScale(desiredTemp);
   const handleX = getXFromAngle(handleAngle, pauseIconOffset);
@@ -21,9 +22,9 @@ function Handle({
       return -(90 - r);
     }
     if (value >= 10) {
-      return 185 + r;
+      return -180 + r;
     }
-    return 180 - (90 - r);
+    return -180 - (90 - r);
   };
   const handleAngleDeg = computeAngle(desiredTemp);
 
@@ -35,24 +36,33 @@ function Handle({
         '--handle-y': `${handleY}px`,
         '--handle-angle': `${handleAngleDeg}deg`
       }}
-    ></div>
+    >
+      <div className="gauge__handle__circle-wrapper">
+        <div
+          className="gauge__handle__circle"
+          style={{ '--temp-color': sequentialScale(desiredTemp) }}
+        ></div>
+      </div>
+    </div>
   );
 }
 
 function Ticks({ angleScale, getXFromAngle, getYFromAngle, tickTextOffset }) {
   const lowestTemp = 5;
   const highestTemp = 35;
-  const step = (highestTemp - lowestTemp) / 24;
-  const ticks = Array.from({ length: 25 }, (_, i) => ({
+  const numOfSteps = 31;
+  const step = (highestTemp - lowestTemp) / (numOfSteps - 1);
+  const mainTickStops = [5, 15, 25];
+  const ticks = Array.from({ length: numOfSteps }, (_, i) => ({
     angle: angleScale(lowestTemp + i * step),
-    offset: [4, 12, 20].includes(i) ? 0.2 : 0.1
+    offset: mainTickStops.includes(i) ? 0.2 : 0.1
   }));
   const tickOffset = 1.7;
 
   const tickText = ['10℃', '20℃', '30℃', '1:23 min left'];
 
   const mainTicks = ticks
-    .filter((_, i) => [4, 12, 20].includes(i))
+    .filter((_, i) => mainTickStops.includes(i))
     .concat([{ angle: angleScale(0) }]);
 
   return (
@@ -82,7 +92,7 @@ function Ticks({ angleScale, getXFromAngle, getYFromAngle, tickTextOffset }) {
 export const Gauge = () => {
   const width = 200;
 
-  const [desiredTemp, setDesiredTemp] = useState(30);
+  const [desiredTemp, setDesiredTemp] = useState(9);
   const currentTemp = 20;
 
   let dimensions = {
@@ -114,7 +124,7 @@ export const Gauge = () => {
     getCoordinatesForAngle(angle, offset)[1];
   const sequentialScale = d3
     .scaleSequential()
-    .domain([40, 0])
+    .domain([35, 5])
     .interpolator(d3.interpolateRainbow);
 
   const angleScale = d3
@@ -140,16 +150,28 @@ export const Gauge = () => {
 
   const tickTextOffset = 2;
 
-  const gradientStops = 40;
   const tempDelta = Math.abs(currentTemp - desiredTemp);
-  const gradientTempStep = tempDelta / gradientStops;
+  const gradientStops = Math.ceil(tempDelta) + 1;
+  const startTemp = Math.min(currentTemp, desiredTemp);
+  const gradientTempStep = tempDelta / (gradientStops - 1);
   const tempGradientId = 'temp-gradient';
+
   const gradientStopsItems = Array.from(
-    { length: gradientStops + 1 },
-    (v, i) => currentTemp + i * gradientTempStep
+    { length: gradientStops },
+    (v, i) => startTemp + i * gradientTempStep
   );
 
+  console.log(d3.extent(gradientStopsItems));
+  console.log(gradientStopsItems);
+
   const gaugeCircleRadius = 122;
+
+  // 15 (40, 234, 141)
+  // 16 (58, 242, 120)
+  // 17 (82, 246, 103)
+  // 18 (111, 246, 91)
+  // 19 (143, 244, 87)
+  // 20 (175, 240, 91)
 
   const pauseIconOffset = tickTextOffset - 0.5;
   const pauseIconX = getXFromAngle(angleScale(0), pauseIconOffset);
@@ -173,7 +195,8 @@ export const Gauge = () => {
               {gradientStopsItems.map((s, i) => (
                 <stop
                   stopColor={sequentialScale(s)}
-                  offset={`${i * (100 / 40)}%`}
+                  offset={`${i * (100 / (gradientStopsItems.length - 1))}%`}
+                  data-color={s}
                 />
               ))}
             </linearGradient>
@@ -211,7 +234,9 @@ export const Gauge = () => {
         </div>
         <div
           id="pause-icon"
-          style={{ transform: `translate(${pauseIconX}px, ${pauseIconY}px` }}
+          style={{
+            transform: `translate(${pauseIconX}px, ${pauseIconY}px`
+          }}
         >
           <i class="fas fa-pause"></i>
         </div>
@@ -221,6 +246,7 @@ export const Gauge = () => {
           getYFromAngle={getYFromAngle}
           pauseIconOffset={pauseIconOffset}
           desiredTemp={desiredTemp}
+          sequentialScale={sequentialScale}
         />
       </div>
       <button

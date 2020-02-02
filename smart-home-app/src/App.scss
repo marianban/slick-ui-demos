@@ -4,6 +4,7 @@
   --handle-x: 0px;
   --handle-y: 0px;
   --handle-deg: 0deg;
+  --temp-color: red;
 }
 
 @font-face {
@@ -238,6 +239,23 @@ h2 {
             calc(-50% + var(--handle-y))
           )
           rotate(calc(-90deg - 45deg + var(--handle-angle)));
+
+        &__circle-wrapper {
+          position: relative;
+          width: 100%;
+          height: 100%;
+        }
+
+        &__circle {
+          position: absolute;
+          width: 0.4rem;
+          height: 0.4rem;
+          border-radius: 50%;
+          background-color: var(--temp-color);
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
       }
 
       &__tick {

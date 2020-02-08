@@ -92,7 +92,7 @@ function Ticks({ angleScale, getXFromAngle, getYFromAngle, tickTextOffset }) {
 export const Gauge = () => {
   const width = 200;
 
-  const [desiredTemp, setDesiredTemp] = useState(9);
+  const [desiredTemp, setDesiredTemp] = useState(20);
   const currentTemp = 20;
 
   let dimensions = {
@@ -134,49 +134,68 @@ export const Gauge = () => {
 
   var arcGenerator = d3.arc();
 
-  var pathData = arcGenerator({
+  var greyBgArc = arcGenerator({
     startAngle: angleScale(5),
     endAngle: angleScale(35),
     innerRadius: 60,
     outerRadius: 80
   });
 
-  var valueArc = arcGenerator({
-    startAngle: angleScale(currentTemp),
-    endAngle: angleScale(desiredTemp),
+  var leftGradientArc = arcGenerator({
+    startAngle: angleScale(20),
+    endAngle: angleScale(5),
     innerRadius: 80,
     outerRadius: 82
   });
 
+  var rightGradientArc = arcGenerator({
+    startAngle: angleScale(20),
+    endAngle: angleScale(35),
+    innerRadius: 80,
+    outerRadius: 82
+  });
+
+  const leftCoverArc = arcGenerator({
+    startAngle: angleScale(20),
+    endAngle: angleScale(0),
+    innerRadius: 80,
+    outerRadius: 83
+  });
+
+  const rightCoverArc = arcGenerator({
+    startAngle: angleScale(20),
+    endAngle: angleScale(40),
+    innerRadius: 80,
+    outerRadius: 83
+  });
+
   const tickTextOffset = 2;
-
-  const tempDelta = Math.abs(currentTemp - desiredTemp);
-  const gradientStops = Math.ceil(tempDelta) + 1;
-  const startTemp = Math.min(currentTemp, desiredTemp);
-  const gradientTempStep = tempDelta / (gradientStops - 1);
   const tempGradientId = 'temp-gradient';
+  const rightGradientId = 'right-gradient';
 
-  const gradientStopsItems = Array.from(
-    { length: gradientStops },
-    (v, i) => startTemp + i * gradientTempStep
-  );
+  const stop = (temp, offset) => ({ color: sequentialScale(temp), offset });
+  const gradientStopsItems = [
+    stop(20, 0),
+    stop(15, 20),
+    stop(10, 50),
+    stop(7, 75),
+    stop(5, 100)
+  ];
 
-  console.log(d3.extent(gradientStopsItems));
-  console.log(gradientStopsItems);
+  const rightGradientStopsItems = [
+    stop(20, 0),
+    stop(25, 20),
+    stop(30, 50),
+    stop(32, 75),
+    stop(35, 100)
+  ];
 
   const gaugeCircleRadius = 122;
-
-  // 15 (40, 234, 141)
-  // 16 (58, 242, 120)
-  // 17 (82, 246, 103)
-  // 18 (111, 246, 91)
-  // 19 (143, 244, 87)
-  // 20 (175, 240, 91)
-
   const pauseIconOffset = tickTextOffset - 0.5;
   const pauseIconX = getXFromAngle(angleScale(0), pauseIconOffset);
   const pauseIconY = getYFromAngle(angleScale(0), pauseIconOffset);
 
+  let desiredTempAngle = angleScale(desiredTemp) - 2 * Math.PI;
   return (
     <>
       <button
@@ -191,12 +210,23 @@ export const Gauge = () => {
       <div className="gauge">
         <svg width={dimensions.width} height={dimensions.height}>
           <defs>
-            <linearGradient id={tempGradientId}>
+            <linearGradient id={tempGradientId} gradientTransform="rotate(90)">
               {gradientStopsItems.map((s, i) => (
                 <stop
-                  stopColor={sequentialScale(s)}
-                  offset={`${i * (100 / (gradientStopsItems.length - 1))}%`}
-                  data-color={s}
+                  key={s.temp}
+                  stopColor={s.color}
+                  offset={`${s.offset}%`}
+                  data-temp={s.temp}
+                />
+              ))}
+            </linearGradient>
+            <linearGradient id={rightGradientId} gradientTransform="rotate(90)">
+              {rightGradientStopsItems.map((s, i) => (
+                <stop
+                  key={s.temp}
+                  stopColor={s.color}
+                  offset={`${s.offset}%`}
+                  data-temp={s.temp}
                 />
               ))}
             </linearGradient>
@@ -208,8 +238,25 @@ export const Gauge = () => {
                 dimensions.boundedRadius}px)`
             }}
           >
-            <path d={pathData} fill="#F1F0F5" />
-            <path d={valueArc} fill={`url(#${tempGradientId})`} />
+            <path d={greyBgArc} fill="#F1F0F5" />
+            {desiredTemp <= 20 && (
+              <path d={leftGradientArc} fill={`url(#${tempGradientId})`} />
+            )}
+            {desiredTemp > 20 && (
+              <path d={rightGradientArc} fill={`url(#${rightGradientId})`} />
+            )}
+
+            <g
+              className="cover-arc"
+              style={{
+                '--cover-deg': `${desiredTempAngle}rad`
+              }}
+            >
+              <rect x="-50%" y="-50%" width="100%" height="100%" />
+              {desiredTemp <= 20 && <path d={leftCoverArc} />}
+              {desiredTemp > 20 && <path d={rightCoverArc} />}
+            </g>
+
             <Ticks
               angleScale={angleScale}
               getXFromAngle={getXFromAngle}
@@ -228,7 +275,8 @@ export const Gauge = () => {
           <div className="gauge__circle__indicator">
             <div className="gauge__circle__label">Goal</div>
             <div className="gauge__circle__temp">
-              30<sup>℃</sup>
+              {desiredTemp}
+              <sup>℃</sup>
             </div>
           </div>
         </div>

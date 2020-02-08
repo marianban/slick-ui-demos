@@ -5,6 +5,7 @@
   --handle-y: 0px;
   --handle-deg: 0deg;
   --temp-color: red;
+  --cover-deg: 0rad;
 }
 
 @font-face {
@@ -213,6 +214,41 @@ h2 {
     .gauge {
       position: relative;
       margin: 0 4rem;
+
+      .cover-arc {
+        transform-origin: left top;
+        // animation: rotate 1s infinite alternate;
+        height: 200%;
+        width: 100%;
+        position: relative;
+        transition: transform 250ms ease-in-out;
+        transform: rotate(calc(var(--cover-deg)));
+
+        rect,
+        path {
+          display: block;
+          position: absolute;
+          top: 0;
+          left: 0;
+        }
+
+        rect {
+          fill: transparent;
+        }
+
+        path {
+          fill: #fff;
+        }
+      }
+
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(90deg);
+        }
+      }
 
       #pause-icon {
         color: #a6a2ba;

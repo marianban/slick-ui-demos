@@ -43,10 +43,14 @@ body {
   animation: fadeIn 1s cubic-bezier(0, 0.24, 0.34, 1);
 
   @keyframes fadeIn {
-    from {
+    0% {
       opacity: 0;
+      transform: scale(0.9);
     }
-    to {
+    20% {
+      transform: scale(1);
+    }
+    100% {
       opacity: 1;
     }
   }
@@ -112,6 +116,7 @@ h2 {
   flex-shrink: 0;
   border: none;
   box-shadow: 0 0.4rem 0.6rem hsla(0, 0%, 0%, 0.1);
+  background-color: #fff;
 
   svg {
     color: white;

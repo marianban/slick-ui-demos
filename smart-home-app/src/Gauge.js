@@ -67,8 +67,9 @@ function Ticks({ angleScale, getXFromAngle, getYFromAngle, tickTextOffset }) {
 
   return (
     <g>
-      {ticks.map(t => (
+      {ticks.map((t, i) => (
         <line
+          key={`tick-${i}`}
           className="gauge__tick"
           x1={getXFromAngle(t.angle, tickOffset)}
           x2={getXFromAngle(t.angle, tickOffset + t.offset)}
@@ -78,6 +79,7 @@ function Ticks({ angleScale, getXFromAngle, getYFromAngle, tickTextOffset }) {
       ))}
       {mainTicks.map((t, i) => (
         <text
+          key={`maintick-${i}`}
           className={`gauge__tick__text gauge__tick__text--${i + 1}`}
           x={getXFromAngle(t.angle, tickTextOffset)}
           y={getYFromAngle(t.angle, tickTextOffset)}
@@ -169,12 +171,15 @@ export const Gauge = () => {
     outerRadius: 83
   });
 
-  const tickTextOffset = 2;
-  const tempGradientId = 'temp-gradient';
+  const leftGradientId = 'left-gradient';
   const rightGradientId = 'right-gradient';
 
-  const stop = (temp, offset) => ({ color: sequentialScale(temp), offset });
-  const gradientStopsItems = [
+  const stop = (temp, offset) => ({
+    color: sequentialScale(temp),
+    temp,
+    offset
+  });
+  const leftGradientStopsItems = [
     stop(20, 0),
     stop(15, 20),
     stop(10, 50),
@@ -191,6 +196,7 @@ export const Gauge = () => {
   ];
 
   const gaugeCircleRadius = 122;
+  const tickTextOffset = 2;
   const pauseIconOffset = tickTextOffset - 0.5;
   const pauseIconX = getXFromAngle(angleScale(0), pauseIconOffset);
   const pauseIconY = getYFromAngle(angleScale(0), pauseIconOffset);
@@ -210,10 +216,10 @@ export const Gauge = () => {
       <div className="gauge">
         <svg width={dimensions.width} height={dimensions.height}>
           <defs>
-            <linearGradient id={tempGradientId} gradientTransform="rotate(90)">
-              {gradientStopsItems.map((s, i) => (
+            <linearGradient id={leftGradientId} gradientTransform="rotate(90)">
+              {leftGradientStopsItems.map((s, i) => (
                 <stop
-                  key={s.temp}
+                  key={`left-${s.temp}`}
                   stopColor={s.color}
                   offset={`${s.offset}%`}
                   data-temp={s.temp}
@@ -223,7 +229,7 @@ export const Gauge = () => {
             <linearGradient id={rightGradientId} gradientTransform="rotate(90)">
               {rightGradientStopsItems.map((s, i) => (
                 <stop
-                  key={s.temp}
+                  key={`right-${s.temp}`}
                   stopColor={s.color}
                   offset={`${s.offset}%`}
                   data-temp={s.temp}
@@ -240,7 +246,7 @@ export const Gauge = () => {
           >
             <path d={greyBgArc} fill="#F1F0F5" />
             {desiredTemp <= 20 && (
-              <path d={leftGradientArc} fill={`url(#${tempGradientId})`} />
+              <path d={leftGradientArc} fill={`url(#${leftGradientId})`} />
             )}
             {desiredTemp > 20 && (
               <path d={rightGradientArc} fill={`url(#${rightGradientId})`} />
@@ -256,6 +262,15 @@ export const Gauge = () => {
               {desiredTemp <= 20 && <path d={leftCoverArc} />}
               {desiredTemp > 20 && <path d={rightCoverArc} />}
             </g>
+
+            <circle
+              cx={getXFromAngle(angleScale(currentTemp), 1.6)}
+              cy={getYFromAngle(angleScale(currentTemp), 1.6) - 1}
+              r="2"
+              fill="none"
+              stroke={sequentialScale(currentTemp)}
+              strokeWidth="2"
+            />
 
             <Ticks
               angleScale={angleScale}
@@ -275,7 +290,7 @@ export const Gauge = () => {
           <div className="gauge__circle__indicator">
             <div className="gauge__circle__label">Goal</div>
             <div className="gauge__circle__temp">
-              {desiredTemp}
+              <span>{desiredTemp}</span>
               <sup>℃</sup>
             </div>
           </div>
@@ -283,10 +298,11 @@ export const Gauge = () => {
         <div
           id="pause-icon"
           style={{
-            transform: `translate(${pauseIconX}px, ${pauseIconY}px`
+            '--pause-icon-x': `${pauseIconX}px`,
+            '--pause-icon-y': `${pauseIconY}px`
           }}
         >
-          <i class="fas fa-pause"></i>
+          <i className="fas fa-pause"></i>
         </div>
         <Handle
           angleScale={angleScale}

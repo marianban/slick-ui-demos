@@ -8,8 +8,6 @@ const data = Array.from({ length: 13 }, (_, i) => ({
   temperature: 10 + Math.round(Math.random() * 20)
 }));
 
-console.table(data);
-
 export const History = () => {
   const yAccessor = d => d.temperature;
   const boundedHeight = 150;
@@ -44,9 +42,8 @@ export const History = () => {
       <h2>Last Days</h2>
       <div className="bar-chart">
         {data.map((d, i) => (
-          <>
+          <React.Fragment key={d.id}>
             <div
-              key={d.id}
               className="bar-chart__bar"
               style={{
                 height: yScale(yAccessor(d)),
@@ -55,13 +52,12 @@ export const History = () => {
               }}
             />
             <div
-              key={`label-${d.id}`}
               className="bar-chart__bar__label"
               style={{ animationDelay: `${60 * i}ms` }}
             >
               {d.day}
             </div>
-          </>
+          </React.Fragment>
         ))}
       </div>
     </div>

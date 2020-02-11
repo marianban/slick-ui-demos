@@ -94,7 +94,7 @@ function Ticks({ angleScale, getXFromAngle, getYFromAngle, tickTextOffset }) {
 export const Gauge = () => {
   const width = 200;
 
-  const [desiredTemp, setDesiredTemp] = useState(20);
+  const [desiredTemp, setDesiredTemp] = useState(32);
   const currentTemp = 20;
 
   let dimensions = {

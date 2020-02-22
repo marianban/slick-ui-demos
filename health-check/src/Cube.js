@@ -1,8 +1,8 @@
 import React from 'react';
 import './Cube.scss';
 
-export const Cube = () => (
-  <div className="cube-container">
+export const Cube = ({ style = {} }) => (
+  <div className="cube-container" style={style}>
     <div className="cube actual">
       <div className="side back">back</div>
       <div className="side left">left</div>

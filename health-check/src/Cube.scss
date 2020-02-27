@@ -8,10 +8,21 @@
   --left-grad-color-1: #511fae;
   --left-grad-color-2: #e4534c;
   --top-grad-color-2: #fd794b;
+  --right-grad-color-1: #b170e4;
   --right-grad-color-2: #ffb8a5;
   --animation-direction: alternate;
   --scale-from: 0.04;
   --scale-to: 3;
+  --animation-name: animate-height;
+  --left-border-top: #fff;
+  --left-border-bottom: #0a0322;
+  --left-border-right: #6a289e;
+  --left-border-left: #de5150;
+  --left-border-left-2: #de5150;
+  --front-border-top: #fff;
+  --front-border-bottom: #0a0322;
+  --front-border-left: #e185bc;
+  --reflection-opacity: 1;
 }
 
 .cube-container {
@@ -29,7 +40,7 @@
   transform: rotateX(-25deg) rotateY(45deg);
   color: transparent;
   transform-origin: bottom center;
-  animation: animate-height 2s infinite;
+  animation: var(--animation-name) 4s infinite;
   animation-direction: var(--animation-direction);
   width: var(--size);
   height: var(--size);
@@ -43,6 +54,20 @@
       --left-grad-color-2: #d7beff;
       --top-grad-color-2: #d0b2ff;
       --right-grad-color-2: #d0b2ff;
+      --refection-opacity: calc(1 - var(--refection-opacity) 1);
+    }
+  }
+
+  @keyframes animate-height-reverse {
+    from {
+      --height-scale: var(--scale-from);
+      --left-grad-color-2: #d7beff;
+      --top-grad-color-2: #d0b2ff;
+      --right-grad-color-2: #d0b2ff;
+    }
+    to {
+      --height-scale: var(--scale-to);
+      --left-border-left: var(--left-border-left-2);
     }
   }
 
@@ -57,7 +82,7 @@
     width: var(--size);
     height: var(--size);
     opacity: 1;
-    border: 1px solid transparent;
+    border: 1px solid #ccc;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -70,16 +95,15 @@
   }
   .left {
     width: var(--depth);
-    border-top: 1px solid #fff;
-    border-bottom: 1px solid #0a0322;
-    border-right: 1px solid #6a289e;
-    border-left: 1px solid #de5150;
+    border-top: 1px solid var(--left-border-top);
+    border-bottom: 1px solid var(--left-border-bottom);
+    border-right: 1px solid var(--left-border-right);
+    border-left: 1px solid var(--left-border-left);
     transform-origin: bottom center;
     transform: translateX(-50%) rotateY(90deg);
   }
   .left:not(.reflection) {
-    transform: scaleY(calc(var(--cube-height) / var(--size))) translateX(-50%)
-      rotateY(90deg);
+    transform: scaleY(var(--height-scale)) translateX(-50%) rotateY(90deg);
 
     &::before {
       content: '';
@@ -103,12 +127,13 @@
     }
   }
   .right {
-    background-color: transparent;
+    display: none;
     transform: translateX(50%) rotateY(90deg);
   }
   .top {
     transform: translateY(-50%) rotateX(90deg);
     height: var(--depth);
+    border: none;
   }
   .top:not(.reflection) {
     transform: translateY(calc(-1 * (var(--height-scale) - 1) * var(--size)))
@@ -141,15 +166,16 @@
     transform: translateY(50%) rotateX(270deg);
   }
   .front {
-    border-top: 1px solid #fff;
-    border-bottom: 1px solid #0a0322;
-    border-left: 1px solid #e185bc;
+    border-top: 1px solid var(--front-border-top);
+    border-bottom: 1px solid var(--front-border-bottom);
+    border-left: 1px solid var(--front-border-left);
 
     transform: translateZ(calc(var(--depth) / 2));
     transform-origin: bottom center;
   }
   .front:not(.reflection) {
-    transform: scaleY(var(--height-scale)) translateZ(calc(var(--depth) / 2));
+    transform: scaleY(var(--height-scale))
+      translateZ(calc((var(--depth) / 2) - 1px));
 
     &::before {
       content: '';
@@ -166,8 +192,8 @@
       width: 100%;
       background: linear-gradient(
         to top right,
-        #b170e4,
-        #b170e4 5%,
+        var(--right-grad-color-1),
+        var(--right-grad-color-1) 5%,
         transparent 70%
       );
     }
@@ -179,6 +205,8 @@
     transform: translateY(calc(var(--size) - var(--size) / 15)) rotateX(-25deg)
       rotateY(45deg);
 
+    transition: background-color 1s ease-in-out, opacity 1s ease-in-out;
+
     z-index: -1;
 
     .back,
@@ -189,6 +217,7 @@
     .left,
     .front {
       filter: blur(10px);
+      opacity: var(--reflection-opacity);
     }
     .left {
       border: none;
@@ -198,8 +227,8 @@
         width: 100%;
         height: 100%;
         content: '';
-        transition: background-color 1s ease-in-out;
         background-color: var(--right-grad-color-2);
+        opacity: var(--reflection-opacity);
       }
       &::after {
         position: absolute;
@@ -214,6 +243,7 @@
           #953ff4 50%,
           #953ff4
         );
+        opacity: var(--reflection-opacity);
       }
     }
     .front {

@@ -54,7 +54,7 @@
       --left-grad-color-2: #d7beff;
       --top-grad-color-2: #d0b2ff;
       --right-grad-color-2: #d0b2ff;
-      --refection-opacity: calc(1 - var(--refection-opacity) 1);
+      --refection-opacity: 0.5;
     }
   }
 
@@ -64,10 +64,12 @@
       --left-grad-color-2: #d7beff;
       --top-grad-color-2: #d0b2ff;
       --right-grad-color-2: #d0b2ff;
+      --refection-opacity: 0.5;
     }
     to {
       --height-scale: var(--scale-to);
       --left-border-left: var(--left-border-left-2);
+      --refection-opacity: 1;
     }
   }
 
@@ -101,6 +103,10 @@
     border-left: 1px solid var(--left-border-left);
     transform-origin: bottom center;
     transform: translateX(-50%) rotateY(90deg);
+  }
+  .left.reflection {
+    transition: opacity 1s ease-in-out;
+    opacity: var(--refection-opacity);
   }
   .left:not(.reflection) {
     transform: scaleY(var(--height-scale)) translateX(-50%) rotateY(90deg);
@@ -173,6 +179,10 @@
     transform: translateZ(calc(var(--depth) / 2));
     transform-origin: bottom center;
   }
+  .front.reflection {
+    transition: opacity 1s ease-in-out;
+    opacity: var(--refection-opacity);
+  }
   .front:not(.reflection) {
     transform: scaleY(var(--height-scale))
       translateZ(calc((var(--depth) / 2) - 1px));
@@ -198,14 +208,10 @@
       );
     }
   }
-}
 
-.cube {
   &.reflection {
     transform: translateY(calc(var(--size) - var(--size) / 15)) rotateX(-25deg)
       rotateY(45deg);
-
-    transition: background-color 1s ease-in-out, opacity 1s ease-in-out;
 
     z-index: -1;
 
@@ -213,11 +219,11 @@
     .bottom,
     .right {
       display: none;
+      transition: inherit;
     }
     .left,
     .front {
       filter: blur(10px);
-      opacity: var(--reflection-opacity);
     }
     .left {
       border: none;
@@ -227,6 +233,8 @@
         width: 100%;
         height: 100%;
         content: '';
+        transition: inherit;
+        transition: background-color 1s ease-in-out, opacity 1s ease-in-out;
         background-color: var(--right-grad-color-2);
         opacity: var(--reflection-opacity);
       }
@@ -243,6 +251,7 @@
           #953ff4 50%,
           #953ff4
         );
+        transition: opacity 1s ease-in-out;
         opacity: var(--reflection-opacity);
       }
     }

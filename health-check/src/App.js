@@ -40,7 +40,8 @@ function App() {
           '--front-border-left': '#AFA6ED',
           '--front-border-right': 'black',
           '--front-border-top': '#E2F8FE',
-          '--left-border-top': '#E2F8FE'
+          '--left-border-top': '#E2F8FE',
+          '--animation-name': 'animate-height-reverse'
         }}
       />
       <Cube

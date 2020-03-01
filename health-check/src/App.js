@@ -1,6 +1,9 @@
 import React from 'react';
+import '@fortawesome/fontawesome-free/js/all';
 import { Cube } from './Cube';
 import './App.scss';
+import './Menu';
+import { Menu } from './Menu';
 
 function App() {
   // #8FF9F6
@@ -97,6 +100,7 @@ function App() {
           '--animation-name': 'animate-height-reverse'
         }}
       />
+      <Menu />
     </div>
   );
 }

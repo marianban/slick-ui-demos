@@ -5,6 +5,10 @@
   src: url(fonts/Inter-UI-Regular.ttf);
 }
 
+:root {
+  --menu-height: 40%;
+}
+
 html {
   font-size: 62.5%;
   font-family: Inter UI Regular, sans-serif;
@@ -27,7 +31,7 @@ body {
     #8249f2 20%,
     #953ff4 20% 40%,
     #8249f2 40% 60%,
-    #953ff4 60% 100%
+    #953ff4 calc(100% - var(--menu-height)) 100%
   );
   // width: 90vw;
   // height: 70vh;

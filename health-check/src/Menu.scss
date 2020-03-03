@@ -1,18 +1,19 @@
 .menu {
   --item-width: calc((100%) / 7);
-
+  width: 100%;
   height: var(--menu-height);
   position: absolute;
-  width: 100%;
   bottom: 0;
+  right: 0;
   border-radius: 0 0 3rem 3rem;
   display: flex;
   list-style: none;
   justify-content: flex-start;
   font-size: 3rem;
   flex-shrink: 0;
+  direction: rtl;
+  transition: transform 500ms ease-out;
   // transform: translateX(calc(var(--item-width) * -7));
-
   &-item {
     display: flex;
     align-items: center;

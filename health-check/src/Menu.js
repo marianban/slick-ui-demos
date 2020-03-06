@@ -14,33 +14,43 @@ export const Menu = props => {
   ]);
   const menu = useRef();
   const selectItem = index => {
-    console.log(index);
-    console.log(items.slice(0, index));
     setItems(items => [...items, ...items.slice(0, index)]);
   };
 
   useEffect(() => {
-    /*
-    const newItems = items.length - 7;
-    if (newItems) {
-      const shiftBy = newItems - 7;
-      if (shiftBy) {
-        menu.current.style.transform = `translateX(calc(var(--item-width) * ${shiftBy}))`;
-      }
+    if (items.length !== 7) {
+      const shiftBy = items.length - 7;
+      const slideTiming = {
+        duration: 500,
+        easing: 'ease-in-out'
+      };
+      const slideAnimation = [
+        { transform: 'translateX(0)' },
+        {
+          transform: `translateX(calc(var(--item-width) * ${shiftBy}))`
+        }
+      ];
+      const animation = menu.current.animate(slideAnimation, slideTiming);
+
+      animation.onfinish = function() {
+        setItems(items.slice(shiftBy));
+      };
     }
-    */
   }, [items]);
 
   return (
     <menu className="menu" ref={menu}>
       {items.map((item, i) => (
-        <li
-          className="menu-item"
-          key={`${item.className}-${i}`}
-          onClick={() => selectItem(i)}
-        >
-          <li className={item.className}></li>
-        </li>
+        <>
+          <li
+            className="menu-item"
+            key={`${item.className}-${i}`}
+            onClick={() => selectItem(i)}
+          >
+            <li className={item.className}></li>
+          </li>
+          <li className="menu-item-active"></li>
+        </>
       ))}
     </menu>
   );

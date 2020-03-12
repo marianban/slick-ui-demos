@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { v4 } from 'uuid';
+import classNames from 'classnames';
 import './Menu.scss';
 
 export const Menu = props => {
-  const it = name => ({ className: `fas fa-${name}` });
+  const it = name => ({ className: `fas fa-${name}`, id: v4() });
   const [items, setItems] = useState([
     it('male'),
     it('swimmer'),
@@ -13,8 +15,11 @@ export const Menu = props => {
     it('skiing-nordic')
   ]);
   const menu = useRef();
+  const [clicked, setClicked] = useState(0);
   const selectItem = index => {
-    setItems(items => [...items, ...items.slice(0, index)]);
+    const newItems = items.map(v => ({ ...v, id: v4() }));
+    setItems(items => [...newItems, ...items.slice(0, index)]);
+    setClicked(newItems[index].id);
   };
 
   useEffect(() => {
@@ -33,6 +38,7 @@ export const Menu = props => {
       const animation = menu.current.animate(slideAnimation, slideTiming);
 
       animation.onfinish = function() {
+        setClicked(null);
         setItems(items.slice(shiftBy));
       };
     }
@@ -43,13 +49,15 @@ export const Menu = props => {
       {items.map((item, i) => (
         <>
           <li
-            className="menu-item"
-            key={`${item.className}-${i}`}
+            className={classNames('menu-item', {
+              'menu-item-active': i === 0,
+              'menu-item-clicked': clicked === item.id
+            })}
+            key={`${item.id}`}
             onClick={() => selectItem(i)}
           >
-            <li className={item.className}></li>
+            <i className={item.className}></i>
           </li>
-          <li className="menu-item-active"></li>
         </>
       ))}
     </menu>

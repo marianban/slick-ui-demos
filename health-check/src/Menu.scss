@@ -1,4 +1,5 @@
 .menu {
+  --duration: 250ms;
   --item-width: calc((100%) / 7);
   width: 100%;
   height: var(--menu-height);
@@ -15,25 +16,75 @@
   // transition: transform 500ms ease-out;
   // transform: translateX(calc(var(--item-width) * -7));
   &-item {
-    display: flex;
+    display: grid;
+    grid-template: 1fr / 1fr;
     align-items: center;
     justify-content: center;
+    justify-items: center;
     padding: 2rem 0.5rem;
     border-left: 1px solid rgba($color: #fff, $alpha: 0.2);
     border-right: 1px solid rgba($color: #fff, $alpha: 0.2);
     width: var(--item-width);
     flex-shrink: 0;
 
-    &-active {
-      height: 100%;
-      width: var(--item-width);
-      background-color: #fff;
-      color: #803eef;
+    &::before {
+      content: '';
+      margin: 1rem;
+      background-color: transparent;
       border-radius: 1rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: absolute;
+      grid-area: 1/1;
+      justify-self: stretch;
+      align-self: stretch;
+      transition: background-color 100ms ease-in-out;
+    }
+
+    svg {
+      grid-area: 1/1;
+    }
+
+    &:hover:not(&-clicked) {
+      &::before {
+        background-color: rgba($color: #fff, $alpha: 0.1);
+      }
+    }
+
+    &-clicked {
+      --color: #fff;
+      --bg-color: transparent;
+      // color: var(--color);
+      color: #fff;
+      animation: animateClick 500ms forwards;
+      animation-timing-function: ease-out;
+
+      &::before {
+        background-color: var(--bg-color) !important;
+        transition: background-color 500ms ease-out;
+      }
+
+      @keyframes animateClick {
+        from {
+          color: #fff;
+          // --color: #fff;
+          // --bg-color: transparent;
+        }
+        to {
+          // --color: #803eef;
+          color: #803eef;
+          --bg-color: #fff;
+          // background-color: #fff;
+        }
+      }
+    }
+
+    &-active {
+      color: #803eef;
+
+      &::before {
+        background-color: #fff;
+      }
     }
   }
 }

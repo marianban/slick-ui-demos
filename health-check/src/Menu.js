@@ -1,33 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { v4 } from 'uuid';
 import classNames from 'classnames';
 import './Menu.scss';
 
 export const Menu = props => {
-  const it = name => ({ className: `fas fa-${name}`, id: v4() });
-  const [items, setItems] = useState([
-    it('male'),
-    it('swimmer'),
-    it('running'),
-    it('skiing'),
-    it('skating'),
-    it('biking'),
-    it('skiing-nordic')
-  ]);
+  const { onMenuItemSelect, initialIcons, selected } = props;
+  const numberOfIcons = initialIcons.length;
+  const [icons, setIcons] = useState(initialIcons);
+  const [clicked, setClicked] = useState(null);
   const menu = useRef();
-  const [clicked, setClicked] = useState(0);
   const selectItem = index => {
-    const newItems = items.map(v => ({ ...v, id: v4() }));
-    setItems(items => [...newItems, ...items.slice(0, index)]);
-    setClicked(newItems[index].id);
+    const enteringIcons = icons.slice(0, index).map(v => ({ ...v, id: v4() }));
+    setIcons(items => [...icons, ...enteringIcons]);
+    onMenuItemSelect(icons[index]);
+    setClicked(icons[index].id);
   };
 
   useEffect(() => {
-    if (items.length !== 7) {
-      const shiftBy = items.length - 7;
+    if (icons.length !== numberOfIcons) {
+      const shiftBy = icons.length - numberOfIcons;
       const slideTiming = {
-        duration: 500,
-        easing: 'ease-in-out'
+        duration: 750,
+        easing: 'cubic-bezier(0.5, 0, 0.5, 1)'
       };
       const slideAnimation = [
         { transform: 'translateX(0)' },
@@ -36,21 +31,20 @@ export const Menu = props => {
         }
       ];
       const animation = menu.current.animate(slideAnimation, slideTiming);
-
-      animation.onfinish = function() {
+      animation.onfinish = () => {
         setClicked(null);
-        setItems(items.slice(shiftBy));
+        setIcons(icons.slice(shiftBy));
       };
     }
-  }, [items]);
+  }, [icons, numberOfIcons]);
 
   return (
     <menu className="menu" ref={menu}>
-      {items.map((item, i) => (
+      {icons.map((item, i) => (
         <>
           <li
             className={classNames('menu-item', {
-              'menu-item-active': i === 0,
+              'menu-item-active': selected.id === item.id,
               'menu-item-clicked': clicked === item.id
             })}
             key={`${item.id}`}
@@ -62,4 +56,10 @@ export const Menu = props => {
       ))}
     </menu>
   );
+};
+
+Menu.propTypes = {
+  onMenuItemSelected: PropTypes.func.isRequired,
+  initialIcons: PropTypes.arrayOf(PropTypes.object).isRequired,
+  selected: PropTypes.object.isRequired
 };

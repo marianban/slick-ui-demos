@@ -13,8 +13,7 @@
   font-size: 3rem;
   flex-shrink: 0;
   direction: rtl;
-  // transition: transform 500ms ease-out;
-  // transform: translateX(calc(var(--item-width) * -7));
+
   &-item {
     display: grid;
     grid-template: 1fr / 1fr;
@@ -22,10 +21,13 @@
     justify-content: center;
     justify-items: center;
     padding: 2rem 0.5rem;
-    border-left: 1px solid rgba($color: #fff, $alpha: 0.2);
-    border-right: 1px solid rgba($color: #fff, $alpha: 0.2);
     width: var(--item-width);
     flex-shrink: 0;
+
+    &:not(:first-child):not(:last-child) {
+      border-left: 1px solid rgba($color: #fff, $alpha: 0.2);
+      border-right: 1px solid rgba($color: #fff, $alpha: 0.2);
+    }
 
     &::before {
       content: '';
@@ -56,12 +58,12 @@
       --bg-color: transparent;
       // color: var(--color);
       color: #fff;
-      animation: animateClick 500ms forwards;
+      animation: animateClick var(--duration) forwards;
       animation-timing-function: ease-out;
 
       &::before {
         background-color: var(--bg-color) !important;
-        transition: background-color 500ms ease-out;
+        transition: background-color var(--duration) ease-out;
       }
 
       @keyframes animateClick {

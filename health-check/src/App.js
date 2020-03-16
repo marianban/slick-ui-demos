@@ -131,6 +131,18 @@ function App() {
           <h1 className="heading" key={selectedItem.id}>
             {selectedItem.heading}
             <br /> Status
+            <svg
+              width="120"
+              viewBox="0 0 190 160"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M 10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80"
+                stroke="#fff"
+                strokeWidth="15"
+                fill="transparent"
+              />
+            </svg>
           </h1>
         </div>
       </div>

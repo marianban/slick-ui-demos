@@ -23,6 +23,9 @@
     padding: 2rem 0.5rem;
     width: var(--item-width);
     flex-shrink: 0;
+    --color: #fff;
+    color: var(--color);
+    transition: color var(--duration) ease-out;
 
     &:not(:first-child):not(:last-child) {
       border-left: 1px solid rgba($color: #fff, $alpha: 0.2);
@@ -54,10 +57,7 @@
     }
 
     &-clicked {
-      --color: #fff;
       --bg-color: transparent;
-      // color: var(--color);
-      color: #fff;
       animation: animateClick var(--duration) forwards;
       animation-timing-function: ease-out;
 
@@ -67,22 +67,15 @@
       }
 
       @keyframes animateClick {
-        from {
-          color: #fff;
-          // --color: #fff;
-          // --bg-color: transparent;
-        }
         to {
-          // --color: #803eef;
-          color: #803eef;
+          --color: #803eef;
           --bg-color: #fff;
-          // background-color: #fff;
         }
       }
     }
 
     &-active {
-      color: #803eef;
+      --color: #803eef;
 
       &::before {
         background-color: #fff;

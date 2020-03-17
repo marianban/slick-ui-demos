@@ -14,7 +14,7 @@ const icon = (name, heading) => ({
 
 const initialIcons = [
   icon('male', 'Fitness'),
-  icon('swimmer', 'Swimming'),
+  icon('swimmer', 'Swim'),
   icon('running', 'Running'),
   icon('skiing', 'Skiing'),
   icon('skating', 'Skating'),
@@ -128,22 +128,31 @@ function App() {
             initialIcons={initialIcons}
             onMenuItemSelect={handleMenuItemSelect}
           />
-          <h1 className="heading" key={selectedItem.id}>
-            {selectedItem.heading}
-            <br /> Status
-            <svg
-              width="120"
-              viewBox="0 0 190 160"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M 10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80"
-                stroke="#fff"
-                strokeWidth="15"
-                fill="transparent"
+          <div className="heading-container" key={selectedItem.id}>
+            <h1 className="heading">
+              {selectedItem.heading}
+              <br /> Status
+            </h1>
+            <div className="wave-container">
+              <svg
+                width="150"
+                viewBox="0 0 210 150"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M 3 41 Q 32 45 92 70 Q 131 81 155 44 Q 175 27 202 28"
+                  stroke="#fff"
+                  strokeWidth="15"
+                  fill="transparent"
+                />
+              </svg>
+              <img
+                className="avatar"
+                src="https://i.pravatar.cc/150?img=25"
+                alt="avatar"
               />
-            </svg>
-          </h1>
+            </div>
+          </div>
         </div>
       </div>
       <div className="app-shadow"></div>

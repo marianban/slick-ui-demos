@@ -70,18 +70,73 @@ body {
   border-radius: 3rem;
 }
 
-.heading {
-  z-index: 10;
-  position: absolute;
+.heading-container {
   right: 3rem;
   top: 11rem;
-  font-size: 5.5rem;
-  font-weight: bold;
+  position: absolute;
   animation: slideIn var(--duration) cubic-bezier(0.5, 0, 0.5, 1);
 
   @keyframes slideIn {
     from {
       transform: translateX(150%);
+    }
+  }
+}
+
+.heading {
+  z-index: 10;
+  font-size: 5.5rem;
+  font-weight: bold;
+}
+
+.wave-container {
+  width: 150px;
+  height: 70px;
+  position: relative;
+  svg {
+    position: absolute;
+  }
+  .avatar {
+    position: absolute;
+    right: 22px;
+    top: 12px;
+    object-fit: cover;
+    width: 5rem;
+    border-radius: 50%;
+    border: 4px solid #8249f2;
+    z-index: 1;
+    animation: show2 var(--duration) cubic-bezier(0.5, 0, 0.5, 1) forwards;
+    animation-delay: var(--duration);
+    transform: scale(0);
+
+    @keyframes show2 {
+      from {
+        transform: scale(0);
+      }
+      to {
+        transform: scale(1);
+      }
+    }
+  }
+
+  &::after {
+    content: '';
+    width: 100%;
+    height: 100%;
+    background-color: #8249f2;
+    display: block;
+    position: absolute;
+    animation: show var(--duration) cubic-bezier(0.5, 0, 0.5, 1) forwards;
+    animation-delay: var(--duration);
+    transform-origin: right;
+
+    @keyframes show {
+      from {
+        transform: scaleX(1);
+      }
+      to {
+        transform: scaleX(0);
+      }
     }
   }
 }

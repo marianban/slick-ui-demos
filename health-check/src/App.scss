@@ -71,16 +71,24 @@ body {
 }
 
 .heading-container {
-  right: 3rem;
+  --heading-item-width: 24rem;
+  right: 0rem;
   top: 11rem;
   position: absolute;
-  animation: slideIn var(--duration) cubic-bezier(0.5, 0, 0.5, 1);
+  display: flex;
+  transform: translateX(var(--heading-item-width));
+  width: calc(2 * var(--heading-item-width));
+  overflow: hidden;
 
-  @keyframes slideIn {
-    from {
-      transform: translateX(150%);
-    }
+  .heading-item {
+    width: var(--heading-item-width);
   }
+
+  // @keyframes slideIn {
+  //   from {
+  //     transform: translateX(150%);
+  //   }
+  // }
 }
 
 .heading {

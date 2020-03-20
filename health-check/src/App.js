@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useLayoutEffect } from 'react';
 import { v4 } from 'uuid';
 import '@fortawesome/fontawesome-free/js/all';
 import { Cube } from './Cube';
@@ -24,9 +24,27 @@ const initialIcons = [
 
 function App() {
   const [selectedItem, setSelectedItem] = useState(initialIcons[0]);
+  const [heading, setHeading] = useState(initialIcons[0].heading);
+  console.log(setHeading);
+  const currentRef = useRef();
+  const nextRef = useRef();
   const handleMenuItemSelect = item => {
     setSelectedItem(item);
   };
+  useLayoutEffect(() => {
+    const slideTiming = {
+      duration: 750,
+      easing: 'cubic-bezier(0.5, 0, 0.5, 1)'
+    };
+    const slideAnimation = [
+      { transform: 'translateX(0)' },
+      {
+        transform: 'translateX(-25rem)'
+      }
+    ];
+    currentRef.current.animate(slideAnimation, slideTiming);
+    nextRef.current.animate(slideAnimation, slideTiming);
+  }, [selectedItem]);
 
   return (
     <div className="app-wrapper">
@@ -128,29 +146,56 @@ function App() {
             initialIcons={initialIcons}
             onMenuItemSelect={handleMenuItemSelect}
           />
-          <div className="heading-container" key={selectedItem.id}>
-            <h1 className="heading">
-              {selectedItem.heading}
-              <br /> Status
-            </h1>
-            <div className="wave-container">
-              <svg
-                width="150"
-                viewBox="0 0 210 150"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M 3 41 Q 32 45 92 70 Q 131 81 155 44 Q 175 27 202 28"
-                  stroke="#fff"
-                  strokeWidth="15"
-                  fill="transparent"
+          <div className="heading-container">
+            <div className="heading-item" ref={currentRef}>
+              <h1 className="heading">
+                {heading}
+                <br /> Status
+              </h1>
+              <div className="wave-container">
+                <svg
+                  width="150"
+                  viewBox="0 0 210 150"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M 3 41 Q 32 45 92 70 Q 131 81 155 44 Q 175 27 202 28"
+                    stroke="#fff"
+                    strokeWidth="15"
+                    fill="transparent"
+                  />
+                </svg>
+                <img
+                  className="avatar"
+                  src="https://i.pravatar.cc/150?img=25"
+                  alt="avatar"
                 />
-              </svg>
-              <img
-                className="avatar"
-                src="https://i.pravatar.cc/150?img=25"
-                alt="avatar"
-              />
+              </div>
+            </div>
+            <div className="heading-item" ref={nextRef}>
+              <h1 className="heading">
+                {selectedItem.heading}
+                <br /> Status
+              </h1>
+              <div className="wave-container">
+                <svg
+                  width="150"
+                  viewBox="0 0 210 150"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M 3 41 Q 32 45 92 70 Q 131 81 155 44 Q 175 27 202 28"
+                    stroke="#fff"
+                    strokeWidth="15"
+                    fill="transparent"
+                  />
+                </svg>
+                <img
+                  className="avatar"
+                  src="https://i.pravatar.cc/150?img=25"
+                  alt="avatar"
+                />
+              </div>
             </div>
           </div>
         </div>

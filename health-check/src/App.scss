@@ -83,12 +83,6 @@ body {
   .heading-item {
     width: var(--heading-item-width);
   }
-
-  // @keyframes slideIn {
-  //   from {
-  //     transform: translateX(150%);
-  //   }
-  // }
 }
 
 .heading {
@@ -113,11 +107,12 @@ body {
     border-radius: 50%;
     border: 4px solid #8249f2;
     z-index: 1;
-    animation: show2 var(--duration) cubic-bezier(0.5, 0, 0.5, 1) forwards;
-    animation-delay: var(--duration);
+
+    animation: animate-avatar var(--duration) cubic-bezier(0.5, 0, 0.5, 1)
+      forwards;
     transform: scale(0);
 
-    @keyframes show2 {
+    @keyframes animate-avatar {
       from {
         transform: scale(0);
       }
@@ -127,24 +122,13 @@ body {
     }
   }
 
-  &::after {
+  .wave-bg {
     content: '';
     width: 100%;
     height: 100%;
     background-color: #8249f2;
     display: block;
     position: absolute;
-    animation: show var(--duration) cubic-bezier(0.5, 0, 0.5, 1) forwards;
-    animation-delay: var(--duration);
     transform-origin: right;
-
-    @keyframes show {
-      from {
-        transform: scaleX(1);
-      }
-      to {
-        transform: scaleX(0);
-      }
-    }
   }
 }

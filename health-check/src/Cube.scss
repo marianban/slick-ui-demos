@@ -44,6 +44,7 @@
   animation-direction: var(--animation-direction);
   width: var(--size);
   height: var(--size);
+  will-change: transform;
 
   @keyframes animate-height {
     from {
@@ -90,6 +91,7 @@
     justify-content: center;
     font-size: 2em;
     transition: transform 1s ease-in-out;
+    will-change: transform;
   }
   .back {
     display: none;
@@ -107,6 +109,7 @@
   .left.reflection {
     transition: opacity 1s ease-in-out;
     opacity: var(--refection-opacity);
+    will-change: opacity;
   }
   .left:not(.reflection) {
     transform: scaleY(var(--height-scale)) translateX(-50%) rotateY(90deg);
@@ -210,8 +213,10 @@
   }
 
   &.reflection {
+    // display: none;
     transform: translateY(calc(var(--size) - var(--size) / 15)) rotateX(-25deg)
       rotateY(45deg);
+    will-change: transform;
 
     z-index: -1;
 
@@ -219,21 +224,23 @@
     .bottom,
     .right {
       display: none;
-      transition: inherit;
+      border: none !important;
     }
     .left,
     .front {
       filter: blur(10px);
+      border: none !important;
     }
     .left {
-      border: none;
+      border: none !important;
 
       &::before {
         position: absolute;
         width: 100%;
         height: 100%;
         content: '';
-        transition: inherit;
+        transition: none;
+        // transition: inherit;
         transition: background-color 1s ease-in-out, opacity 1s ease-in-out;
         background-color: var(--right-grad-color-2);
         opacity: var(--reflection-opacity);
@@ -278,6 +285,28 @@
       border-bottom: 1px solid #6842a1;
       border-left: 2px solid #c8afe3;
       border-radius: 5px;
+    }
+  }
+}
+
+.textured {
+  .cube {
+    .front:not(.reflection) {
+      &::after {
+        background: linear-gradient(
+            to top right,
+            var(--right-grad-color-1),
+            var(--right-grad-color-1) 5%,
+            transparent 70%
+          ),
+          repeating-linear-gradient(
+            to right,
+            transparent,
+            transparent 3px,
+            #000 3px,
+            #000 7px
+          );
+      }
     }
   }
 }

@@ -25,9 +25,9 @@ const initialIcons = [
 function App() {
   const [selectedItem, setSelectedItem] = useState(initialIcons[0]);
   const [heading, setHeading] = useState(initialIcons[0].heading);
-  console.log(setHeading);
   const currentRef = useRef();
   const nextRef = useRef();
+  const waveBgRef = useRef();
   const handleMenuItemSelect = item => {
     setSelectedItem(item);
   };
@@ -39,11 +39,24 @@ function App() {
     const slideAnimation = [
       { transform: 'translateX(0)' },
       {
-        transform: 'translateX(-25rem)'
+        transform: 'translateX(-24rem)'
       }
     ];
-    currentRef.current.animate(slideAnimation, slideTiming);
+    const animation = currentRef.current.animate(slideAnimation, slideTiming);
     nextRef.current.animate(slideAnimation, slideTiming);
+    animation.onfinish = () => {
+      setHeading(selectedItem.heading);
+    };
+    const waveBgTiming = {
+      duration: 750,
+      delay: 100,
+      easing: 'cubic-bezier(0.5, 0, 0.5, 1)'
+    };
+    const waveAnimation = [
+      { transform: 'scaleX(1)' },
+      { transform: 'scaleX(0)' }
+    ];
+    waveBgRef.current.animate(waveAnimation, waveBgTiming);
   }, [selectedItem]);
 
   return (
@@ -64,6 +77,8 @@ function App() {
               '--left-grad-color-1': '#89225A',
               '--left-grad-color-2': '#F4B4A5',
               '--left-border-right': '#963463',
+              '--left-border-left': '#E19B98',
+              '--left-border-left-2': '#E19B98',
               '--animation-name': 'animate-height-reverse'
             }}
           />
@@ -96,18 +111,21 @@ function App() {
               '--scale-to': 0.04,
               '--size': '10rem',
               '--depth': '8rem',
-              '--top-grad-color-2': '#8FF9F6',
-              '--right-grad-color-2': '#8FF9F6',
+              '--top-grad-color-2': '#D1FBF9',
+              '--right-grad-color-1': '#87FCE3',
+              '--right-grad-color-2': '#87FCE3',
               '--left-grad-color-2': '#278874',
               '--left-border-left': '#278874',
               '--left-border-right': '#3B578F',
               '--front-border-left': '#9FB9EE'
             }}
+            className="textured"
           />
           <Cube
             style={{
-              '--cube-left': '45%',
-              '--scale-from': 2,
+              '--cube-left': '42%',
+              '--cube-bottom': '67%',
+              '--scale-from': 2.5,
               '--scale-to': 0.04,
               '--size': '10rem',
               '--depth': '8rem',
@@ -177,7 +195,7 @@ function App() {
                 {selectedItem.heading}
                 <br /> Status
               </h1>
-              <div className="wave-container">
+              <div className="wave-container" key={selectedItem.id}>
                 <svg
                   width="150"
                   viewBox="0 0 210 150"
@@ -195,6 +213,7 @@ function App() {
                   src="https://i.pravatar.cc/150?img=25"
                   alt="avatar"
                 />
+                <div className="wave-bg" ref={waveBgRef}></div>
               </div>
             </div>
           </div>

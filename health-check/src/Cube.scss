@@ -74,12 +74,6 @@
     }
   }
 
-  @keyframes spin {
-    to {
-      transform: rotateX(180deg) rotateZ(180deg);
-    }
-  }
-
   .side {
     position: absolute;
     width: var(--size);
@@ -121,6 +115,7 @@
       width: 100%;
       background-color: var(--left-grad-color-2);
       transition: background-color 1s ease-in-out;
+      will-change: background-color;
     }
 
     &::after {
@@ -155,6 +150,7 @@
       width: 100%;
       background-color: var(--top-grad-color-2);
       transition: background-color 1s ease-in-out;
+      will-change: background-color;
     }
     &::after {
       content: '';
@@ -197,6 +193,7 @@
       width: 100%;
       transition: background-color 1s ease-in-out;
       background-color: var(--right-grad-color-2);
+      will-change: background-color;
     }
     &::after {
       content: '';
@@ -244,6 +241,7 @@
         transition: background-color 1s ease-in-out, opacity 1s ease-in-out;
         background-color: var(--right-grad-color-2);
         opacity: var(--reflection-opacity);
+        will-change: background-color;
       }
       &::after {
         position: absolute;
@@ -260,6 +258,7 @@
         );
         transition: opacity 1s ease-in-out;
         opacity: var(--reflection-opacity);
+        will-change: opacity;
       }
     }
     .front {

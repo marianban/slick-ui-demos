@@ -1,9 +1,13 @@
 import React from 'react';
 import './Icons.scss';
 
+// font awesome icons https://fontawesome.com/license/free
+
+console.log('Using font awesome free: https://fontawesome.com/license/free');
+
 export const Male = () => (
   <svg
-    class="svg-inline--fa fa-male fa-w-6"
+    className="svg-inline--fa fa-male fa-w-6"
     aria-hidden="true"
     focusable="false"
     data-prefix="fas"
@@ -22,7 +26,7 @@ export const Male = () => (
 
 export const Swimmer = () => (
   <svg
-    class="svg-inline--fa fa-swimmer fa-w-20"
+    className="svg-inline--fa fa-swimmer fa-w-20"
     aria-hidden="true"
     focusable="false"
     data-prefix="fas"
@@ -41,7 +45,7 @@ export const Swimmer = () => (
 
 export const Running = () => (
   <svg
-    class="svg-inline--fa fa-running fa-w-13"
+    className="svg-inline--fa fa-running fa-w-13"
     aria-hidden="true"
     focusable="false"
     data-prefix="fas"
@@ -60,7 +64,7 @@ export const Running = () => (
 
 export const Skiing = () => (
   <svg
-    class="svg-inline--fa fa-skiing fa-w-16"
+    className="svg-inline--fa fa-skiing fa-w-16"
     aria-hidden="true"
     focusable="false"
     data-prefix="fas"
@@ -79,7 +83,7 @@ export const Skiing = () => (
 
 export const Skating = () => (
   <svg
-    class="svg-inline--fa fa-skating fa-w-14"
+    className="svg-inline--fa fa-skating fa-w-14"
     aria-hidden="true"
     focusable="false"
     data-prefix="fas"
@@ -98,7 +102,7 @@ export const Skating = () => (
 
 export const Biking = () => (
   <svg
-    class="svg-inline--fa fa-biking fa-w-20"
+    className="svg-inline--fa fa-biking fa-w-20"
     aria-hidden="true"
     focusable="false"
     data-prefix="fas"
@@ -117,7 +121,7 @@ export const Biking = () => (
 
 export const SkiingNordic = () => (
   <svg
-    class="svg-inline--fa fa-skiing-nordic fa-w-18"
+    className="svg-inline--fa fa-skiing-nordic fa-w-18"
     aria-hidden="true"
     focusable="false"
     data-prefix="fas"

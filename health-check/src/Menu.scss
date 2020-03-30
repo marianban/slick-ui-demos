@@ -14,6 +14,11 @@
   flex-shrink: 0;
   direction: rtl;
 
+  &-animating {
+    // disable menu interaction during animations
+    pointer-events: none;
+  }
+
   &-item {
     display: grid;
     grid-template: 1fr / 1fr;

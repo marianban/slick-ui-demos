@@ -39,27 +39,27 @@ export const Menu = props => {
   }, [icons, numberOfIcons]);
 
   return (
-    <menu className="menu" ref={menu}>
+    <menu
+      className={classNames('menu', { 'menu-animating': clicked !== null })}
+      ref={menu}
+    >
       {icons.map((item, i) => (
-        <>
-          <li
-            className={classNames('menu-item', {
-              'menu-item-active': selected.id === item.id,
-              'menu-item-clicked': clicked === item.id
-            })}
-            key={`${item.id}`}
-            onClick={() => selectItem(i)}
-          >
-            <item.Icon />
-          </li>
-        </>
+        <li
+          className={classNames('menu-item', {
+            'menu-item-active': selected.id === item.id,
+            'menu-item-clicked': clicked === item.id
+          })}
+          key={`${item.id}`}
+          onClick={() => selectItem(i)}
+        >
+          <item.Icon />
+        </li>
       ))}
     </menu>
   );
 };
 
 Menu.propTypes = {
-  onMenuItemSelected: PropTypes.func.isRequired,
   initialIcons: PropTypes.arrayOf(PropTypes.object).isRequired,
   selected: PropTypes.object.isRequired
 };

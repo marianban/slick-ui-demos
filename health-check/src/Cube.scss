@@ -1,28 +1,31 @@
 :root {
+  --cube-animation-duration: 3s;
   --cube-bottom: 60%;
-  --cube-left: 15%;
-  --size: 16rem;
-  --depth: 10rem;
-  --height-scale: 1;
   --cube-height: 40rem;
-  --left-grad-color-1: #511fae;
-  --left-grad-color-2: #e4534c;
-  --top-grad-color-2: #fd794b;
-  --right-grad-color-1: #b170e4;
-  --right-grad-color-2: #ffb8a5;
-  --animation-direction: alternate;
-  --scale-from: 0.04;
-  --scale-to: 3;
-  --animation-name: animate-height;
-  --left-border-top: #fff;
-  --left-border-bottom: #0a0322;
-  --left-border-right: #6a289e;
-  --left-border-left: #de5150;
-  --left-border-left-2: #de5150;
-  --front-border-top: #fff;
+  --cube-left: 15%;
+  --depth: 10rem;
+  --easing: ease-in-out;
   --front-border-bottom: #0a0322;
   --front-border-left: #e185bc;
-  --reflection-opacity: 1;
+  --front-border-top: #fff;
+  --front-bottom-corner-color: #b170e4;
+  --height-scale: 1;
+  --left-border-bottom: #0a0322;
+  --left-border-left: #de5150;
+  --left-border-right: #6a289e;
+  --left-border-top: #fff;
+  --left-bottom-corner-color: #511fae;
+  --left-grad-color-from: #d7beff;
+  --left-grad-color-to: #d7beff;
+  --reflection-opacity-from: 0.5;
+  --reflection-opacity-to: 1;
+  --right-grad-color-from: #ffb8a5;
+  --right-grad-color-to: #d0b2ff;
+  --scale-from: 0.04;
+  --scale-to: 3;
+  --size: 16rem;
+  --top-grad-color-from: #d0b2ff;
+  --top-grad-color-to: #d0b2ff;
 }
 
 .cube-container {
@@ -38,58 +41,21 @@
   position: absolute;
   transform-style: preserve-3d;
   transform: rotateX(-25deg) rotateY(45deg);
-  color: transparent;
   transform-origin: bottom center;
-  animation: var(--animation-name) 4s infinite;
-  animation-direction: var(--animation-direction);
   width: var(--size);
   height: var(--size);
   will-change: transform;
-
-  @keyframes animate-height {
-    from {
-      --height-scale: var(--scale-from);
-    }
-    to {
-      --height-scale: var(--scale-to);
-      --left-grad-color-2: #d7beff;
-      --top-grad-color-2: #d0b2ff;
-      --right-grad-color-2: #d0b2ff;
-      --refection-opacity: 0.5;
-    }
-  }
-
-  @keyframes animate-height-reverse {
-    from {
-      --height-scale: var(--scale-from);
-      --left-grad-color-2: #d7beff;
-      --top-grad-color-2: #d0b2ff;
-      --right-grad-color-2: #d0b2ff;
-      --refection-opacity: 0.5;
-    }
-    to {
-      --height-scale: var(--scale-to);
-      --left-border-left: var(--left-border-left-2);
-      --refection-opacity: 1;
-    }
-  }
 
   .side {
     position: absolute;
     width: var(--size);
     height: var(--size);
-    opacity: 1;
     border: 1px solid #ccc;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 2em;
-    transition: transform 1s ease-in-out;
     will-change: transform;
-  }
-  .back {
-    display: none;
-    transform: translateZ(calc(-1 * var(--size) / 2)) rotateX(180deg);
   }
   .left {
     width: var(--depth);
@@ -100,22 +66,36 @@
     transform-origin: bottom center;
     transform: translateX(-50%) rotateY(90deg);
   }
-  .left.reflection {
-    transition: opacity 1s ease-in-out;
-    opacity: var(--refection-opacity);
-    will-change: opacity;
-  }
   .left:not(.reflection) {
-    transform: scaleY(var(--height-scale)) translateX(-50%) rotateY(90deg);
+    animation: animate-height-left var(--cube-animation-duration) var(--easing)
+      infinite alternate;
+
+    @keyframes animate-height-left {
+      from {
+        transform: scaleY(var(--scale-from)) translateX(-50%) rotateY(90deg);
+      }
+      to {
+        transform: scaleY(var(--scale-to)) translateX(-50%) rotateY(90deg);
+      }
+    }
 
     &::before {
       content: '';
       position: absolute;
       height: 100%;
       width: 100%;
-      background-color: var(--left-grad-color-2);
-      transition: background-color 1s ease-in-out;
       will-change: background-color;
+      animation: animate-left-bg var(--cube-animation-duration) var(--easing)
+        infinite alternate;
+
+      @keyframes animate-left-bg {
+        from {
+          background-color: var(--left-grad-color-from);
+        }
+        to {
+          background-color: var(--left-grad-color-to);
+        }
+      }
     }
 
     &::after {
@@ -125,14 +105,10 @@
       width: 100%;
       background: linear-gradient(
         to top left,
-        var(--left-grad-color-1),
+        var(--left-bottom-corner-color),
         transparent 80%
       );
     }
-  }
-  .right {
-    display: none;
-    transform: translateX(50%) rotateY(90deg);
   }
   .top {
     transform: translateY(-50%) rotateX(90deg);
@@ -140,17 +116,37 @@
     border: none;
   }
   .top:not(.reflection) {
-    transform: translateY(calc(-1 * (var(--height-scale) - 1) * var(--size)))
-      translateY(-50%) rotateX(90deg);
+    animation: animate-position-top var(--cube-animation-duration) var(--easing)
+      infinite alternate;
+
+    @keyframes animate-position-top {
+      from {
+        transform: translateY(calc(-1 * (var(--scale-from) - 1) * var(--size)))
+          translateY(-50%) rotateX(90deg);
+      }
+      to {
+        transform: translateY(calc(-1 * (var(--scale-to) - 1) * var(--size)))
+          translateY(-50%) rotateX(90deg);
+      }
+    }
 
     &::before {
       content: '';
       position: absolute;
       height: 100%;
       width: 100%;
-      background-color: var(--top-grad-color-2);
-      transition: background-color 1s ease-in-out;
+      animation: animate-top-bg var(--cube-animation-duration) var(--easing)
+        infinite alternate;
       will-change: background-color;
+
+      @keyframes animate-top-bg {
+        from {
+          background-color: var(--top-grad-color-from);
+        }
+        to {
+          background-color: var(--top-grad-color-to);
+        }
+      }
     }
     &::after {
       content: '';
@@ -165,35 +161,45 @@
       );
     }
   }
-  .bottom {
-    display: none;
-    background-color: #521ca4;
-    transform: translateY(50%) rotateX(270deg);
-  }
   .front {
     border-top: 1px solid var(--front-border-top);
     border-bottom: 1px solid var(--front-border-bottom);
     border-left: 1px solid var(--front-border-left);
-
     transform: translateZ(calc(var(--depth) / 2));
     transform-origin: bottom center;
   }
-  .front.reflection {
-    transition: opacity 1s ease-in-out;
-    opacity: var(--refection-opacity);
-  }
   .front:not(.reflection) {
-    transform: scaleY(var(--height-scale))
-      translateZ(calc((var(--depth) / 2) - 1px));
+    animation: animate-height-front var(--cube-animation-duration) var(--easing)
+      infinite alternate;
+
+    @keyframes animate-height-front {
+      from {
+        transform: scaleY(var(--scale-from))
+          translateZ(calc((var(--depth) / 2) - 1px));
+      }
+      to {
+        transform: scaleY(var(--scale-to))
+          translateZ(calc((var(--depth) / 2) - 1px));
+      }
+    }
 
     &::before {
       content: '';
       position: absolute;
       height: 100%;
       width: 100%;
-      transition: background-color 1s ease-in-out;
-      background-color: var(--right-grad-color-2);
+      animation: animate-right-bg var(--cube-animation-duration) var(--easing)
+        infinite alternate;
       will-change: background-color;
+
+      @keyframes animate-right-bg {
+        from {
+          background-color: var(--right-grad-color-from);
+        }
+        to {
+          background-color: var(--right-grad-color-to);
+        }
+      }
     }
     &::after {
       content: '';
@@ -202,27 +208,17 @@
       width: 100%;
       background: linear-gradient(
         to top right,
-        var(--right-grad-color-1),
-        var(--right-grad-color-1) 5%,
+        var(--front-bottom-corner-color),
+        var(--front-bottom-corner-color) 5%,
         transparent 70%
       );
     }
   }
 
   &.reflection {
-    // display: none;
     transform: translateY(calc(var(--size) - var(--size) / 15)) rotateX(-25deg)
       rotateY(45deg);
-    will-change: transform;
-
     z-index: -1;
-
-    .back,
-    .bottom,
-    .right {
-      display: none;
-      border: none !important;
-    }
     .left,
     .front {
       filter: blur(10px);
@@ -237,11 +233,20 @@
         height: 100%;
         content: '';
         transition: none;
-        // transition: inherit;
-        transition: background-color 1s ease-in-out, opacity 1s ease-in-out;
-        background-color: var(--right-grad-color-2);
-        opacity: var(--reflection-opacity);
-        will-change: background-color;
+        background-color: var(--right-grad-color-to);
+        will-change: opacity;
+
+        animation: animate-left-before-reflection var(--cube-animation-duration)
+          var(--easing) infinite alternate;
+
+        @keyframes animate-left-before-reflection {
+          from {
+            opacity: var(--reflection-opacity-from);
+          }
+          to {
+            opacity: var(--reflection-opacity-to);
+          }
+        }
       }
       &::after {
         position: absolute;
@@ -256,19 +261,39 @@
           #953ff4 50%,
           #953ff4
         );
-        transition: opacity 1s ease-in-out;
-        opacity: var(--reflection-opacity);
-        will-change: opacity;
+      }
+
+      animation: animate-left-after-reflection var(--cube-animation-duration)
+        var(--easing) infinite alternate;
+
+      @keyframes animate-left-after-reflection {
+        from {
+          opacity: var(--reflection-opacity-from);
+        }
+        to {
+          opacity: var(--reflection-opacity-to);
+        }
       }
     }
     .front {
-      border: none;
       background: linear-gradient(
         to bottom,
         #b170e4,
         #c79ced 20%,
         transparent 60%
       );
+      will-change: opacity;
+      animation: animate-front-reflection var(--cube-animation-duration)
+        var(--easing) infinite alternate;
+
+      @keyframes animate-front-reflection {
+        from {
+          opacity: var(--reflection-opacity-from);
+        }
+        to {
+          opacity: var(--reflection-opacity-to);
+        }
+      }
     }
     .top {
       height: var(--depth);
@@ -294,8 +319,8 @@
       &::after {
         background: linear-gradient(
             to top right,
-            var(--right-grad-color-1),
-            var(--right-grad-color-1) 5%,
+            var(--front-bottom-corner-color),
+            var(--front-bottom-corner-color) 5%,
             transparent 70%
           ),
           repeating-linear-gradient(

@@ -137,7 +137,6 @@ function App() {
               '--reflection-opacity-from': 1,
               '--reflection-opacity-to': 0.5
             }}
-            className="textured"
           />
           {/* medium block */}
           <Cube
@@ -157,6 +156,7 @@ function App() {
               '--reflection-opacity-from': 1,
               '--reflection-opacity-to': 0.5
             }}
+            className="textured"
           />
           {/* smallest block */}
           <Cube

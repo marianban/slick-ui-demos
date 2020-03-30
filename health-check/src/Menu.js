@@ -50,7 +50,7 @@ export const Menu = props => {
             key={`${item.id}`}
             onClick={() => selectItem(i)}
           >
-            <i className={item.className}></i>
+            <item.Icon />
           </li>
         </>
       ))}

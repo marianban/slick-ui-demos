@@ -1,25 +1,33 @@
 import React, { useState, useRef, useLayoutEffect } from 'react';
 import { v4 } from 'uuid';
-import '@fortawesome/fontawesome-free/js/all';
 import { Cube } from './Cube';
 import './App.scss';
 import './Menu';
 import { Menu } from './Menu';
+import {
+  Male,
+  Swimmer,
+  Running,
+  Skiing,
+  Skating,
+  Biking,
+  SkiingNordic
+} from './Icons';
 
-const icon = (name, heading) => ({
-  className: `fas fa-${name}`,
+const icon = (icon, heading) => ({
+  Icon: icon,
   id: v4(),
   heading
 });
 
 const initialIcons = [
-  icon('male', 'Fitness'),
-  icon('swimmer', 'Swim'),
-  icon('running', 'Running'),
-  icon('skiing', 'Skiing'),
-  icon('skating', 'Skating'),
-  icon('biking', 'Biking'),
-  icon('skiing-nordic', 'Nordic')
+  icon(Male, 'Fitness'),
+  icon(Swimmer, 'Swim'),
+  icon(Running, 'Running'),
+  icon(Skiing, 'Skiing'),
+  icon(Skating, 'Skating'),
+  icon(Biking, 'Biking'),
+  icon(SkiingNordic, 'Nordic')
 ];
 
 function App() {
@@ -63,7 +71,7 @@ function App() {
     <div className="app-wrapper">
       <div className="app-container">
         <div className="app">
-          {/* smallest cube */}
+          smallest cube
           <Cube
             style={{
               '--animation-name': 'animate-height-reverse',

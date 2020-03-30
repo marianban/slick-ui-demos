@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import 'web-animations-js';
 
 const isSafari = () => {
   return (
@@ -12,11 +13,16 @@ const isSafari = () => {
 };
 
 const Main = () => {
-  if (isSafari()) {
-    return <h1>Please use Chrome or Firefox</h1>;
-  }
-
-  return <App />;
+  return (
+    <>
+      {isSafari() && (
+        <h1 className="not-supported-browser">
+          Webkit is not supported. Please use Chrome or Firefox
+        </h1>
+      )}
+      <App />
+    </>
+  );
 };
 
 ReactDOM.render(<Main />, document.getElementById('root'));

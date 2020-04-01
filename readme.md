@@ -1,4 +1,4 @@
-# Collection of slick UI demos
+# Collection of slick 😎 UI demos
 
 ## Health Check App
 

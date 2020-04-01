@@ -4,20 +4,18 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import 'web-animations-js';
-
-const isSafari = () => {
-  return (
-    navigator.userAgent.includes('Safari') &&
-    !navigator.userAgent.includes('Chrome')
-  );
-};
+import { isSafari } from './utils';
 
 const Main = () => {
   return (
     <>
       {isSafari() && (
         <h1 className="not-supported-browser">
-          Webkit is not supported. Please use Chrome or Firefox
+          Webkit is not supported{' '}
+          <span role="img" aria-label="crying cat">
+            😿
+          </span>
+          . Please use Chrome or Firefox
         </h1>
       )}
       <App />

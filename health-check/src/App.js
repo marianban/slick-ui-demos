@@ -71,7 +71,7 @@ function App() {
     <div className="app-wrapper">
       <div className="app-container">
         <div className="app">
-          smallest cube
+          {/* smallest cube */}
           <Cube
             style={{
               '--animation-name': 'animate-height-reverse',

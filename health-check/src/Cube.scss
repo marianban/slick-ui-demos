@@ -84,6 +84,7 @@
       position: absolute;
       height: 100%;
       width: 100%;
+      background-color: var(--left-grad-color-from);
       will-change: background-color;
       animation: animate-left-bg var(--cube-animation-duration) var(--easing)
         infinite alternate;
@@ -135,6 +136,7 @@
       position: absolute;
       height: 100%;
       width: 100%;
+      background-color: var(--top-grad-color-from);
       animation: animate-top-bg var(--cube-animation-duration) var(--easing)
         infinite alternate;
       will-change: background-color;
@@ -191,6 +193,7 @@
       animation: animate-right-bg var(--cube-animation-duration) var(--easing)
         infinite alternate;
       will-change: background-color;
+      background-color: var(--right-grad-color-from);
 
       @keyframes animate-right-bg {
         from {

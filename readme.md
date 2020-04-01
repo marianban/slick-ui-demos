@@ -2,7 +2,7 @@
 
 ## Health Check App
 
-Doesn't work in WebKit (Safari, iOS)
+Doesn't work in WebKit (Safari, iOS) 😿
 
 [![Health check app](health-check-app.gif)](http://marianban.github.io/health-check/index.html)
 

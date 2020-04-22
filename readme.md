@@ -1,4 +1,4 @@
-# Collection of slick 😎 UI demos
+# Slick 😎 UI demos
 
 ## Underwater Button Effect
 

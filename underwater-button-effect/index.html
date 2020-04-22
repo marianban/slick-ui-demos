@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Underwater button effect</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.1/d3.min.js"></script>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div>
+      <div class="app">
+        <button class="btn">Click Me</button>
+        <div class="circle" style="--i: 1;"></div>
+        <div class="circle" style="--i: 2;"></div>
+        <div class="circle" style="--i: 3;"></div>
+        <div class="circle" style="--i: 4;"></div>
+        <div class="circle" style="--i: 5;"></div>
+      </div>
+    </div>
+    <svg height="0" xmlns="http://www.w3.org/2000/svg">
+      <filter id="filter">
+        <feTurbulence
+          id="turbulence"
+          type="fractalNoise"
+          baseFrequency="0"
+          numOctaves="1"
+          result="noise"
+        />
+        <feDisplacementMap
+          in2="noise"
+          in="SourceGraphic"
+          scale="30"
+          xChannelSelector="R"
+          yChannelSelector="R"
+        />
+        <feDisplacementMap
+          in2="noise"
+          scale="-30"
+          xChannelSelector="R"
+          yChannelSelector="R"
+        />
+      </filter>
+    </svg>
+  </body>
+</html>

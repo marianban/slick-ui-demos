@@ -1,0 +1,79 @@
+:root {
+  --bg: hsla(228, 57%, 54%, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  display: grid;
+  height: 100vh;
+  width: 100vw;
+  place-items: center;
+}
+
+.app {
+  display: grid;
+  place-items: center;
+  position: relative;
+  filter: url(#filter);
+  height: 30em;
+  width: 30em;
+  overflow: visible;
+}
+
+svg {
+  visibility: hidden;
+}
+
+.btn {
+  filter: url(#filter);
+  font-size: 1em;
+  font-weight: 400;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--bg);
+  color: white;
+  border-radius: 0.5em;
+  border: none;
+  padding: 1em 2em;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 150ms ease-in-out, background 0.3s ease-in-out;
+  outline: none;
+  grid-area: 1/1;
+}
+.btn:hover {
+  background-color: #253988;
+}
+.btn:active {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.circle {
+  content: '';
+  width: 30em;
+  height: 30em;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  transform-origin: center center;
+  grid-area: 1/1;
+  opacity: 0;
+  pointer-events: none;
+}
+.circle.circle-animation {
+  animation: animate var(--duration) cubic-bezier(0.215, 0.61, 0.355, 1);
+  animation-delay: calc((var(--i) / 10) * var(--duration));
+}
+@keyframes animate {
+  from {
+    transform: scale(0);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}

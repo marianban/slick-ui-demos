@@ -2,7 +2,7 @@
 
 ## Underwater Button Effect
 
-[![Underwater Button Effect](underwater-button-effect.gif)](http://marianban.github.io/underwater-button-effect/index.html)
+[![Underwater Button Effect](underwater-btn-effect.gif)](http://marianban.github.io/underwater-button-effect/index.html)
 
 Live Demo: [link](http://marianban.github.io/underwater-button-effect/index.html)
 

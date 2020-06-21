@@ -12,6 +12,11 @@
   --object-box-shadow-monitor: 0 1.6vmin 0.8vmin 0.2vmin #222;
 }
 
+@font-face {
+  font-family: 'Terminal';
+  src: url('PrintChar21.ttf');
+}
+
 html {
   width: 100%;
 }
@@ -625,6 +630,37 @@ body {
   transform: translateZ(0vmin);
   z-index: 100;
   box-shadow: inset 0 -0.7vmin 0.7vmin rgba(#3c7653, 0.5);
+
+  &__terminal {
+    height: 100%;
+    padding: 2vmin;
+    font-size: 1vmin;
+    color: #fff;
+    font-family: 'Terminal';
+    text-transform: uppercase;
+
+    .cursor {
+      display: inline-block;
+      width: 0.8vmin;
+      height: 0.8vmin;
+      margin: 0.1vmin;
+      vertical-align: text-bottom;
+      background-color: #fff;
+      animation: blink 0.7s linear 0s infinite;
+
+      @keyframes blink {
+        from {
+          visibility: visible;
+        }
+        50% {
+          visibility: hidden;
+        }
+        to {
+          visibility: hidden;
+        }
+      }
+    }
+  }
 
   &__line {
     position: absolute;

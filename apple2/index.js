@@ -2,16 +2,16 @@ console.clear();
 
 const keys = [
   { key: 'Esc', key2: '' },
-  { key: 'bang', key2: '1' },
-  { key: 'at', key2: '2' },
-  { key: 'hash', key2: '3' },
-  { key: 'dolar', key2: '4' },
-  { key: 'prc', key2: '5' },
-  { key: 'caret', key2: '6' },
-  { key: 'amp', key2: '7' },
-  { key: 'star', key2: '8' },
-  { key: 'lp', key2: '9' },
-  { key: 'rp', key2: '0' },
+  { key: 'bang', key2: '1', print: '1' },
+  { key: 'at', key2: '2', print: '2' },
+  { key: 'hash', key2: '3', print: '3' },
+  { key: 'dolar', key2: '4', print: '4' },
+  { key: 'prc', key2: '5', print: '5' },
+  { key: 'caret', key2: '6', print: '6' },
+  { key: 'amp', key2: '7', print: '7' },
+  { key: 'star', key2: '8', print: '8' },
+  { key: 'lp', key2: '9', print: '9' },
+  { key: 'rp', key2: '0', print: '0' },
   { key: '-', key2: '_' },
   { key: 'plus', key2: 'eq' },
   { key: 'Del', key2: '' },
@@ -95,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   updateKeysZ();
+  render();
 });
 
 window.addEventListener('resize', updateKeysZ);
@@ -199,4 +200,74 @@ function getKeyLabel(key) {
   }
 
   return key;
+}
+
+let line = 0;
+const lines = [']'];
+const ENTER = 13;
+const BACKSPACE = 8;
+const SPACEBAR = 32;
+
+document.addEventListener('keydown', (event) => {
+  if (event.isComposing || event.keyCode === 229) {
+    return;
+  }
+
+  const keycode = event.keyCode;
+
+  const isPrintable =
+    (keycode > 47 && keycode < 58) || // number keys
+    keycode == SPACEBAR ||
+    keycode == ENTER || // spacebar & return key(s) (if you want to allow carriage returns)
+    keycode == BACKSPACE ||
+    (keycode > 64 && keycode < 91) || // letter keys
+    (keycode > 95 && keycode < 112) || // numpad keys
+    (keycode > 185 && keycode < 193) || // ;=,-./` (in order)
+    (keycode > 218 && keycode < 223); // [\]' (in order)
+
+  if (isPrintable) {
+    if (keycode === ENTER) {
+      if (line === 23) {
+        // end of screen get rid of first line
+        line--;
+        lines.splice(0, 1);
+      }
+
+      line++;
+      if (!lines[line]) {
+        lines[line] = ']';
+      }
+    } else if (keycode === BACKSPACE) {
+      if (lines[line].length <= 1 && line > 0) {
+        lines.pop();
+        line--;
+      } else {
+        const length = lines[line].length - 1;
+        lines[line] = lines[line].slice(0, Math.max(1, length));
+      }
+    } else if (lines[line].length < 80) {
+      if (keycode === SPACEBAR) {
+        lines[line] += '\u00A0'; // non breaking space
+      } else {
+        lines[line] += event.key;
+      }
+    }
+  }
+  render();
+});
+
+const terminal = document.querySelector('.monitor__terminal');
+function render() {
+  terminal.innerHTML = '';
+  for (let i = 0; i < lines.length; i++) {
+    const line = document.createElement('div');
+    line.textContent = lines[i];
+    const lastLine = i === lines.length - 1;
+    if (lastLine) {
+      const cursor = document.createElement('span');
+      cursor.classList.add('cursor');
+      line.appendChild(cursor);
+    }
+    terminal.appendChild(line);
+  }
 }

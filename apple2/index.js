@@ -1,71 +1,70 @@
 console.clear();
 
 const keys = [
-  { key: 'Esc', key2: '' },
-  { key: 'bang', key2: '1', print: '1' },
-  { key: 'at', key2: '2', print: '2' },
-  { key: 'hash', key2: '3', print: '3' },
-  { key: 'dolar', key2: '4', print: '4' },
-  { key: 'prc', key2: '5', print: '5' },
-  { key: 'caret', key2: '6', print: '6' },
-  { key: 'amp', key2: '7', print: '7' },
-  { key: 'star', key2: '8', print: '8' },
-  { key: 'lp', key2: '9', print: '9' },
-  { key: 'rp', key2: '0', print: '0' },
-  { key: '-', key2: '_' },
-  { key: 'plus', key2: 'eq' },
-  { key: 'Del', key2: '' },
-  { key: '⇥', key2: '' },
-  { key: 'Q', key2: '' },
-  { key: 'W', key2: '' },
-  { key: 'E', key2: '' },
-  { key: 'R', key2: '' },
-  { key: 'T', key2: '' },
-  { key: 'Y', key2: '' },
-  { key: 'U', key2: '' },
-  { key: 'I', key2: '' },
-  { key: 'O', key2: '' },
-  { key: 'P', key2: '' },
-  { key: 'lb', key2: 'lbr' },
-  { key: 'rb', key2: 'rbr' },
-  { key: '↵', key2: '' },
-  { key: 'Ctrl', key2: '' },
-  { key: 'A', key2: '' },
-  { key: 'S', key2: '' },
-  { key: 'D', key2: '' },
-  { key: 'F', key2: '' },
-  { key: 'G', key2: '' },
-  { key: 'H', key2: '' },
-  { key: 'J', key2: '' },
-  { key: 'K', key2: '' },
-  { key: 'L', key2: '' },
-  { key: 'semi', key2: 'colon' },
-  { key: 'dquote', key2: 'quote' },
-  { key: 'tild', key2: 'dot' },
-  { key: '⇧L', key2: '' },
-  { key: 'pipe', key2: 'backslash' },
-  { key: 'Z', key2: '' },
-  { key: 'X', key2: '' },
-  { key: 'C', key2: '' },
-  { key: 'V', key2: '' },
-  { key: 'B', key2: '' },
-  { key: 'N', key2: '' },
-  { key: 'M', key2: '' },
-  { key: 'langleb', key2: 'comma' },
-  { key: 'rangleb', key2: 'dot' },
-  { key: 'qmark', key2: 'slash' },
+  { key: 'Esc', key2: '', keyCode: 27 },
+  { key: 'bang', key2: '1', keyCode: 49 },
+  { key: 'at', key2: '2', keyCode: 50 },
+  { key: 'hash', key2: '3', keyCode: 51 },
+  { key: 'dolar', key2: '4', keyCode: 52 },
+  { key: 'prc', key2: '5', keyCode: 53 },
+  { key: 'caret', key2: '6', keyCode: 54 },
+  { key: 'amp', key2: '7', keyCode: 55 },
+  { key: 'star', key2: '8', keyCode: 56 },
+  { key: 'lp', key2: '9', keyCode: 57 },
+  { key: 'rp', key2: '0', keyCode: 48 },
+  { key: '-', key2: '_', keyCode: 189 },
+  { key: 'plus', key2: 'eq', keyCode: 187 },
+  { key: 'Del', key2: '', keyCode: 8 },
+  { key: '⇥', key2: '', keyCode: 9 },
+  { key: 'Q', key2: '', code: 81, keyCode: 81 },
+  { key: 'W', key2: '', code: 87, keyCode: 87 },
+  { key: 'E', key2: '', code: 69, keyCode: 69 },
+  { key: 'R', key2: '', code: 82, keyCode: 82 },
+  { key: 'T', key2: '', keyCode: 84 },
+  { key: 'Y', key2: '', keyCode: 89 },
+  { key: 'U', key2: '', keyCode: 85 },
+  { key: 'I', key2: '', keyCode: 73 },
+  { key: 'O', key2: '', keyCode: 79 },
+  { key: 'P', key2: '', keyCode: 80 },
+  { key: 'lb', key2: 'lbr', keyCode: 219 },
+  { key: 'rb', key2: 'rbr', keyCode: 221 },
+  { key: '↵', key2: '', keyCode: 13 },
+  { key: 'Ctrl', key2: '', keyCode: 17 },
+  { key: 'A', key2: '', keyCode: 65 },
+  { key: 'S', key2: '', keyCode: 83 },
+  { key: 'D', key2: '', keyCode: 68 },
+  { key: 'F', key2: '', keyCode: 70 },
+  { key: 'G', key2: '', keyCode: 71 },
+  { key: 'H', key2: '', keyCode: 72 },
+  { key: 'J', key2: '', keyCode: 74 },
+  { key: 'K', key2: '', keyCode: 75 },
+  { key: 'L', key2: '', keyCode: 76 },
+  { key: 'semi', key2: 'colon', keyCode: 186 },
+  { key: 'dquote', key2: 'quote', keyCode: 222 },
+  { key: 'tild', key2: 'dot', keyCode: 220 },
+  { key: '⇧L', key2: '', keyCode: 16 },
+  { key: 'pipe', key2: 'backslash', keyCode: 192 },
+  { key: 'Z', key2: '', keyCode: 90 },
+  { key: 'X', key2: '', keyCode: 88 },
+  { key: 'C', key2: '', keyCode: 67 },
+  { key: 'V', key2: '', keyCode: 86 },
+  { key: 'B', key2: '', keyCode: 66 },
+  { key: 'N', key2: '', keyCode: 78 },
+  { key: 'M', key2: '', keyCode: 77 },
+  { key: 'langleb', key2: 'comma', keyCode: 188 },
+  { key: 'rangleb', key2: 'dot', keyCode: 190 },
+  { key: 'qmark', key2: 'slash', keyCode: 191 },
   { key: '⇧', key2: '' },
   { key: '⇩', key2: '' },
   { key: 'none', key2: '' },
-  { key: '', key2: '' },
-  { key: '_', key2: '' },
-  { key: 'r', key2: '' },
-  { key: '⭠', key2: '' },
-  { key: '⭢', key2: '' },
-  { key: '⭣', key2: '' },
-  { key: '⭡', key2: '' },
+  { key: '', key2: '', keyCode: 91 },
+  { key: '_', key2: '', keyCode: 32 },
+  { key: 'r', key2: '', keyCode: 93 },
+  { key: '⭠', key2: '', keyCode: 37 },
+  { key: '⭢', key2: '', keyCode: 39 },
+  { key: '⭣', key2: '', keyCode: 40 },
+  { key: '⭡', key2: '', keyCode: 38 },
 ];
-
 let keysContainer, keyTemplate;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -76,6 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const key = keyTemplate.cloneNode(true);
     key.classList.remove('key--template');
     key.classList.add('key--' + keys[i].key);
+    if (keys[i].keyCode) {
+      key.classList.add('key-code--' + keys[i].keyCode);
+    }
     const keyLabelTop = key.querySelector('.key__label-top');
     if (keys[i].key === '') {
       const appleFilled = document.createElement('div');
@@ -215,6 +217,8 @@ document.addEventListener('keydown', (event) => {
 
   const keycode = event.keyCode;
 
+  animateKey(keycode);
+
   const isPrintable =
     (keycode > 47 && keycode < 58) || // number keys
     keycode == SPACEBAR ||
@@ -226,6 +230,7 @@ document.addEventListener('keydown', (event) => {
     (keycode > 218 && keycode < 223); // [\]' (in order)
 
   if (isPrintable) {
+    console.log({ line, length: lines[line].length });
     if (keycode === ENTER) {
       if (line === 23) {
         // end of screen get rid of first line
@@ -245,7 +250,7 @@ document.addEventListener('keydown', (event) => {
         const length = lines[line].length - 1;
         lines[line] = lines[line].slice(0, Math.max(1, length));
       }
-    } else if (lines[line].length < 80) {
+    } else if (lines[line].length < 40) {
       if (keycode === SPACEBAR) {
         lines[line] += '\u00A0'; // non breaking space
       } else {
@@ -255,6 +260,24 @@ document.addEventListener('keydown', (event) => {
   }
   render();
 });
+
+function animateKey(keyCode) {
+  const key = document.querySelector(`.key-code--${keyCode}`);
+  console.log({ key });
+  if (key) {
+    const movement = [
+      { transform: 'translateZ(-0.5rem)' },
+      { transform: 'translateZ(0rem)' },
+    ];
+    const timing = {
+      duration: 500,
+      iterations: 1,
+      direction: 'alternate',
+      easing: 'ease-in-out',
+    };
+    key.animate(movement, timing);
+  }
+}
 
 const terminal = document.querySelector('.monitor__terminal');
 function render() {

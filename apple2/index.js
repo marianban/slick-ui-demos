@@ -97,7 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   updateKeysZ();
-  render();
+
+  intro().then(render);
 });
 
 window.addEventListener('resize', updateKeysZ);
@@ -115,13 +116,9 @@ function updateKeysZ() {
             '--key-right-z',
             'calc(-0.75vmin + ' + z + 'px)'
           );
-
           if (keys[i].key === '↵') {
             const keyFront = key.querySelector('.key__side--front');
-            console.log('front', key.offsetHeight);
             const frontOffset = key.offsetHeight;
-            console.log({ frontOffset }, keyFront);
-            console.dir(keyFront);
             keyFront.style.setProperty(
               '--height-half',
               'calc(-0.75vmin + ' + frontOffset + 'px)'
@@ -209,6 +206,7 @@ const lines = [']'];
 const ENTER = 13;
 const BACKSPACE = 8;
 const SPACEBAR = 32;
+const MAX_LINE_LENGTH = 40;
 
 document.addEventListener('keydown', (event) => {
   if (event.isComposing || event.keyCode === 229) {
@@ -229,9 +227,18 @@ document.addEventListener('keydown', (event) => {
     (keycode > 185 && keycode < 193) || // ;=,-./` (in order)
     (keycode > 218 && keycode < 223); // [\]' (in order)
 
+  const startNewLine = lines[line].length >= MAX_LINE_LENGTH;
+
   if (isPrintable) {
-    console.log({ line, length: lines[line].length });
-    if (keycode === ENTER) {
+    if (keycode === BACKSPACE) {
+      if (lines[line].length <= 1 && line > 0) {
+        lines.pop();
+        line--;
+      } else {
+        const length = lines[line].length - 1;
+        lines[line] = lines[line].slice(0, Math.max(1, length));
+      }
+    } else if (keycode === ENTER || startNewLine) {
       if (line === 23) {
         // end of screen get rid of first line
         line--;
@@ -242,15 +249,15 @@ document.addEventListener('keydown', (event) => {
       if (!lines[line]) {
         lines[line] = ']';
       }
-    } else if (keycode === BACKSPACE) {
-      if (lines[line].length <= 1 && line > 0) {
-        lines.pop();
-        line--;
-      } else {
-        const length = lines[line].length - 1;
-        lines[line] = lines[line].slice(0, Math.max(1, length));
+
+      if (startNewLine) {
+        if (keycode === SPACEBAR) {
+          lines[line] += '\u00A0'; // non breaking space
+        } else {
+          lines[line] += event.key;
+        }
       }
-    } else if (lines[line].length < 40) {
+    } else if (lines[line].length < MAX_LINE_LENGTH) {
       if (keycode === SPACEBAR) {
         lines[line] += '\u00A0'; // non breaking space
       } else {
@@ -263,14 +270,13 @@ document.addEventListener('keydown', (event) => {
 
 function animateKey(keyCode) {
   const key = document.querySelector(`.key-code--${keyCode}`);
-  console.log({ key });
   if (key) {
     const movement = [
       { transform: 'translateZ(-0.5rem)' },
       { transform: 'translateZ(0rem)' },
     ];
     const timing = {
-      duration: 500,
+      duration: 250,
       iterations: 1,
       direction: 'alternate',
       easing: 'ease-in-out',
@@ -293,4 +299,46 @@ function render() {
     }
     terminal.appendChild(line);
   }
+}
+
+const introTemplate = `
+                                        
+                                        
+                                        
+                      //////            
+                    ///////             
+                   ///////              
+                   ///                  
+      /////////////////////////////     
+   //////////////////////////////////   
+  ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,      
+ ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,       
+ ///////////////////////////////        
+ ///////////////////////////////        
+ ((((((((((((((((((((((((((((((((       
+  (((((((((((((((((((((((((((((((((     
+   ###################################  
+    #################################   
+     ##############################     
+       (((((((((((((((((((((((((((      
+         %(((((((       (((((((         
+`;
+
+function intro() {
+  lines.length = 0;
+  let intervalId = null;
+  const introLines = introTemplate.split('\n');
+  return new Promise((resolve) => {
+    intervalId = setInterval(() => {
+      if (!introLines.length) {
+        clearInterval(intervalId);
+        lines.length = 0;
+        lines.push(']');
+        resolve();
+        return;
+      }
+      lines.push(introLines.splice(0, 1));
+      render();
+    }, 100);
+  });
 }

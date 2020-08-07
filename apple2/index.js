@@ -1,5 +1,9 @@
 console.clear();
 
+let on = false;
+let line = 0;
+const lines = [']'];
+
 const keys = [
   { key: 'Esc', key2: '', keyCode: 27 },
   { key: 'bang', key2: '1', keyCode: 49 },
@@ -65,11 +69,32 @@ const keys = [
   { key: '⭣', key2: '', keyCode: 40 },
   { key: '⭡', key2: '', keyCode: 38 },
 ];
-let keysContainer, keyTemplate;
+let keysContainer, keyTemplate, powerSwitch;
 
 document.addEventListener('DOMContentLoaded', () => {
   keysContainer = document.querySelector('.keys-container');
   keyTemplate = document.querySelector('.key--template');
+  powerSwitch = document.querySelector('.monitor__power-switch');
+
+  let booting = false;
+  powerSwitch.addEventListener('click', () => {
+    if (booting) {
+      return;
+    }
+    on = !on;
+    if (on) {
+      booting = true;
+      intro().then(() => {
+        render();
+        booting = false;
+      });
+    } else {
+      terminal.innerHTML = '';
+      lines.length = 0;
+      lines.push(']');
+      line = 0;
+    }
+  });
 
   for (let i = 0; i < keys.length; i++) {
     const key = keyTemplate.cloneNode(true);
@@ -97,8 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   updateKeysZ();
-
-  intro().then(render);
 });
 
 window.addEventListener('resize', updateKeysZ);
@@ -201,8 +224,6 @@ function getKeyLabel(key) {
   return key;
 }
 
-let line = 0;
-const lines = [']'];
 const ENTER = 13;
 const BACKSPACE = 8;
 const SPACEBAR = 32;
@@ -216,6 +237,10 @@ document.addEventListener('keydown', (event) => {
   const keycode = event.keyCode;
 
   animateKey(keycode);
+
+  if (!on) {
+    return;
+  }
 
   const isPrintable =
     (keycode > 47 && keycode < 58) || // number keys
@@ -321,7 +346,10 @@ const introTemplate = `
     #################################   
      ##############################     
        (((((((((((((((((((((((((((      
-         %(((((((       (((((((         
+         %(((((((       (((((((     
+                                          
+                                        
+                                          
 `;
 
 function intro() {
@@ -342,3 +370,5 @@ function intro() {
     }, 100);
   });
 }
+
+// write hello you are amazing :)

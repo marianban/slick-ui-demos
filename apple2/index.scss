@@ -880,11 +880,12 @@ body {
     height: 2.55vmin;
     box-shadow: inset 0 0 0.44999999999999996vmin #3c7653;
     transform: translate(0, -0.75vmin);
+    position: relative;
 
     &__button {
       position: absolute;
-      top: 0.9750000000000001vmin;
-      left: 61.800000000000004vmin;
+      bottom: 1px;
+      left: 50%;
       width: 1.5vmin;
       height: 0.75vmin;
       border: 1px solid rgba(#3c7653, 0.3);
@@ -892,6 +893,13 @@ body {
       background-color: #e7e4d9;
       box-shadow: inset 0 0.15000000000000002vmin 0.30000000000000004vmin #fff;
       border-radius: 0.30000000000000004vmin 0.30000000000000004vmin 0 0;
+      transform: translateX(-50%);
+    }
+
+    &:hover & {
+      &__button {
+        background-color: rgba(#3c7653, 0.3);
+      }
     }
   }
 }

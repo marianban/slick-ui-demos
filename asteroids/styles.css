@@ -1,0 +1,151 @@
+/*
+
+
+*/
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: none;
+  background-color: #000;
+}
+
+.loader {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5vmin;
+  height: 5vmax;
+  z-index: 1;
+}
+
+.loader::after {
+  content: '';
+  width: 5vmax;
+  height: 5vmax;
+  border: 0.5vmax solid #fff;
+  border-color: #fff transparent #fff transparent;
+  display: block;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@font-face {
+  font-family: 'Pixels';
+  /* https://www.dafont.com/astro-armada.font */
+  src: url('https://res.cloudinary.com/dzadmlxnt/raw/upload/v1606029613/asteroids/astroarmadatwo_z5py2m.ttf');
+}
+
+html {
+  box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+canvas {
+  display: block;
+}
+
+#game-container {
+  position: relative;
+  width: fit-content;
+  height: fit-content;
+  overflow: hidden;
+}
+
+.bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /*
+  <span>Photo by <a href="https://unsplash.com/@kaip?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Kai Pilger</a> on <a href="https://unsplash.com/s/photos/space?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Unsplash</a></span>
+  */
+  background: url('https://res.cloudinary.com/dzadmlxnt/image/upload/v1606641819/asteroids/asteroids-bg-space-opt_kail1k.jpg');
+  backgroud-position: center;
+  background-size: 80% 80%;
+  /*background-blend-mode: screen;*/
+}
+
+.hud {
+  position: absolute;
+  top: 0.5em;
+  left: 0;
+  height: auto;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  z-index: 10;
+  font-size: 3em;
+  padding: 0em 1em;
+  color: #ecb835;
+}
+
+#score {
+  font-variant-numeric: tabular-nums;
+  font-family: 'Pixels', monospace;
+}
+
+.stars {
+  pointer-events: none;
+  width: 4155px;
+  height: 100vh;
+  animation-name: MOVE-BG;
+  animation-direction: alternate;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  z-index: -1;
+}
+
+.stars-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 4155px;
+  height: 100vh;
+  /* stars background credit://css-tricks.com/examples/StarryNightCSS3/ */
+  background: url('https://res.cloudinary.com/dzadmlxnt/image/upload/v1586775578/i%20want%20to%20belive%20assets/midground_rzfzvc.png')
+    repeat 20% 20%;
+  pointer-events: none;
+  animation-duration: 90s;
+}
+
+.stars-fg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 4155px;
+  background: url('https://res.cloudinary.com/dzadmlxnt/image/upload/v1586775575/i%20want%20to%20belive%20assets/foreground_bynyta.png')
+    repeat 20% 20%;
+  animation-duration: 30s;
+}
+
+@keyframes MOVE-BG {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(calc(-100% + 100vw), 0, 0);
+  }
+}

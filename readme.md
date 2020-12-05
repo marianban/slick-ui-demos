@@ -1,5 +1,15 @@
 # Slick 😎 UI demos
 
+## Asteroids
+
+[![Asteroids](asteroids-7.gif)](http://marianban.github.io/asteroids/index.html)
+
+Live Demo: [link](http://marianban.github.io/asteroids/index.html)
+
+CodePen: [link](https://codepen.io/marianban/pen/zYBXGRV)
+
+Uses: JS, CSS
+
 ## Apple IIe 3D CSS
 
 [![Apple IIe 3D CSS](AppleIIe.png)](http://marianban.github.io/apple-IIe/index.html)

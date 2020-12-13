@@ -3,17 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
   <title>Flow Field</title>
-  <style>
-    body,html {
-      padding: 0;
-      margin: 0;
-    }
-  </style>
 </head>
 <body>
   <div id="container"></div>
+  <div class="settings">
+    <label>
+      <span>Cell Size</span>
+      <input type="range" data-prop="cellSize" min="5" max="200">
+      <input type="number" data-prop="cellSize" min="5" max="200" />
+    </label>
+    <label>
+      <span>Particles</span>
+      <input type="range" data-prop="particles" min="1" max="2000">
+      <input type="number" data-prop="particles" min="1" max="2000" />
+    </label>
+    <label>
+      <span>Noise Seed</span>
+      <input type="range" data-prop="noiseSeed" min="1" max="1000" >
+      <input type="number" data-prop="noiseSeed" min="1" max="1000" />
+    </label>
+    <label>
+      <span>Space Noise Step</span>
+      <input type="range" data-prop="spaceNoiseStep" min="0.01" max="1" step="0.01">
+      <input type="number" data-prop="spaceNoiseStep" min="0.01" max="1" step="0.01" />
+    </label>
+    <label>
+      <span>Time Noise Step</span>
+      <input type="range" data-prop="timeNoiseStep" min="0.01" max="1" step="0.01">
+      <input type="number" data-prop="timeNoiseStep" min="0.01" max="1" step="0.01" />
+    </label>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
-  <script src="index.js"></script>
+  <script src="index.mjs" type="module"></script>
+  <script src="framework.mjs" type="module"></script>
 </body>
 </html>

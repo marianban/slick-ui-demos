@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npx live-server ."
+    "start": "npx live-server --ignore=styles.scss ."
   },
   "author": "Marian Ban",
   "license": "MIT"

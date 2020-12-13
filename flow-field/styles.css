@@ -1,0 +1,45 @@
+body,
+html {
+  padding: 0;
+  margin: 0; }
+
+html {
+  font-size: 62.5%;
+  color: var(--color-text-1); }
+
+body {
+  font-size: 1.4rem; }
+
+*,
+*::after,
+*::before {
+  box-sizing: border-box; }
+
+label {
+  display: grid;
+  align-items: center;
+  justify-content: space-evenly;
+  grid-template-areas: 'label label' 'slider input';
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 2rem;
+  row-gap: 0.5rem;
+  font-size: 1.8rem; }
+  label span {
+    grid-area: label; }
+  label input[type='number'] {
+    width: 6rem; }
+
+.settings {
+  position: absolute;
+  top: 2vmin;
+  right: 2vmin;
+  width: 30rem;
+  height: 40rem;
+  background-color: #fff;
+  border-radius: 1rem;
+  padding: 2vmin;
+  display: grid;
+  grid-auto-flow: row;
+  grid-auto-rows: min-content;
+  row-gap: 2rem; }

@@ -34,6 +34,29 @@
       <input type="range" data-prop="timeNoiseStep" min="0.01" max="1" step="0.01">
       <input type="number" data-prop="timeNoiseStep" min="0.01" max="1" step="0.01" />
     </label>
+    <label>
+      <span>Time Noise Offset</span>
+      <input type="range" data-prop="timeNoiseOffset" min="1" max="10000">
+      <input type="number" data-prop="timeNoiseOffset" min="1" max="10000"/>
+    </label>
+    <label>
+      <span>X Noise Offset</span>
+      <input type="range" data-prop="xNoiseOffset" min="1" max="10000">
+      <input type="number" data-prop="xNoiseOffset" min="1" max="10000" />
+    </label>
+    <label>
+      <span>Y Noise Offset</span>
+      <input type="range" data-prop="yNoiseOffset" min="1" max="10000">
+      <input type="number" data-prop="yNoiseOffset" min="1" max="10000" />
+    </label>
+    <label>
+      <span>Brush Size</span>
+      <input type="range" data-prop="brushSize" min="1" max="10">
+      <input type="number" data-prop="brushSize" min="1" max="10" />
+    </label>
+    <button id="startBtn" type="button">Start</button>
+    <button id="stopBtn" type="button">Stop</button>
+    <button id="clearBtn" type="button">Clear</button>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
   <script src="index.mjs" type="module"></script>

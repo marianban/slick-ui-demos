@@ -1,4 +1,4 @@
-import { initForm } from './framework.mjs';
+import { initForm, $ } from './framework.mjs';
 
 let rows;
 let cols;
@@ -8,87 +8,49 @@ const settings = {
   noiseSeed: 1000,
   spaceNoiseStep: 0.5,
   timeNoiseStep: 0.02,
+  timeNoiseOffset: 0,
+  xNoiseOffset: 0,
+  yNoiseOffset: 82300,
+  brushSize: 1,
 };
 
 let particles = [];
 
-class Particle {
-  constructor(location) {
-    this.prevLocation = location;
-    this.location = location;
-    this.velocity = createVector(0, 0);
-    this.acceleration = createVector(0, 0);
-  }
-
-  applyForce(force) {
-    this.acceleration.add(force);
-  }
-
-  update() {
-    this.velocity.add(this.acceleration);
-    this.velocity.limit(5);
-    this.location.add(this.velocity);
-    this.acceleration.mult(0);
-  }
-
-  within(element) {
-    const { x, y } = this.location;
-    if (
-      element.x < x &&
-      x < element.x + element.size &&
-      element.y < y &&
-      y < element.y + element.size
-    ) {
-      return true;
-    }
-    return false;
-  }
-
-  bounds() {
-    const { x, y } = this.location;
-    if (x >= width) {
-      this.location.x = 0;
-      this.prevLocation.x = 0;
-    }
-    if (x <= 0) {
-      this.location.x = width;
-      this.prevLocation.x = width;
-    }
-    if (y >= height) {
-      this.location.y = 0;
-      this.prevLocation.y = 0;
-    }
-    if (y <= 0) {
-      this.location.y = height;
-      this.prevLocation.y = height;
-    }
-  }
-
-  draw() {
-    stroke(color(20, 20, 20, 20));
-
-    line(
-      this.prevLocation.x,
-      this.prevLocation.y,
-      this.location.x,
-      this.location.y
-    );
-
-    this.prevLocation = this.location.copy();
-  }
-}
-
 const sketch = function (p) {
+  let toff = 0;
+  let isDrawing = false;
+
   p.setup = () => {
     const canvas = p.createCanvas(p.windowWidth, p.windowHeight, p.WEBGL);
     canvas.parent('container');
 
-    initForm(settings);
+    const {
+      elements: { startBtn, stopBtn, clearBtn },
+      on,
+    } = initForm(settings);
+
+    startBtn.addEventListener('click', () => {
+      isDrawing = true;
+    });
+
+    stopBtn.addEventListener('click', () => {
+      isDrawing = false;
+    });
+
+    clearBtn.addEventListener('click', () => {
+      p.background(p.color('#000093'));
+    });
+
+    on('particles', () => {
+      initParticles();
+    });
 
     initGrid();
     initParticles();
 
     p.background(p.color('#000093'));
+
+    toff = settings.timeNoiseOffset;
   };
 
   p.windowResized = () => {
@@ -96,22 +58,49 @@ const sketch = function (p) {
     initGrid();
   };
 
-  let toff = 0;
-  const forces = [];
-
   p.draw = () => {
     //blendMode(OVERLAY);
+    if (!isDrawing) {
+      return;
+    }
+    p.noiseSeed(settings.noiseSeed);
+    p.translate(-p.width / 2, -p.height / 2, 0);
+    const forces = generateFlowField();
+    drawParticles(forces);
+  };
 
-    const { cellSize, spaceNoiseStep, timeNoiseStep } = settings;
+  function initGrid() {
+    const { cellSize } = settings;
+    cols = p.floor(p.windowWidth / cellSize);
+    rows = p.floor(p.windowHeight / cellSize);
+  }
 
-    return;
-    noiseSeed(1000);
-    let yoff = 0;
-    let xoff = 82300;
+  function initParticles() {
+    const numOfNewParticles = settings.particles - particles.length;
+    if (numOfNewParticles > 0) {
+      for (let i = 0; i < numOfNewParticles; i++) {
+        particles.push(
+          new Particle(p.createVector(p.random(p.width), p.random(p.height)))
+        );
+      }
+    } else {
+      particles.splice(-Math.min(particles.length - 1, numOfNewParticles * -1));
+    }
+  }
+
+  function generateFlowField() {
+    const {
+      cellSize,
+      spaceNoiseStep,
+      timeNoiseStep,
+      xNoiseOffset,
+      yNoiseOffset,
+    } = settings;
+
     toff += timeNoiseStep;
-    forces.length = 0;
-
-    translate(-width / 2, -height / 2, 0);
+    let yoff = xNoiseOffset;
+    let xoff = yNoiseOffset;
+    const forces = [];
 
     for (let r = 0; r <= rows; r++) {
       let y = r * cellSize;
@@ -120,9 +109,9 @@ const sketch = function (p) {
       for (let c = 0; c <= cols; c++) {
         let x = c * cellSize;
         xoff += spaceNoiseStep;
-        const n = noise(yoff, xoff, toff);
+        const n = p.noise(yoff, xoff, toff);
         const angle = n * Math.PI * 2;
-        const vector = createVector(cos(angle), sin(angle));
+        const vector = p.createVector(p.cos(angle), p.sin(angle));
         vector.mult(cellSize / 2);
         const force = vector.copy();
         force.normalize();
@@ -131,6 +120,10 @@ const sketch = function (p) {
       }
     }
 
+    return forces;
+  }
+
+  function drawParticles(forces) {
     for (let i = 0; i < particles.length; i++) {
       const ant = particles[i];
       for (let j = 0; j < forces.length; j++) {
@@ -144,17 +137,72 @@ const sketch = function (p) {
       ant.bounds();
       ant.draw();
     }
-  };
-
-  function initGrid() {
-    const { cellSize } = settings;
-    cols = p.floor(p.windowWidth / cellSize);
-    rows = p.floor(p.windowHeight / cellSize);
   }
 
-  function initParticles() {
-    for (let i = 0; i < settings.particles.length; i++) {
-      particles.push(new Particle(createVector(random(width), random(height))));
+  class Particle {
+    constructor(location) {
+      this.prevLocation = location;
+      this.location = location;
+      this.velocity = p.createVector(0, 0);
+      this.acceleration = p.createVector(0, 0);
+    }
+
+    applyForce(force) {
+      this.acceleration.add(force);
+    }
+
+    update() {
+      this.velocity.add(this.acceleration);
+      this.velocity.limit(5);
+      this.location.add(this.velocity);
+      this.acceleration.mult(0);
+    }
+
+    within(element) {
+      const { x, y } = this.location;
+      if (
+        element.x < x &&
+        x < element.x + element.size &&
+        element.y < y &&
+        y < element.y + element.size
+      ) {
+        return true;
+      }
+      return false;
+    }
+
+    bounds() {
+      const { x, y } = this.location;
+      if (x >= p.width) {
+        this.location.x = 0;
+        this.prevLocation.x = 0;
+      }
+      if (x <= 0) {
+        this.location.x = p.width;
+        this.prevLocation.x = p.width;
+      }
+      if (y >= p.height) {
+        this.location.y = 0;
+        this.prevLocation.y = 0;
+      }
+      if (y <= 0) {
+        this.location.y = p.height;
+        this.prevLocation.y = p.height;
+      }
+    }
+
+    draw() {
+      p.strokeWeight(settings.brushSize);
+      p.stroke(p.color(20, 20, 20, 20));
+
+      p.line(
+        this.prevLocation.x,
+        this.prevLocation.y,
+        this.location.x,
+        this.location.y
+      );
+
+      this.prevLocation = this.location.copy();
     }
   }
 };

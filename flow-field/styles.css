@@ -35,7 +35,7 @@ label {
   top: 2vmin;
   right: 2vmin;
   width: 30rem;
-  height: 40rem;
+  height: auto;
   background-color: #fff;
   border-radius: 1rem;
   padding: 2vmin;

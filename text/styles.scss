@@ -21,6 +21,10 @@ body {
   background: linear-gradient(to right, #1488cc, #2b32b2);
 }
 
+canvas {
+  transform: translate3d(0, 0, 0);
+}
+
 *,
 *::after,
 *::before {

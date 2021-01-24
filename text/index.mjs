@@ -1,7 +1,8 @@
 const sketch = function (p) {
   let font;
-  let text = 'hello';
+  let text = 'hello :)';
   let letters;
+  let imgs;
   let deletedLetters = new Set();
 
   p.preload = () => {
@@ -9,13 +10,10 @@ const sketch = function (p) {
   };
 
   p.setup = () => {
-    const canvas = p.createCanvas(p.windowWidth, p.windowHeight, p.WEBGL);
+    const canvas = p.createCanvas(p.windowWidth, p.windowHeight /*, p.WEBGL*/);
     canvas.parent('container');
-
-    const allPoints = font.textToPoints(text, 400, 400, 255);
-    const letterPointGroups = groupPointsByLetters(allPoints.reverse());
-
-    letters = letterPointGroups.map((points) => new Letter(points));
+    imgs = createImages();
+    letters = convertTextToLetters(text);
   };
 
   p.windowResized = () => {
@@ -23,8 +21,11 @@ const sketch = function (p) {
   };
 
   p.draw = () => {
-    p.translate(-p.windowWidth / 2, -p.windowHeight / 2);
+    // p.translate(-p.windowWidth / 2, -p.windowHeight / 2);
     p.clear();
+
+    // p.background(200);
+
     letters.forEach((letter) => {
       letter.behaviour();
       letter.update();
@@ -41,13 +42,98 @@ const sketch = function (p) {
   };
 
   p.keyPressed = () => {
-    if (p.keyCode === p.BACKSPACE && letters.length) {
+    if (p.keyCode === p.BACKSPACE) {
+      const removed = text[text.length - 1];
+      text = text.slice(0, -1);
+      if (removed === ' ' || !letters.length) {
+        return;
+      }
       const deleted = letters.pop();
       deleted.delete();
       deletedLetters.add(deleted);
     }
-    return false; // prevent any default behaviour
+
+    return true;
   };
+
+  p.keyTyped = () => {
+    text += p.key;
+
+    const allLetters = convertTextToLetters(text);
+    // fix for colon
+    const numOfNewChars = allLetters.length - letters.length;
+    if (numOfNewChars <= 0) {
+      return true;
+    }
+    const newLetters = allLetters.slice(-1 * numOfNewChars);
+    const newPoints = newLetters.reduce(
+      (acc, lt) => acc.concat(lt.getPoints()),
+      []
+    );
+    letters.push(new Letter(newPoints));
+
+    return true;
+  };
+
+  function createImages() {
+    const colors = [
+      '#CBFF66',
+      '#66FF70',
+      '#FF6A65',
+      '#FF66BA',
+      '#FFD0EA',
+      '#FF9694',
+      '#10FC1A',
+      '#AAFE0D',
+    ];
+
+    const images = [];
+
+    for (const color of colors) {
+      const canvas = document.createElement('canvas');
+      const size = 60;
+      canvas.width = size * window.devicePixelRatio;
+      canvas.height = size * window.devicePixelRatio;
+      canvas.style.width = size;
+      canvas.style.height = size;
+      const context = canvas.getContext('2d');
+      context.shadowOffsetX = 5;
+      context.shadowOffsetY = 5;
+      context.shadowColor = 'rgba(0, 0, 0, .2)';
+      context.shadowBlur = 20;
+      context.scale(window.devicePixelRatio, window.devicePixelRatio);
+      context.beginPath();
+      context.arc(size / 2, size / 2, 7, 0, 2 * Math.PI, false);
+      context.fillStyle = color;
+      context.fill();
+      context.beginPath();
+      context.arc(size / 2.1, size / 2.1, 5, 0, 2 * Math.PI, false);
+      context.fillStyle = p.color('rgba(255, 255, 255, .4)');
+      context.fill();
+      context.beginPath();
+      context.translate(-12, 26);
+      context.rotate((-45 * Math.PI) / 180);
+      // this effect is not scalable
+      context.ellipse(size / 2.2, size / 2.2, 2, 1, 0, 2 * Math.PI, false);
+      context.fillStyle = p.color('rgba(255, 255, 255, .6)');
+
+      context.fill();
+      images.push(canvas);
+    }
+
+    return images;
+  }
+
+  function convertTextToLetters(text) {
+    const allPoints = font
+      .textToPoints(text, 40, 400, 220)
+      .map((p) => ({ x: Math.round(p.x), y: Math.round(p.y) }));
+    if (!allPoints.length) {
+      return [];
+    }
+    const letterPointGroups = groupPointsByLetters(allPoints.reverse());
+    return letterPointGroups.map((points) => new Letter(points));
+  }
 
   function groupPointsByLetters(points) {
     const letters = [];
@@ -58,7 +144,7 @@ const sketch = function (p) {
       const distanceX = next.x - prev.x;
       const distanceY = next.y - prev.y;
       const euclideanDistance = Math.sqrt(distanceX ** 2 + distanceY ** 2);
-      if (euclideanDistance >= 70) {
+      if (euclideanDistance >= 60) {
         letters.push(letter.slice());
         letter = [];
       }
@@ -79,6 +165,9 @@ const sketch = function (p) {
           )
       );
       this.deleted = false;
+    }
+    getPoints() {
+      return this.points.map((p) => p.target);
     }
     draw() {
       this.points.forEach((point) => {
@@ -136,8 +225,8 @@ const sketch = function (p) {
       this.target = target;
       this.vel = p.createVector();
       this.acc = p.createVector();
-      this.r = 20;
-      this.maxSpeed = 10;
+      this.maxSpeed = 30;
+      this.img = p.random(imgs);
     }
 
     update() {
@@ -148,12 +237,8 @@ const sketch = function (p) {
 
     flee(target) {
       const desired = p5.Vector.sub(target, this.pos);
-      const distance = desired.mag();
-      // if (distance > 150) {
-      //   return p.createVector(0, 0);
-      // }
       desired.normalize();
-      desired.mult(p.random(this.maxSpeed / 2, this.maxSpeed * 2));
+      desired.mult(p.random(this.maxSpeed / 2, this.maxSpeed));
       const steer = p5.Vector.sub(desired, this.vel);
       steer.limit(10 + p.random(30));
       steer.mult(-1);
@@ -184,10 +269,14 @@ const sketch = function (p) {
     }
 
     draw() {
-      p.frameRate(60);
-      p.stroke('#CBFF66');
-      p.strokeWeight(this.r);
-      p.point(this.pos.x, this.pos.y);
+      const img = this.img;
+      p.drawingContext.drawImage(
+        img,
+        this.pos.x,
+        this.pos.y,
+        Math.round(img.width / window.devicePixelRatio),
+        Math.round(img.height / window.devicePixelRatio)
+      );
     }
   }
 };

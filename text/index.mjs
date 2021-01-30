@@ -22,10 +22,7 @@ const sketch = function (p) {
   };
 
   p.draw = () => {
-    // p.translate(-p.windowWidth / 2, -p.windowHeight / 2);
     p.clear();
-
-    // p.background(200);
 
     letters.forEach((letter) => {
       letter.behaviour();
@@ -244,7 +241,7 @@ const sketch = function (p) {
       this.target = target;
       this.vel = p.createVector();
       this.acc = p.createVector();
-      this.maxSpeed = 30;
+      this.maxSpeed = 20;
       this.img = p.random(imgs);
     }
 

@@ -1,7 +1,8 @@
 const sketch = function (p) {
   let font;
-  let text = 'hello :)';
-  let letters;
+  let text = '';
+  const defaultText = 'hello :)';
+  let letters = [];
   let imgs;
   let deletedLetters = new Set();
 
@@ -13,7 +14,7 @@ const sketch = function (p) {
     const canvas = p.createCanvas(p.windowWidth, p.windowHeight /*, p.WEBGL*/);
     canvas.parent('container');
     imgs = createImages();
-    letters = convertTextToLetters(text);
+    initInitialLetters();
   };
 
   p.windowResized = () => {
@@ -52,28 +53,46 @@ const sketch = function (p) {
       deleted.delete();
       deletedLetters.add(deleted);
     }
-
-    return true;
   };
 
   p.keyTyped = () => {
-    text += p.key;
-
-    const allLetters = convertTextToLetters(text);
-    // fix for colon
-    const numOfNewChars = allLetters.length - letters.length;
-    if (numOfNewChars <= 0) {
-      return true;
+    if (!p.key) {
+      return;
     }
+    processNextLetter(p.key);
+  };
+
+  function initInitialLetters() {
+    const chars = defaultText.split('').reverse();
+    let char;
+    while ((char = chars.pop())) {
+      processNextLetter(char);
+    }
+  }
+
+  function processNextLetter(char) {
+    text += char;
+    const numOfNewChars = computeLetterDifference(text);
+    if (numOfNewChars <= 0) {
+      return;
+    }
+    const allLetters = convertTextToLetters(text);
     const newLetters = allLetters.slice(-1 * numOfNewChars);
     const newPoints = newLetters.reduce(
       (acc, lt) => acc.concat(lt.getPoints()),
       []
     );
-    letters.push(new Letter(newPoints));
+    const nextLetter = new Letter(newPoints);
+    if (nextLetter) {
+      letters.push(nextLetter);
+    }
+  }
 
-    return true;
-  };
+  function computeLetterDifference(newText) {
+    const newLetters = convertTextToLetters(newText);
+    const diff = newLetters.length - letters.length;
+    return diff;
+  }
 
   function createImages() {
     const colors = [

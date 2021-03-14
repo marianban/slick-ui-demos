@@ -1,5 +1,15 @@
 # Slick 😎 UI demos
 
+## Candy Text
+
+[![Candy Text](candy-text-optimized.gif)](http://marianban.github.io/candy-text/index.html)
+
+Live Demo: [link](http://marianban.github.io/candy-text/index.html)
+
+CodePen: [link](https://codepen.io/marianban/full/OJbVLeN)
+
+Uses: JS, CSS, p5.js
+
 ## Asteroids
 
 [![Asteroids](asteroids-7.gif)](http://marianban.github.io/asteroids/index.html)
@@ -8,7 +18,7 @@ Live Demo: [link](http://marianban.github.io/asteroids/index.html)
 
 CodePen: [link](https://codepen.io/marianban/pen/zYBXGRV)
 
-Uses: JS, CSS
+Uses: JS, CSS, p5.js
 
 ## Apple IIe 3D CSS
 

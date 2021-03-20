@@ -1,14 +1,21 @@
 import './style.css';
 import * as THREE from 'three';
 import * as dat from 'dat.gui';
+import Stats from 'stats.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { VertexNormalsHelper } from 'three/examples/jsm/helpers/VertexNormalsHelper';
+import {
+  Lensflare,
+  LensflareElement,
+} from 'three/examples/jsm/objects/Lensflare';
 
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 };
+
+const stats = new Stats();
+stats.showPanel(0);
+document.body.appendChild(stats.dom);
 
 const canvas = document.querySelector('canvas.webgl');
 const pixelRatio = Math.min(window.devicePixelRatio, 2);
@@ -16,8 +23,31 @@ const pixelRatio = Math.min(window.devicePixelRatio, 2);
 /**
  * Debug
  */
-const gui = new dat.GUI();
-const parameters = {};
+const gui = new dat.GUI({ width: 300 });
+const parameters = {
+  windSpeed: 0.02,
+  rotationSpeed: 0.01,
+  c: 0,
+  p: 1.35,
+};
+
+const movementFolder = gui.addFolder('Movement');
+movementFolder
+  .add(parameters, 'windSpeed')
+  .min(-0.1)
+  .max(0.1)
+  .step('0.0001')
+  .name('wind');
+movementFolder
+  .add(parameters, 'rotationSpeed')
+  .min(-0.1)
+  .max(0.1)
+  .step('0.0001')
+  .name('rotation');
+
+/**
+ * Textures
+ */
 
 // source https://www.solarsystemscope.com/textures/
 const textureLoader = new THREE.TextureLoader();
@@ -25,16 +55,15 @@ const dayTexture = textureLoader.load('/8k_earth_daymap.jpg');
 const nightTexture = textureLoader.load('/8k_earth_nightmap.jpg');
 const normalTexture = textureLoader.load('/8k_earth_normal_map.png');
 const specularTexture = textureLoader.load('/8k_earth_specular_map.png');
-// const cloudsTexture = textureLoader.load('/Earth-clouds.png');
 const cloudsTexture = textureLoader.load('/8k_earth_clouds.jpg');
-
+const textureFlare0 = textureLoader.load('/lensflare/lensflare0.png');
+const textureFlare2 = textureLoader.load('/lensflare/lensflare2.png');
+const textureFlare3 = textureLoader.load('/lensflare/hexangle.png');
 // http://www.cgchannel.com/2021/01/get-a-free-43200-x-21600px-displacement-map-of-the-earth/
 const displacementTexture = textureLoader.load(
-  '/EARTH_DISPLACE_42K_16BITS_preview.jpg'
+  '/EARTH_DISPLACE_42K_16BITS_preview_small.jpg'
 );
-
 const cubeTextureLoader = new THREE.CubeTextureLoader();
-
 const environmentMapTexture = cubeTextureLoader.load([
   '/space/px.png',
   '/space/nx.png',
@@ -53,27 +82,38 @@ scene.background = environmentMapTexture;
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0x00fffc, 1.3);
-directionalLight.position.set(8, 0.0, 0);
+const directionalLight = new THREE.DirectionalLight(0x99ffff, 1.3);
+directionalLight.position.set(800, 0.0, 0);
 scene.add(directionalLight);
 
-const directionalLightHelper = new THREE.DirectionalLightHelper(
-  directionalLight,
-  0.2
+/**
+ * Lensflare
+ */
+const lensflare = new Lensflare();
+lensflare.addElement(
+  new LensflareElement(textureFlare0, 700, 0, directionalLight.color)
 );
-scene.add(directionalLightHelper);
+lensflare.addElement(new LensflareElement(textureFlare2, 1200, 0.025));
+lensflare.addElement(new LensflareElement(textureFlare3, 60, 0.6));
+lensflare.addElement(new LensflareElement(textureFlare3, 70, 0.7));
+lensflare.addElement(new LensflareElement(textureFlare3, 120, 0.9));
+lensflare.addElement(new LensflareElement(textureFlare3, 70, 1));
+directionalLight.add(lensflare);
 
-// Camera
-
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
-camera.position.z = 4;
+/**
+ * Camera
+ */
+const camera = new THREE.PerspectiveCamera(65, sizes.width / sizes.height);
+camera.position.z = 6;
 scene.add(camera);
 
-// Materials
-
-const earthSegments = 1000;
+/**
+ * Earth
+ */
+const earthSegments = 500;
 const earthGeometry = new THREE.SphereGeometry(2, earthSegments, earthSegments);
 const earthMaterial = new THREE.MeshPhongMaterial({
+  precision: 'lowp',
   map: dayTexture,
   specularMap: specularTexture,
   specular: new THREE.Color(0x111111),
@@ -82,11 +122,15 @@ const earthMaterial = new THREE.MeshPhongMaterial({
   displacementMap: displacementTexture,
   displacementScale: 0.03,
 });
+const earthFolder = gui.addFolder('Earth');
+earthFolder.add(earthMaterial, 'shininess').min(0).max(100).step(0.01);
+earthFolder
+  .add(earthMaterial, 'displacementScale')
+  .min(0)
+  .max(0.1)
+  .step(0.0001)
+  .name('displacement');
 
-// material.normalScale.set(-1, -1);
-// material.normalScale.set(0.5, 0.5)
-// gui.add(material, 'metalness').min(0).max(1).step(0.0001);
-// gui.add(material, 'roughness').min(0).max(1).step(0.0001);
 const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
 scene.add(earthMesh);
 
@@ -96,9 +140,11 @@ const cloudGeometry = new THREE.SphereGeometry(
   couldSegments,
   couldSegments
 );
-const cloudMaterial = new THREE.MeshPhongMaterial({
+const cloudMaterial = new THREE.MeshLambertMaterial({
   // try to use jpeg and blend modes
   // http://www.shadedrelief.com/natural3/pages/clouds.html
+  depthPacking: THREE.RGBADepthPacking,
+  precision: 'lowp',
   map: cloudsTexture,
   side: THREE.DoubleSide,
   opacity: 0.8,
@@ -115,8 +161,9 @@ const nightGeometry = new THREE.SphereGeometry(
   couldSegments,
   couldSegments
 );
-// TODO: apply transparency to texture base on the angle between normal and light direction
+
 const nightMaterial = new THREE.ShaderMaterial({
+  precision: 'lowp',
   uniforms: {
     uTexture: { value: nightTexture },
     uLightPosition: { value: directionalLight.position },
@@ -131,15 +178,14 @@ const nightMaterial = new THREE.ShaderMaterial({
    varying float vAlpha;
 
    void main() {
-      vec4 vViewPosition4 = modelViewMatrix * vec4(position, 1.0);
-      vec3 vViewPosition = vViewPosition4.xyz;
-      vec3 normal = normalize(normalMatrix * normal);
+      vec4 viewPosition4 = modelViewMatrix * vec4(position, 1.0);
       vec4 viewLightPosition4 = viewMatrix * vec4(uLightPosition, 1.0);
-      vec3 lightDirection = normalize(viewLightPosition4.xyz - vViewPosition);
+      vec3 lightDirection = normalize(viewLightPosition4.xyz - viewPosition4.xyz);
+      vec3 normalDirection = normalize(normalMatrix * normal);
 
-      gl_Position = projectionMatrix * vViewPosition4;
+      gl_Position = projectionMatrix * viewPosition4;
 
-      vAlpha = abs(min(0.0, dot(lightDirection, normal)));
+      vAlpha = abs(min(0.0, dot(lightDirection, normalDirection)));
       vUv = uv;
    }
   `,
@@ -158,65 +204,61 @@ const nightMaterial = new THREE.ShaderMaterial({
 const nightMesh = new THREE.Mesh(nightGeometry, nightMaterial);
 earthMesh.add(nightMesh);
 
-const helper = new VertexNormalsHelper(nightMesh, 2, 0x00ff00, 1);
-// scene.add(helper);
-
-parameters.c = 0.1;
-parameters.p = 1.2;
+parameters.c = 0;
+parameters.p = 1.35;
 // reference http://stemkoski.github.io/Three.js/Shader-Glow.html
 const atmosphereMaterial = new THREE.ShaderMaterial({
+  precision: 'lowp',
   uniforms: {
-    c: { value: parameters.c },
-    p: { value: parameters.p },
-    glowColor: { value: new THREE.Color(0x034d8e) },
-    viewVector: { value: camera.position },
+    uC: { value: parameters.c },
+    uP: { value: parameters.p },
+    uColor: { value: new THREE.Color(0x034d8e) },
   },
   vertexShader: `
-    uniform vec3 viewVector;
-    uniform float c;
-    uniform float p;
-    varying float intensity;
+    uniform float uC;
+    uniform float uP;
+    varying float vAlpha;
     void main()
     {
-        vec3 vNormal = normalize( normalMatrix * normal );
-        vec3 vNormel = normalize( normalMatrix * viewVector );
-        intensity = pow( c - dot(vNormal, vNormel), p );
-
-        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+        vec4 viewPosition4 = modelViewMatrix * vec4(position, 1.0);
+        vec3 viewPosition = viewPosition4.xyz;
+        vec4 viewCameraPosition4 = viewMatrix * vec4(cameraPosition, 1.0);
+        vec3 cameraDirection = normalize(viewCameraPosition4.xyz - viewPosition);
+        vec3 normalDirection = normalize(normalMatrix * normal);
+        float intensity = abs(min(0.0, dot(cameraDirection, normalDirection)));
+        vAlpha = pow(intensity + uC, uP);
+        gl_Position = projectionMatrix * viewPosition4;
     }
   `,
   fragmentShader: `
-    uniform vec3 glowColor;
-    varying float intensity;
+    uniform vec3 uColor;
+    varying float vAlpha;
     void main()
     {
-      vec3 glow = glowColor * intensity;
-      gl_FragColor = vec4( glow, 1.0 );
+      gl_FragColor = vec4(uColor, vAlpha);
     }
   `,
   side: THREE.BackSide,
   blending: THREE.AdditiveBlending,
   transparent: true,
 });
-gui
-  .add(atmosphereMaterial.uniforms.c, 'value')
-  .min(0)
+const atmosphereFolder = gui.addFolder('Atmosphere');
+atmosphereFolder
+  .add(atmosphereMaterial.uniforms.uC, 'value')
+  .min(-1)
   .max(1)
   .step(0.0001)
-  .name('atmosphere.c');
-gui
-  .add(atmosphereMaterial.uniforms.p, 'value')
+  .name('c');
+atmosphereFolder
+  .add(atmosphereMaterial.uniforms.uP, 'value')
   .min(0)
   .max(6)
   .step(0.0001)
-  .name('atmosphere.p');
+  .name('p');
 
-const atmosphereGeometry = new THREE.SphereGeometry(2.5, 128, 128);
+const atmosphereGeometry = new THREE.SphereGeometry(2.2, 128, 128);
 const atmosphereMesh = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
 earthMesh.add(atmosphereMesh);
-
-// tutorial
-//learningthreejs.com/blog/2013/09/16/how-to-make-the-earth-in-webgl/
 
 window.addEventListener('resize', () => {
   // Update sizes
@@ -238,52 +280,29 @@ controls.enableDamping = true;
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
-  antialias: true,
+  antialias: pixelRatio < 1.5,
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(pixelRatio);
 renderer.render(scene, camera);
 
-/**
- * Post processing
- */
-const effectComposer = new EffectComposer(renderer);
-effectComposer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-effectComposer.setSize(sizes.width, sizes.height);
-
-// const renderPass = new RenderPass(scene, camera);
-// effectComposer.addPass(renderPass);
-
-// const unrealBloomPass = new UnrealBloomPass();
-// unrealBloomPass.enabled = false;
-// unrealBloomPass.strength = 0.3;
-// unrealBloomPass.radius = 1.0;
-// unrealBloomPass.threshold = 0.6;
-// gui.add(unrealBloomPass, 'strength').min(0).max(3).step(0.0001);
-// gui.add(unrealBloomPass, 'radius').min(0).max(1).step(0.0001);
-// gui.add(unrealBloomPass, 'threshold').min(0).max(1).step(0.0001);
-// // gui.add(unrealBloomPass, 'exposure').min(0).max(2).step(0.0001);
-// effectComposer.addPass(unrealBloomPass);
-
 var clock = new THREE.Clock();
 
 const tick = () => {
-  // Update controls
+  stats.begin();
+
   controls.update();
 
+  // animations
   const elapsedTime = clock.getElapsedTime();
-  cloudMesh.rotation.y = elapsedTime * 0.01;
+  cloudMesh.rotation.y = elapsedTime * parameters.windSpeed;
+  earthMesh.rotation.y = elapsedTime * parameters.rotationSpeed;
 
-  earthMesh.rotation.y = elapsedTime * 0.02;
-
-  // nightMaterial.uniforms.uLightPosition.value = directionalLight.position;
-
-  // Render
   renderer.render(scene, camera);
-  // effectComposer.render();
 
-  // Call tick again on the next frame
   window.requestAnimationFrame(tick);
+
+  stats.end();
 };
 
 tick();

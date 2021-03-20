@@ -29,49 +29,91 @@ const parameters = {
   rotationSpeed: 0.01,
   c: 0,
   p: 1.35,
+  clouds: 'Clear',
 };
-
-const movementFolder = gui.addFolder('Movement');
-movementFolder
-  .add(parameters, 'windSpeed')
-  .min(-0.1)
-  .max(0.1)
-  .step('0.0001')
-  .name('wind');
-movementFolder
-  .add(parameters, 'rotationSpeed')
-  .min(-0.1)
-  .max(0.1)
-  .step('0.0001')
-  .name('rotation');
 
 /**
  * Textures
  */
 
+const backdrop = document.querySelector('.backdrop');
+
+let itemsToLoad = 0;
+let loadedItems = 0;
+
+const updateProgress = () => {
+  itemsToLoad += 1;
+  return () => {
+    loadedItems += 1;
+
+    if (loadedItems === itemsToLoad) {
+      backdrop.style.opacity = 0;
+      backdrop.style.visibility = 'hidden';
+    }
+  };
+};
+
 // source https://www.solarsystemscope.com/textures/
 const textureLoader = new THREE.TextureLoader();
-const dayTexture = textureLoader.load('/8k_earth_daymap.jpg');
-const nightTexture = textureLoader.load('/8k_earth_nightmap.jpg');
-const normalTexture = textureLoader.load('/8k_earth_normal_map.png');
-const specularTexture = textureLoader.load('/8k_earth_specular_map.png');
-const cloudsTexture = textureLoader.load('/8k_earth_clouds.jpg');
-const textureFlare0 = textureLoader.load('/lensflare/lensflare0.png');
-const textureFlare2 = textureLoader.load('/lensflare/lensflare2.png');
-const textureFlare3 = textureLoader.load('/lensflare/hexangle.png');
+const dayTexture = textureLoader.load('/8k_earth_daymap.jpg', updateProgress());
+const nightTexture = textureLoader.load(
+  '/8k_earth_nightmap.jpg',
+  updateProgress()
+);
+const normalTexture = textureLoader.load(
+  '/8k_earth_normal_map.png',
+  updateProgress()
+);
+const specularTexture = textureLoader.load(
+  '/8k_earth_specular_map.png',
+  updateProgress()
+);
+const cloudySkyTexture = textureLoader.load(
+  '/europe_clouds_8k.jpg',
+  updateProgress()
+);
+const hurricanesSkyTexture = textureLoader.load(
+  '/storm_clouds_8k.jpg',
+  updateProgress()
+);
+const textureFlare0 = textureLoader.load(
+  '/lensflare/lensflare0.png',
+  updateProgress()
+);
+const textureFlare2 = textureLoader.load(
+  '/lensflare/lensflare2.png',
+  updateProgress()
+);
+const textureFlare3 = textureLoader.load(
+  '/lensflare/hexangle.png',
+  updateProgress()
+);
 // http://www.cgchannel.com/2021/01/get-a-free-43200-x-21600px-displacement-map-of-the-earth/
 const displacementTexture = textureLoader.load(
-  '/EARTH_DISPLACE_42K_16BITS_preview_small.jpg'
+  '/EARTH_DISPLACE_42K_16BITS_preview_small.jpg',
+  updateProgress()
 );
 const cubeTextureLoader = new THREE.CubeTextureLoader();
-const environmentMapTexture = cubeTextureLoader.load([
-  '/space/px.png',
-  '/space/nx.png',
-  '/space/py.png',
-  '/space/ny.png',
-  '/space/pz.png',
-  '/space/nz.png',
-]);
+const environmentMapTexture = cubeTextureLoader.load(
+  [
+    '/space/px.png',
+    '/space/nx.png',
+    '/space/py.png',
+    '/space/ny.png',
+    '/space/pz.png',
+    '/space/nz.png',
+  ],
+  updateProgress()
+);
+
+const cloudTextures = {
+  Cloudy: cloudySkyTexture,
+  Hurricanes: hurricanesSkyTexture,
+};
+
+/**
+ * Scene
+ */
 
 const scene = new THREE.Scene();
 scene.background = environmentMapTexture;
@@ -110,6 +152,22 @@ scene.add(camera);
 /**
  * Earth
  */
+const earth = new THREE.Group();
+const earthFolder = gui.addFolder('Earth');
+
+earthFolder
+  .add(parameters, 'windSpeed')
+  .min(-0.1)
+  .max(0.1)
+  .step('0.0001')
+  .name('wind');
+earthFolder
+  .add(parameters, 'rotationSpeed')
+  .min(0)
+  .max(0.1)
+  .step('0.0001')
+  .name('rotation');
+
 const earthSegments = 500;
 const earthGeometry = new THREE.SphereGeometry(2, earthSegments, earthSegments);
 const earthMaterial = new THREE.MeshPhongMaterial({
@@ -122,7 +180,7 @@ const earthMaterial = new THREE.MeshPhongMaterial({
   displacementMap: displacementTexture,
   displacementScale: 0.03,
 });
-const earthFolder = gui.addFolder('Earth');
+
 earthFolder.add(earthMaterial, 'shininess').min(0).max(100).step(0.01);
 earthFolder
   .add(earthMaterial, 'displacementScale')
@@ -132,7 +190,7 @@ earthFolder
   .name('displacement');
 
 const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
-scene.add(earthMesh);
+earth.add(earthMesh);
 
 const couldSegments = 200;
 const cloudGeometry = new THREE.SphereGeometry(
@@ -140,12 +198,10 @@ const cloudGeometry = new THREE.SphereGeometry(
   couldSegments,
   couldSegments
 );
-const cloudMaterial = new THREE.MeshLambertMaterial({
-  // try to use jpeg and blend modes
+const cloudMaterial = new THREE.MeshPhongMaterial({
   // http://www.shadedrelief.com/natural3/pages/clouds.html
-  depthPacking: THREE.RGBADepthPacking,
   precision: 'lowp',
-  map: cloudsTexture,
+  map: cloudySkyTexture,
   side: THREE.DoubleSide,
   opacity: 0.8,
   transparent: true,
@@ -154,7 +210,7 @@ const cloudMaterial = new THREE.MeshLambertMaterial({
   blendEquation: THREE.MaxEquation,
 });
 const cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
-earthMesh.add(cloudMesh);
+earth.add(cloudMesh);
 
 const nightGeometry = new THREE.SphereGeometry(
   2.019,
@@ -202,7 +258,7 @@ const nightMaterial = new THREE.ShaderMaterial({
   `,
 });
 const nightMesh = new THREE.Mesh(nightGeometry, nightMaterial);
-earthMesh.add(nightMesh);
+earth.add(nightMesh);
 
 parameters.c = 0;
 parameters.p = 1.35;
@@ -258,7 +314,17 @@ atmosphereFolder
 
 const atmosphereGeometry = new THREE.SphereGeometry(2.2, 128, 128);
 const atmosphereMesh = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
-earthMesh.add(atmosphereMesh);
+earth.add(atmosphereMesh);
+
+scene.add(earth);
+
+earthFolder
+  .add(parameters, 'clouds')
+  .options(['Cloudy', 'Hurricanes'])
+  .onFinishChange((value) => {
+    cloudMaterial.map = cloudTextures[value];
+  })
+  .name('sky');
 
 window.addEventListener('resize', () => {
   // Update sizes
@@ -274,10 +340,6 @@ window.addEventListener('resize', () => {
   renderer.setPixelRatio(pixelRatio);
 });
 
-// Controls
-const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true;
-
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: pixelRatio < 1.5,
@@ -285,6 +347,10 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(pixelRatio);
 renderer.render(scene, camera);
+
+// Controls
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
 
 var clock = new THREE.Clock();
 
@@ -295,8 +361,9 @@ const tick = () => {
 
   // animations
   const elapsedTime = clock.getElapsedTime();
-  cloudMesh.rotation.y = elapsedTime * parameters.windSpeed;
-  earthMesh.rotation.y = elapsedTime * parameters.rotationSpeed;
+
+  cloudMesh.rotation.x = Math.sin(elapsedTime * 2 * parameters.windSpeed);
+  earth.rotation.y = elapsedTime * parameters.rotationSpeed;
 
   renderer.render(scene, camera);
 

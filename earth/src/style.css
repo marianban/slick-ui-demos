@@ -3,6 +3,7 @@ body {
   overflow: hidden;
   margin: 0;
   padding: 0;
+  background: #000000;
 }
 
 .webgl {
@@ -10,4 +11,56 @@ body {
   top: 0;
   left: 0;
   outline: none;
+}
+
+.backdrop {
+  display: block;
+  content: '';
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  background: #000000;
+  transition: opacity 600ms ease-out 1s, visibility 0s linear 2s;
+  pointer-events: none;
+  visibility: visible;
+}
+
+/* https://loading.io/css/ */
+.lds-ring {
+  display: inline-block;
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  border: 8px solid #fff;
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: #fff transparent transparent transparent;
+}
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

@@ -13,24 +13,30 @@ const sizes = {
   height: window.innerHeight,
 };
 
-const stats = new Stats();
-stats.showPanel(0);
-document.body.appendChild(stats.dom);
-
 const canvas = document.querySelector('canvas.webgl');
 const pixelRatio = Math.min(window.devicePixelRatio, 2);
 
 /**
  * Debug
  */
+const stats = new Stats();
+document.body.appendChild(stats.dom);
+stats.dom.children[0].style.display = 'none';
+
 const gui = new dat.GUI({ width: 300 });
 const parameters = {
-  windSpeed: 0.02,
-  rotationSpeed: 0.01,
+  rotationSpeed: 0.05,
+  // relative to rotation
+  windSpeed: 0.005,
   c: 0,
   p: 1.35,
-  clouds: 'Clear',
+  toggleFps: () => {
+    stats.dom.children[0].style.display =
+      stats.dom.children[0].style.display === 'block' ? 'none' : 'block';
+  },
 };
+
+gui.add(parameters, 'toggleFps').name('FPS metter');
 
 /**
  * Textures
@@ -49,33 +55,71 @@ const updateProgress = () => {
     if (loadedItems === itemsToLoad) {
       backdrop.style.opacity = 0;
       backdrop.style.visibility = 'hidden';
+
+      const getFileName = (url) => url.substring(url.lastIndexOf('/') + 1);
+
+      const textureOptions = skyTextures.map((t) => getFileName(t.image.src));
+      const textureMap = skyTextures.reduce(
+        (acc, t) => ({
+          ...acc,
+          [getFileName(t.image.src)]: t,
+        }),
+        {}
+      );
+
+      parameters.sky = textureOptions[0];
+
+      earthFolder
+        .add(parameters, 'sky')
+        .options(textureOptions)
+        .onFinishChange((value) => {
+          cloudMaterial.map = textureMap[value];
+        })
+        .name('sky');
     }
   };
 };
 
-// source https://www.solarsystemscope.com/textures/
 const textureLoader = new THREE.TextureLoader();
-const dayTexture = textureLoader.load('/8k_earth_daymap.jpg', updateProgress());
+
+// https://res.cloudinary.com/dzadmlxnt/image/upload/c_scale,q_auto,w_4096/v1616314378/earth/8k_earth_daymap_cpbveo.jpg
+const textureQuality = isMobile() ? '4k' : '8k';
+
+// surface textures
+// source https://www.solarsystemscope.com/textures/
+const dayTexture = textureLoader.load(
+  `/${textureQuality}_earth_daymap.jpg`,
+  updateProgress()
+);
 const nightTexture = textureLoader.load(
-  '/8k_earth_nightmap.jpg',
+  `/${textureQuality}_earth_nightmap.jpg`,
   updateProgress()
 );
 const normalTexture = textureLoader.load(
-  '/8k_earth_normal_map.png',
+  `/${textureQuality}_earth_normal_map.png`,
   updateProgress()
 );
 const specularTexture = textureLoader.load(
-  '/8k_earth_specular_map.png',
+  `/${textureQuality}_earth_specular_map.png`,
   updateProgress()
 );
+
+// sky textures
+// http://www.shadedrelief.com/natural3/pages/clouds.html
+const skyTextures = [];
 const cloudySkyTexture = textureLoader.load(
-  '/europe_clouds_8k.jpg',
+  `/europe_clouds_${textureQuality}.jpg`,
   updateProgress()
 );
-const hurricanesSkyTexture = textureLoader.load(
-  '/storm_clouds_8k.jpg',
+skyTextures.push(cloudySkyTexture);
+const stormSkyTexture = textureLoader.load(
+  `/storm_clouds_${textureQuality}.jpg`,
   updateProgress()
 );
+skyTextures.push(stormSkyTexture);
+
+// lens flares
+// https://opengameart.org/content/lens-flares-and-particles
 const textureFlare0 = textureLoader.load(
   '/lensflare/lensflare0.png',
   updateProgress()
@@ -84,13 +128,13 @@ const textureFlare2 = textureLoader.load(
   '/lensflare/lensflare2.png',
   updateProgress()
 );
-const textureFlare3 = textureLoader.load(
+const textureFlareHex = textureLoader.load(
   '/lensflare/hexangle.png',
   updateProgress()
 );
 // http://www.cgchannel.com/2021/01/get-a-free-43200-x-21600px-displacement-map-of-the-earth/
 const displacementTexture = textureLoader.load(
-  '/EARTH_DISPLACE_42K_16BITS_preview_small.jpg',
+  `/EARTH_DISPLACE_${textureQuality}_16BITS.jpg`,
   updateProgress()
 );
 const cubeTextureLoader = new THREE.CubeTextureLoader();
@@ -105,11 +149,6 @@ const environmentMapTexture = cubeTextureLoader.load(
   ],
   updateProgress()
 );
-
-const cloudTextures = {
-  Cloudy: cloudySkyTexture,
-  Hurricanes: hurricanesSkyTexture,
-};
 
 /**
  * Scene
@@ -136,10 +175,10 @@ lensflare.addElement(
   new LensflareElement(textureFlare0, 700, 0, directionalLight.color)
 );
 lensflare.addElement(new LensflareElement(textureFlare2, 1200, 0.025));
-lensflare.addElement(new LensflareElement(textureFlare3, 60, 0.6));
-lensflare.addElement(new LensflareElement(textureFlare3, 70, 0.7));
-lensflare.addElement(new LensflareElement(textureFlare3, 120, 0.9));
-lensflare.addElement(new LensflareElement(textureFlare3, 70, 1));
+lensflare.addElement(new LensflareElement(textureFlareHex, 60, 0.6));
+lensflare.addElement(new LensflareElement(textureFlareHex, 70, 0.7));
+lensflare.addElement(new LensflareElement(textureFlareHex, 120, 0.9));
+lensflare.addElement(new LensflareElement(textureFlareHex, 70, 1));
 directionalLight.add(lensflare);
 
 /**
@@ -164,14 +203,16 @@ earthFolder
 earthFolder
   .add(parameters, 'rotationSpeed')
   .min(0)
-  .max(0.1)
+  .max(0.5)
   .step('0.0001')
   .name('rotation');
+
+const shaderPrecision = 'highp';
 
 const earthSegments = 500;
 const earthGeometry = new THREE.SphereGeometry(2, earthSegments, earthSegments);
 const earthMaterial = new THREE.MeshPhongMaterial({
-  precision: 'lowp',
+  precision: shaderPrecision,
   map: dayTexture,
   specularMap: specularTexture,
   specular: new THREE.Color(0x111111),
@@ -199,9 +240,8 @@ const cloudGeometry = new THREE.SphereGeometry(
   couldSegments
 );
 const cloudMaterial = new THREE.MeshPhongMaterial({
-  // http://www.shadedrelief.com/natural3/pages/clouds.html
-  precision: 'lowp',
-  map: cloudySkyTexture,
+  precision: shaderPrecision,
+  map: skyTextures[0],
   side: THREE.DoubleSide,
   opacity: 0.8,
   transparent: true,
@@ -219,7 +259,7 @@ const nightGeometry = new THREE.SphereGeometry(
 );
 
 const nightMaterial = new THREE.ShaderMaterial({
-  precision: 'lowp',
+  precision: shaderPrecision,
   uniforms: {
     uTexture: { value: nightTexture },
     uLightPosition: { value: directionalLight.position },
@@ -262,9 +302,9 @@ earth.add(nightMesh);
 
 parameters.c = 0;
 parameters.p = 1.35;
-// reference http://stemkoski.github.io/Three.js/Shader-Glow.html
+// inspired by http://stemkoski.github.io/Three.js/Shader-Glow.html
 const atmosphereMaterial = new THREE.ShaderMaterial({
-  precision: 'lowp',
+  precision: shaderPrecision,
   uniforms: {
     uC: { value: parameters.c },
     uP: { value: parameters.p },
@@ -318,14 +358,6 @@ earth.add(atmosphereMesh);
 
 scene.add(earth);
 
-earthFolder
-  .add(parameters, 'clouds')
-  .options(['Cloudy', 'Hurricanes'])
-  .onFinishChange((value) => {
-    cloudMaterial.map = cloudTextures[value];
-  })
-  .name('sky');
-
 window.addEventListener('resize', () => {
   // Update sizes
   sizes.width = window.innerWidth;
@@ -343,6 +375,7 @@ window.addEventListener('resize', () => {
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: pixelRatio < 1.5,
+  powerPreference: 'high-performance',
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(pixelRatio);
@@ -373,3 +406,27 @@ const tick = () => {
 };
 
 tick();
+
+function isMobile() {
+  return iOS() || isAndroid();
+}
+
+// https://stackoverflow.com/questions/9038625/detect-if-device-is-ios
+function iOS() {
+  return (
+    [
+      'iPad Simulator',
+      'iPhone Simulator',
+      'iPod Simulator',
+      'iPad',
+      'iPhone',
+      'iPod',
+    ].includes(navigator.platform) ||
+    // iPad on iOS 13 detection
+    (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
+  );
+}
+
+function isAndroid() {
+  return /android/i.test(navigator.userAgent);
+}

@@ -1,0 +1,16 @@
+{
+  "name": "sphere",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^2.1.0"
+  },
+  "dependencies": {
+    "noisejs": "^2.1.0",
+    "three": "^0.126.1"
+  }
+}

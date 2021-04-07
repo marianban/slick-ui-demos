@@ -1,5 +1,15 @@
 # Slick 😎 UI demos
 
+## 3D Earth
+
+[![3D Earth](earth-optimize.gif)](http://marianban.github.io/earth/index.html)
+
+Live Demo: [link](http://marianban.github.io/earth/index.html)
+
+CodePen: [link](https://codepen.io/marianban/full/bGBXmvJ)
+
+Uses: JS, CSS, Three.js
+
 ## Candy Text
 
 [![Candy Text](candy-text-optimized.gif)](http://marianban.github.io/candy-text/index.html)

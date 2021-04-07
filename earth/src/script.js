@@ -88,19 +88,19 @@ const textureQuality = isMobile() ? '4k' : '8k';
 // surface textures
 // source https://www.solarsystemscope.com/textures/
 const dayTexture = textureLoader.load(
-  `/${textureQuality}_earth_daymap.jpg`,
+  `${textureQuality}_earth_daymap.jpg`,
   updateProgress()
 );
 const nightTexture = textureLoader.load(
-  `/${textureQuality}_earth_nightmap.jpg`,
+  `${textureQuality}_earth_nightmap.jpg`,
   updateProgress()
 );
 const normalTexture = textureLoader.load(
-  `/${textureQuality}_earth_normal_map.png`,
+  `${textureQuality}_earth_normal_map.png`,
   updateProgress()
 );
 const specularTexture = textureLoader.load(
-  `/${textureQuality}_earth_specular_map.png`,
+  `${textureQuality}_earth_specular_map.png`,
   updateProgress()
 );
 
@@ -108,12 +108,12 @@ const specularTexture = textureLoader.load(
 // http://www.shadedrelief.com/natural3/pages/clouds.html
 const skyTextures = [];
 const cloudySkyTexture = textureLoader.load(
-  `/europe_clouds_${textureQuality}.jpg`,
+  `europe_clouds_${textureQuality}.jpg`,
   updateProgress()
 );
 skyTextures.push(cloudySkyTexture);
 const stormSkyTexture = textureLoader.load(
-  `/storm_clouds_${textureQuality}.jpg`,
+  `storm_clouds_${textureQuality}.jpg`,
   updateProgress()
 );
 skyTextures.push(stormSkyTexture);
@@ -121,31 +121,31 @@ skyTextures.push(stormSkyTexture);
 // lens flares
 // https://opengameart.org/content/lens-flares-and-particles
 const textureFlare0 = textureLoader.load(
-  '/lensflare/lensflare0.png',
+  'lensflare/lensflare0.png',
   updateProgress()
 );
 const textureFlare2 = textureLoader.load(
-  '/lensflare/lensflare2.png',
+  'lensflare/lensflare2.png',
   updateProgress()
 );
 const textureFlareHex = textureLoader.load(
-  '/lensflare/hexangle.png',
+  'lensflare/hexangle.png',
   updateProgress()
 );
 // http://www.cgchannel.com/2021/01/get-a-free-43200-x-21600px-displacement-map-of-the-earth/
 const displacementTexture = textureLoader.load(
-  `/EARTH_DISPLACE_${textureQuality}_16BITS.jpg`,
+  `EARTH_DISPLACE_${textureQuality}_16BITS.jpg`,
   updateProgress()
 );
 const cubeTextureLoader = new THREE.CubeTextureLoader();
 const environmentMapTexture = cubeTextureLoader.load(
   [
-    '/space/px.png',
-    '/space/nx.png',
-    '/space/py.png',
-    '/space/ny.png',
-    '/space/pz.png',
-    '/space/nz.png',
+    'space/px.png',
+    'space/nx.png',
+    'space/py.png',
+    'space/ny.png',
+    'space/pz.png',
+    'space/nz.png',
   ],
   updateProgress()
 );

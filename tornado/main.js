@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import * as dat from 'three/examples/jsm/libs/dat.gui.module.js';
+import { Sky } from 'three/examples/jsm/objects/Sky.js';
+import smoke2url from './particlePack_1/PNG (Transparent)/smoke_02.png';
 
 let scene, camera, renderer, sizes, controls, material, mesh, stats;
 
@@ -29,6 +31,13 @@ function init() {
   scene = new THREE.Scene();
 
   /**
+   * Textures
+   */
+  const textureLoader = new THREE.TextureLoader();
+
+  const smoke2 = textureLoader.load(smoke2url);
+
+  /**
    * Axes Helper
    */
   const axesHelper = new THREE.AxesHelper(4);
@@ -38,11 +47,19 @@ function init() {
    * Cameras
    */
   camera = new THREE.PerspectiveCamera(85, sizes.aspect, 1, 500);
-  camera.position.z = 4;
+  camera.position.z = 42;
+  camera.position.y = 40;
   scene.add(camera);
 
   /**
-   * Geometry
+   * Sky
+   */
+  const sky = new Sky();
+  sky.scale.setScalar(450000);
+  scene.add(sky);
+
+  /**
+   * Tornado
    */
 
   const parameters = {
@@ -51,7 +68,8 @@ function init() {
     height: 30,
     curviness: 7,
     range: 2,
-    particleSize: 8,
+    particleSize: 600,
+    curvinessChangeRate: 1,
   };
 
   const geometry = new THREE.BufferGeometry();
@@ -73,13 +91,19 @@ function init() {
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
   material = new THREE.ShaderMaterial({
+    depthWrite: false,
+    transparent: true,
+    side: THREE.DoubleSide,
     uniforms: {
-      uSize: { value: parameters.particleSize * sizes.pixelRatio },
+      uSize: { value: parameters.particleSize },
+      uPixelRatio: { value: sizes.pixelRatio },
       uTime: { value: 0 },
       uSpeed: { value: 10 },
       uHeight: { value: parameters.height },
       uCurviness: { value: parameters.curviness },
+      uCurvinessChangeRate: { value: parameters.curvinessChangeRate },
       uRange: { value: parameters.range },
+      uTexture: { value: smoke2 },
     },
     vertexShader: `
       uniform float uSize;
@@ -87,9 +111,12 @@ function init() {
       uniform float uSpeed;
       uniform float uHeight;
       uniform float uCurviness;
+      uniform float uCurvinessChangeRate;
       uniform float uRange;
+      uniform float uPixelRatio;
 
       varying vec4 vNormal;
+      varying vec2 vUv;
 
       void main() {
 
@@ -98,23 +125,26 @@ function init() {
         float distanceToCenter = length(modelPosition.xz);
         float speed = 1.0 - (modelPosition.y / uHeight);
         modelPosition.x = sin(angle + uTime * speed * uSpeed) * distanceToCenter;
-        modelPosition.x = modelPosition.x + sin(modelPosition.y / uCurviness) * uRange;
+        modelPosition.x = modelPosition.x + sin(uTime * uCurvinessChangeRate + (modelPosition.y / uCurviness)) * uRange;
         modelPosition.z = cos(angle + uTime * speed * uSpeed) * distanceToCenter;
-        modelPosition.z = modelPosition.z + cos(modelPosition.y / uCurviness) * uRange;
+        modelPosition.z = modelPosition.z + cos(uTime * uCurvinessChangeRate + (modelPosition.y / uCurviness)) * uRange;
         vec4 viewPosition = viewMatrix * modelPosition;
         vec4 projectedPosition = projectionMatrix * viewPosition;
 
-        vNormal =  vec4(normal, 1.0);
+        vNormal = vec4(normal, 1.0);
         gl_Position = projectedPosition;
-        gl_PointSize = uSize;
+        gl_PointSize = uSize * uPixelRatio;
         gl_PointSize *= (1.0 / - viewPosition.z);
       }
     `,
     fragmentShader: `
       varying vec4 vNormal;
+      uniform sampler2D uTexture;
 
       void main() {
-        gl_FragColor = vec4(255,1,1,1);
+        vec2 uv = (vec3( gl_PointCoord.x, 1.0 - gl_PointCoord.y, 1 ) ).xy;
+        vec4 textureColor = texture2D(uTexture, uv);
+        gl_FragColor = textureColor;
       }
     `,
   });
@@ -130,6 +160,12 @@ function init() {
     .step(0.1)
     .name('curviness');
   gui
+    .add(material.uniforms.uCurvinessChangeRate, 'value')
+    .min(0)
+    .max(10)
+    .step(0.001)
+    .name('curviness rate change');
+  gui
     .add(material.uniforms.uRange, 'value')
     .min(0)
     .max(10)
@@ -138,7 +174,7 @@ function init() {
   gui
     .add(material.uniforms.uSize, 'value')
     .min(1)
-    .max(100)
+    .max(5000)
     .step(0.1)
     .name('size');
   gui
@@ -153,6 +189,21 @@ function init() {
   mesh.scale.set(1, 1, 1);
 
   scene.add(mesh);
+
+  /**
+   * Ground
+   */
+
+  const groundSize = 100;
+  const groundGeometry = new THREE.PlaneGeometry(groundSize, groundSize, 1);
+  const groundMaterial = new THREE.MeshBasicMaterial({
+    color: '#69b581',
+    side: THREE.DoubleSide,
+  });
+  const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+  ground.rotation.x = -Math.PI * 0.5;
+  ground.position.y = -0.8;
+  scene.add(ground);
 
   /**
    * Renderer

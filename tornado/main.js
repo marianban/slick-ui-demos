@@ -3,10 +3,11 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import * as dat from 'three/examples/jsm/libs/dat.gui.module.js';
-import { Sky } from 'three/examples/jsm/objects/Sky.js';
+// import { Sky } from 'three/examples/jsm/objects/Sky.js';
 import smoke2url from './particlePack_1/PNG (Transparent)/smoke_02.png';
+import { BackSide, MultiplyBlending } from 'three';
 
-let scene, camera, renderer, sizes, controls, material, mesh, stats;
+let scene, camera, renderer, sizes, controls, material, mesh, stats, sky;
 
 // https://unsplash.com/photos/XPDXhRy92Oc
 
@@ -30,6 +31,9 @@ function init() {
 
   scene = new THREE.Scene();
 
+  scene.background = new THREE.Color(0xcce0ff);
+  scene.fog = new THREE.Fog(0xcce0ff, 30, 500);
+
   /**
    * Textures
    */
@@ -46,17 +50,19 @@ function init() {
   /**
    * Cameras
    */
-  camera = new THREE.PerspectiveCamera(85, sizes.aspect, 1, 500);
-  camera.position.z = 42;
-  camera.position.y = 40;
+  camera = new THREE.PerspectiveCamera(75, sizes.aspect, 1, 2000000);
+  camera.position.z = 50;
+  camera.position.y = 5;
+  // camera.rotation.set('x', -Math.PI);
+  // camera.position.x = 50;
   scene.add(camera);
 
   /**
    * Sky
    */
-  const sky = new Sky();
-  sky.scale.setScalar(450000);
-  scene.add(sky);
+  // const sky = new Sky();
+  // sky.scale.setScalar(450000);
+  // scene.add(sky);
 
   /**
    * Tornado
@@ -65,16 +71,17 @@ function init() {
   const parameters = {
     count: 10_000,
     radius: 5,
-    height: 30,
+    height: 60,
     curviness: 7,
     range: 2,
-    particleSize: 600,
+    particleSize: 300,
     curvinessChangeRate: 1,
   };
 
   const geometry = new THREE.BufferGeometry();
 
   const positions = new Float32Array(parameters.count * 3);
+  const particleSizes = new Float32Array(parameters.count);
 
   for (let i = 0; i < parameters.count; i++) {
     const ix = i * 3;
@@ -82,18 +89,31 @@ function init() {
     const iz = iy + 1;
     const angle = Math.random() * Math.PI * 2;
     const y = parameters.height * (i / parameters.count);
-    const radius = parameters.radius * (i / parameters.count);
-    positions[ix] = Math.sin(angle) * radius;
+    const radius =
+      (parameters.radius + 0.015 * Math.max(0, i - parameters.count * 0.8)) *
+      (i / parameters.count);
+    positions[ix] = Math.sin(angle) * (radius + Math.random() * radius);
     positions[iy] = y;
-    positions[iz] = Math.cos(angle) * radius;
+    positions[iz] = Math.cos(angle) * (radius + Math.random() * radius);
+    particleSizes[i] = 1;
+    if (i > parameters.count * 0.8) {
+      particleSizes[i] = 12;
+    }
   }
 
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute(
+    'position',
+    new THREE.BufferAttribute(positions.reverse(), 3)
+  );
+  geometry.setAttribute(
+    'size',
+    new THREE.BufferAttribute(particleSizes.reverse(), 1)
+  );
 
   material = new THREE.ShaderMaterial({
     depthWrite: false,
     transparent: true,
-    side: THREE.DoubleSide,
+    side: THREE.FrontSide,
     uniforms: {
       uSize: { value: parameters.particleSize },
       uPixelRatio: { value: sizes.pixelRatio },
@@ -106,6 +126,8 @@ function init() {
       uTexture: { value: smoke2 },
     },
     vertexShader: `
+      attribute float size;
+
       uniform float uSize;
       uniform float uTime;
       uniform float uSpeed;
@@ -133,7 +155,7 @@ function init() {
 
         vNormal = vec4(normal, 1.0);
         gl_Position = projectedPosition;
-        gl_PointSize = uSize * uPixelRatio;
+        gl_PointSize = size * uSize * uPixelRatio;
         gl_PointSize *= (1.0 / - viewPosition.z);
       }
     `,
@@ -194,16 +216,134 @@ function init() {
    * Ground
    */
 
-  const groundSize = 100;
+  const groundSize = 10000;
   const groundGeometry = new THREE.PlaneGeometry(groundSize, groundSize, 1);
   const groundMaterial = new THREE.MeshBasicMaterial({
     color: '#69b581',
-    side: THREE.DoubleSide,
   });
   const ground = new THREE.Mesh(groundGeometry, groundMaterial);
   ground.rotation.x = -Math.PI * 0.5;
   ground.position.y = -0.8;
   scene.add(ground);
+
+  /**
+   * Sky
+   */
+  const skySize = 1000;
+  const skyGeometry = new THREE.PlaneGeometry(skySize, skySize, 1);
+  let skyMaterial = new THREE.MeshBasicMaterial({
+    color: '#B7B1AF',
+    side: BackSide,
+  });
+
+  // https://www.shadertoy.com/view/XsX3zB
+  skyMaterial = new THREE.ShaderMaterial({
+    // color: '#B7B1AF',
+    side: BackSide,
+    transparent: true,
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+        vec4 viewPosition = viewMatrix * modelPosition;
+        vec4 projectedPosition = projectionMatrix * viewPosition;
+        gl_Position = projectedPosition;
+        vUv = uv;
+      }
+    `,
+    fragmentShader: `
+    /* discontinuous pseudorandom uniformly distributed in [-0.5, +0.5]^3 */
+    vec3 random3(vec3 c) {
+      float j = 4096.0*sin(dot(c,vec3(17.0, 59.4, 15.0)));
+      vec3 r;
+      r.z = fract(512.0*j);
+      j *= .125;
+      r.x = fract(512.0*j);
+      j *= .125;
+      r.y = fract(512.0*j);
+      return r-0.5;
+    }
+
+    /* skew constants for 3d simplex functions */
+    const float F3 =  0.3333333;
+    const float G3 =  0.1666667;
+
+    /* 3d simplex noise */
+    float simplex3d(vec3 p) {
+       /* 1. find current tetrahedron T and it's four vertices */
+       /* s, s+i1, s+i2, s+1.0 - absolute skewed (integer) coordinates of T vertices */
+       /* x, x1, x2, x3 - unskewed coordinates of p relative to each of T vertices*/
+
+       /* calculate s and x */
+       vec3 s = floor(p + dot(p, vec3(F3)));
+       vec3 x = p - s + dot(s, vec3(G3));
+
+       /* calculate i1 and i2 */
+       vec3 e = step(vec3(0.0), x - x.yzx);
+       vec3 i1 = e*(1.0 - e.zxy);
+       vec3 i2 = 1.0 - e.zxy*(1.0 - e);
+
+       /* x1, x2, x3 */
+       vec3 x1 = x - i1 + G3;
+       vec3 x2 = x - i2 + 2.0*G3;
+       vec3 x3 = x - 1.0 + 3.0*G3;
+
+       /* 2. find four surflets and store them in d */
+       vec4 w, d;
+
+       /* calculate surflet weights */
+       w.x = dot(x, x);
+       w.y = dot(x1, x1);
+       w.z = dot(x2, x2);
+       w.w = dot(x3, x3);
+
+       /* w fades from 0.6 at the center of the surflet to 0.0 at the margin */
+       w = max(0.6 - w, 0.0);
+
+       /* calculate surflet components */
+       d.x = dot(random3(s), x);
+       d.y = dot(random3(s + i1), x1);
+       d.z = dot(random3(s + i2), x2);
+       d.w = dot(random3(s + 1.0), x3);
+
+       /* multiply d by w^4 */
+       w *= w;
+       w *= w;
+       d *= w;
+
+       /* 3. return the sum of the four surflets */
+       return dot(d, vec4(52.0));
+    }
+
+    /* const matrices for 3d rotation */
+    const mat3 rot1 = mat3(-0.37, 0.36, 0.85,-0.14,-0.93, 0.34,0.92, 0.01,0.4);
+    const mat3 rot2 = mat3(-0.55,-0.39, 0.74, 0.33,-0.91,-0.24,0.77, 0.12,0.63);
+    const mat3 rot3 = mat3(-0.71, 0.52,-0.47,-0.08,-0.72,-0.68,-0.7,-0.45,0.56);
+
+    float simplex3d_fractal(vec3 m) {
+      return 0.5333333*simplex3d(m*rot1)
+        +0.2666667*simplex3d(2.0*m*rot2)
+        +0.1333333*simplex3d(4.0*m*rot3)
+        +0.0666667*simplex3d(8.0*m);
+    }
+
+    varying vec2 vUv;
+
+    void main() {
+      vec2 p = vUv * 20.0;
+      vec3 p3 = vec3(p, 0.9);
+      float value = simplex3d_fractal(p3*8.0+8.0);
+      value = 0.5 + 0.5*value;
+      value *= smoothstep(0.0, 0.005, abs(0.6-p.x));
+      float dist = abs(distance(vUv * 2.0, vec2(1.0)));
+      gl_FragColor = vec4(vec3(value), 1.0 - dist);
+    }
+    `,
+  });
+  sky = new THREE.Mesh(skyGeometry, skyMaterial);
+  sky.rotation.x = -Math.PI * 0.5;
+  sky.position.y = parameters.height + 5;
+  scene.add(sky);
 
   /**
    * Renderer
@@ -212,6 +352,9 @@ function init() {
   renderer = new THREE.WebGLRenderer({
     antialias: sizes.pixelRatio < 1.5,
   });
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.5;
 
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(sizes.pixelRatio);
@@ -222,6 +365,11 @@ function init() {
    */
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
+  controls.screenSpacePanning = false;
+  controls.minDistance = 5;
+  controls.maxDistance = 100;
+  controls.target = new THREE.Vector3(0, 20, 0);
+  // controls.maxPolarAngle = Math.PI / 2;
 
   /**
    * Event Listeners
@@ -252,6 +400,8 @@ function render() {
   const elapsedTime = clock.getElapsedTime();
 
   material.uniforms.uTime.value = elapsedTime;
+
+  sky.rotation.z = elapsedTime / 20.0;
 
   renderer.render(scene, camera);
 

@@ -4,3 +4,10 @@ body {
   padding: 0;
   overflow: hidden;
 }
+
+canvas {
+  background-color: black;
+  width: 100vw;
+  height: 100vw;
+  display: block;
+}

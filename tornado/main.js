@@ -4,10 +4,24 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import * as dat from 'three/examples/jsm/libs/dat.gui.module.js';
 // import { Sky } from 'three/examples/jsm/objects/Sky.js';
-import smoke2url from './particlePack_1/PNG (Transparent)/smoke_02.png';
-import { BackSide, MultiplyBlending } from 'three';
+import smoke2url from './particlePack_1/PNG (Transparent)/smoke_01.png';
+import groundColor from './GroundForest003/REGULAR/3K/GroundForest003_COL_VAR1_3K.jpg';
+import groundDisp from './GroundForest003/REGULAR/3K/GroundForest003_DISP_3K.jpg';
+import groundGloss from './GroundForest003/REGULAR/3K/GroundForest003_GLOSS_3K.jpg';
+import groundNormal from './GroundForest003/REGULAR/3K/GroundForest003_NRM_3K.jpg';
+import groundReflect from './GroundForest003/REGULAR/3K/GroundForest003_REFL_3K.jpg';
+import { BackSide } from 'three';
 
-let scene, camera, renderer, sizes, controls, material, mesh, stats, sky;
+let scene,
+  camera,
+  renderer,
+  sizes,
+  controls,
+  material,
+  mesh,
+  stats,
+  sky,
+  skyMaterial;
 
 // https://unsplash.com/photos/XPDXhRy92Oc
 
@@ -41,6 +55,23 @@ function init() {
 
   const smoke2 = textureLoader.load(smoke2url);
 
+  const groundColorTex = textureLoader.load(groundColor);
+  repeatTexture(groundColorTex);
+  const groundDispTex = textureLoader.load(groundDisp);
+  repeatTexture(groundDispTex);
+  const groundGlossTex = textureLoader.load(groundGloss);
+  repeatTexture(groundGlossTex);
+  const groundReflectTex = textureLoader.load(groundReflect);
+  repeatTexture(groundReflectTex);
+  const groundNormalTex = textureLoader.load(groundNormal);
+  repeatTexture(groundNormalTex);
+
+  function repeatTexture(texture) {
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(400, 400);
+  }
+
   /**
    * Axes Helper
    */
@@ -50,12 +81,21 @@ function init() {
   /**
    * Cameras
    */
-  camera = new THREE.PerspectiveCamera(75, sizes.aspect, 1, 2000000);
+  camera = new THREE.PerspectiveCamera(75, sizes.aspect, 0.01, 1000);
   camera.position.z = 50;
   camera.position.y = 5;
   // camera.rotation.set('x', -Math.PI);
   // camera.position.x = 50;
   scene.add(camera);
+
+  /**
+   * Lights
+   */
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+  scene.add(ambientLight);
+
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
+  scene.add(directionalLight);
 
   /**
    * Sky
@@ -69,7 +109,7 @@ function init() {
    */
 
   const parameters = {
-    count: 10_000,
+    count: 5_000,
     radius: 5,
     height: 60,
     curviness: 7,
@@ -83,6 +123,9 @@ function init() {
   const positions = new Float32Array(parameters.count * 3);
   const particleSizes = new Float32Array(parameters.count);
 
+  const largeSizes = [4, 6, 8, 10, 12, 14, 16, 32, 48];
+  const smallSizes = [1, 2, 4];
+
   for (let i = 0; i < parameters.count; i++) {
     const ix = i * 3;
     const iy = ix + 1;
@@ -95,9 +138,11 @@ function init() {
     positions[ix] = Math.sin(angle) * (radius + Math.random() * radius);
     positions[iy] = y;
     positions[iz] = Math.cos(angle) * (radius + Math.random() * radius);
-    particleSizes[i] = 1;
+    particleSizes[i] =
+      smallSizes[Math.floor(smallSizes.length * Math.random())];
     if (i > parameters.count * 0.8) {
-      particleSizes[i] = 12;
+      particleSizes[i] =
+        largeSizes[Math.floor(largeSizes.length * Math.random())];
     }
   }
 
@@ -217,9 +262,18 @@ function init() {
    */
 
   const groundSize = 10000;
-  const groundGeometry = new THREE.PlaneGeometry(groundSize, groundSize, 1);
-  const groundMaterial = new THREE.MeshBasicMaterial({
+  const groundSegments = 5000;
+  const groundGeometry = new THREE.PlaneGeometry(
+    groundSize,
+    groundSize,
+    groundSegments,
+    groundSegments
+  );
+  const groundMaterial = new THREE.MeshStandardMaterial({
     color: '#69b581',
+    map: groundColorTex,
+    // displacementMap: groundDispTex,
+    // displacementScale: 6,
   });
   const ground = new THREE.Mesh(groundGeometry, groundMaterial);
   ground.rotation.x = -Math.PI * 0.5;
@@ -231,27 +285,30 @@ function init() {
    */
   const skySize = 1000;
   const skyGeometry = new THREE.PlaneGeometry(skySize, skySize, 1);
-  let skyMaterial = new THREE.MeshBasicMaterial({
-    color: '#B7B1AF',
-    side: BackSide,
-  });
 
   // https://www.shadertoy.com/view/XsX3zB
   skyMaterial = new THREE.ShaderMaterial({
     // color: '#B7B1AF',
     side: BackSide,
     transparent: true,
+    uniforms: {
+      uTime: { value: 0 },
+    },
     vertexShader: `
+      uniform float uTime;
       varying vec2 vUv;
+      varying float vTime;
       void main() {
         vec4 modelPosition = modelMatrix * vec4(position, 1.0);
         vec4 viewPosition = viewMatrix * modelPosition;
         vec4 projectedPosition = projectionMatrix * viewPosition;
         gl_Position = projectedPosition;
         vUv = uv;
+        vTime = uTime;
       }
     `,
     fragmentShader: `
+    varying float vTime;
     /* discontinuous pseudorandom uniformly distributed in [-0.5, +0.5]^3 */
     vec3 random3(vec3 c) {
       float j = 4096.0*sin(dot(c,vec3(17.0, 59.4, 15.0)));
@@ -321,10 +378,10 @@ function init() {
     const mat3 rot3 = mat3(-0.71, 0.52,-0.47,-0.08,-0.72,-0.68,-0.7,-0.45,0.56);
 
     float simplex3d_fractal(vec3 m) {
-      return 0.5333333*simplex3d(m*rot1)
+      return 0.5333333*simplex3d(m*rot1 + vTime * 0.1)
         +0.2666667*simplex3d(2.0*m*rot2)
-        +0.1333333*simplex3d(4.0*m*rot3)
-        +0.0666667*simplex3d(8.0*m);
+        +0.1333333*simplex3d(4.0*m*rot3 + vTime)
+        +0.0666667*simplex3d(8.0*m + vTime * 0.5);
     }
 
     varying vec2 vUv;
@@ -400,8 +457,9 @@ function render() {
   const elapsedTime = clock.getElapsedTime();
 
   material.uniforms.uTime.value = elapsedTime;
+  skyMaterial.uniforms.uTime.value = elapsedTime;
 
-  sky.rotation.z = elapsedTime / 20.0;
+  sky.rotation.z = elapsedTime / 40.0;
 
   renderer.render(scene, camera);
 

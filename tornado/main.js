@@ -10,6 +10,7 @@ import groundDisp from './GroundForest003/REGULAR/3K/GroundForest003_DISP_3K.jpg
 import groundGloss from './GroundForest003/REGULAR/3K/GroundForest003_GLOSS_3K.jpg';
 import groundNormal from './GroundForest003/REGULAR/3K/GroundForest003_NRM_3K.jpg';
 import groundReflect from './GroundForest003/REGULAR/3K/GroundForest003_REFL_3K.jpg';
+import groundAo from './GroundForest003/REGULAR/3K/GroundForest003_AO_3K.jpg';
 import { BackSide } from 'three';
 
 let scene,
@@ -46,7 +47,7 @@ function init() {
   scene = new THREE.Scene();
 
   scene.background = new THREE.Color(0xcce0ff);
-  scene.fog = new THREE.Fog(0xcce0ff, 30, 500);
+  scene.fog = new THREE.Fog(0xcce0ff, 10, 200);
 
   /**
    * Textures
@@ -65,18 +66,20 @@ function init() {
   repeatTexture(groundReflectTex);
   const groundNormalTex = textureLoader.load(groundNormal);
   repeatTexture(groundNormalTex);
+  const groundAoTex = textureLoader.load(groundAo);
+  repeatTexture(groundAoTex);
 
   function repeatTexture(texture) {
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(400, 400);
+    texture.repeat.set(16, 16);
   }
 
   /**
    * Axes Helper
    */
-  const axesHelper = new THREE.AxesHelper(4);
-  scene.add(axesHelper);
+  // const axesHelper = new THREE.AxesHelper(4);
+  // scene.add(axesHelper);
 
   /**
    * Cameras
@@ -261,23 +264,33 @@ function init() {
    * Ground
    */
 
-  const groundSize = 10000;
-  const groundSegments = 5000;
+  const groundSize = 500;
+  const groundSegments = 1000;
   const groundGeometry = new THREE.PlaneGeometry(
     groundSize,
     groundSize,
     groundSegments,
     groundSegments
   );
+  groundGeometry.setAttribute(
+    'uv2',
+    new THREE.BufferAttribute(groundGeometry.attributes.uv.array, 2)
+  );
+
   const groundMaterial = new THREE.MeshStandardMaterial({
     color: '#69b581',
     map: groundColorTex,
-    // displacementMap: groundDispTex,
-    // displacementScale: 6,
+    displacementMap: groundDispTex,
+    displacementScale: 2,
+    normalMap: groundNormalTex,
+    roughnessMap: groundGlossTex,
+    roughness: 0.5,
+    aoMap: groundAoTex,
+    aoMapIntensity: 1,
   });
   const ground = new THREE.Mesh(groundGeometry, groundMaterial);
   ground.rotation.x = -Math.PI * 0.5;
-  ground.position.y = -0.8;
+  ground.position.y = -1.5;
   scene.add(ground);
 
   /**

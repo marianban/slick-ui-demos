@@ -528,11 +528,11 @@ let $gameScore = null;
 
 function preload() {
   asteroidBg = loadImage(
-    'https://res.cloudinary.com/dzadmlxnt/image/upload/v1606642498/asteroids/asteroids-bg_p4dfyc-optimized_oidd13.jpg'
+    'https://closure.vps.wbsprt.com/files/asteroids/asteroids-bg_p4dfyc-optimized_oidd13.jpg'
   );
   // https://free3d.com/3d-model/low-poly-spaceship-37605.html
   spaceShip = loadModel(
-    'https://res.cloudinary.com/dzadmlxnt/raw/upload/v1605625376/asteroids/SpaceShip_x7aymb.obj',
+    'https://closure.vps.wbsprt.com/files/asteroids/SpaceShip_x7aymb.obj',
     true
   );
 }

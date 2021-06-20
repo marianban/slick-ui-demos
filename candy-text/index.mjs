@@ -8,7 +8,7 @@ const sketch = function (p) {
 
   p.preload = () => {
     font = p.loadFont(
-      'https://res.cloudinary.com/dzadmlxnt/raw/upload/v1612201668/candy-text/HachiMaruPop-Regular_wkxluv.ttf'
+      'https://closure.vps.wbsprt.com/files/candytext/HachiMaruPop-Regular_wkxluv.ttf'
     );
   };
 

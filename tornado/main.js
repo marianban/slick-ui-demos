@@ -22,7 +22,9 @@ let scene,
   mesh,
   stats,
   sky,
-  skyMaterial;
+  skyMaterial,
+  debrisMaterial,
+  debrisMesh;
 
 // https://unsplash.com/photos/XPDXhRy92Oc
 
@@ -256,9 +258,93 @@ function init() {
 
   mesh = new THREE.Points(geometry, material);
 
-  mesh.scale.set(1, 1, 1);
-
   scene.add(mesh);
+
+  /* Debris */
+
+  const debrisGeometry = new THREE.BufferGeometry();
+
+  const debrisCount = 1000;
+  const debrisRadius = parameters.radius;
+
+  const debrisPositions = new Float32Array(debrisCount * 3);
+  const debrisSizes = new Float32Array(debrisCount);
+
+  const debrisHeight = parameters.height * 0.1;
+
+  const debrisLargeSizes = [1, 2, 3, 4];
+
+  for (let i = 0; i < debrisCount; i++) {
+    const ix = i * 3;
+    const iy = ix + 1;
+    const iz = iy + 1;
+    const angle = Math.random() * Math.PI * 2;
+    const y = debrisHeight * (i / debrisCount);
+    const radius = 3 + debrisRadius * (i / debrisCount);
+    debrisPositions[ix] = Math.sin(angle) * (radius + Math.random() * radius);
+    debrisPositions[iy] = y;
+    debrisPositions[iz] = Math.cos(angle) * (radius + Math.random() * radius);
+    debrisSizes[i] =
+      debrisLargeSizes[Math.floor(debrisLargeSizes.length * Math.random())];
+  }
+
+  debrisGeometry.setAttribute(
+    'position',
+    new THREE.BufferAttribute(debrisPositions.reverse(), 3)
+  );
+  debrisGeometry.setAttribute(
+    'size',
+    new THREE.BufferAttribute(debrisSizes.reverse(), 1)
+  );
+
+  debrisMaterial = new THREE.ShaderMaterial({
+    depthWrite: false,
+    transparent: true,
+    side: THREE.FrontSide,
+    uniforms: {
+      uPixelRatio: { value: sizes.pixelRatio },
+      uTime: { value: 0 },
+      uSpeed: { value: 10 },
+      uHeight: { value: debrisHeight },
+    },
+    vertexShader: `
+      attribute float size;
+
+      uniform float uTime;
+      uniform float uSpeed;
+      uniform float uHeight;
+      uniform float uPixelRatio;
+
+      varying vec2 vUv;
+
+      void main() {
+
+        vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+        float angle = atan(modelPosition.x, modelPosition.z);
+        float distanceToCenter = length(modelPosition.xz);
+        float speed = 1.0 - (modelPosition.y / uHeight);
+        modelPosition.x = sin(angle + uTime * speed * uSpeed) * distanceToCenter;
+        modelPosition.x = modelPosition.x + sin(uTime );
+        modelPosition.z = cos(angle + uTime * speed * uSpeed) * distanceToCenter;
+        modelPosition.z = modelPosition.z + cos(uTime);
+        vec4 viewPosition = viewMatrix * modelPosition;
+        vec4 projectedPosition = projectionMatrix * viewPosition;
+
+        gl_Position = projectedPosition;
+        gl_PointSize = size * 20.0 * uPixelRatio;
+        gl_PointSize *= (1.0 / - viewPosition.z);
+      }
+    `,
+    fragmentShader: `
+      void main() {
+        gl_FragColor = vec4(vec3(0.0), 1.0);
+      }
+    `,
+  });
+
+  debrisMesh = new THREE.Points(debrisGeometry, debrisMaterial);
+
+  scene.add(debrisMesh);
 
   /**
    * Ground
@@ -470,6 +556,7 @@ function render() {
   const elapsedTime = clock.getElapsedTime();
 
   material.uniforms.uTime.value = elapsedTime;
+  debrisMaterial.uniforms.uTime.value = elapsedTime;
   skyMaterial.uniforms.uTime.value = elapsedTime;
 
   sky.rotation.z = elapsedTime / 40.0;

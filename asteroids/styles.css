@@ -46,7 +46,7 @@ body {
 @font-face {
   font-family: 'Pixels';
   /* https://www.dafont.com/astro-armada.font */
-  src: url('https://res.cloudinary.com/dzadmlxnt/raw/upload/v1606029613/asteroids/astroarmadatwo_z5py2m.ttf');
+  src: url('https://closure.vps.wbsprt.com/files/asteroids/astroarmadatwo_z5py2m.ttf');
 }
 
 html {
@@ -78,8 +78,8 @@ canvas {
   /*
   <span>Photo by <a href="https://unsplash.com/@kaip?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Kai Pilger</a> on <a href="https://unsplash.com/s/photos/space?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Unsplash</a></span>
   */
-  background: url('https://res.cloudinary.com/dzadmlxnt/image/upload/v1606641819/asteroids/asteroids-bg-space-opt_kail1k.jpg');
-  backgroud-position: center;
+  background: url('https://closure.vps.wbsprt.com/files/asteroids/asteroids-bg-space-opt_kail1k.jpg');
+  background-position: center;
   background-size: 80% 80%;
   /*background-blend-mode: screen;*/
 }
@@ -123,7 +123,7 @@ canvas {
   width: 4155px;
   height: 100vh;
   /* stars background credit://css-tricks.com/examples/StarryNightCSS3/ */
-  background: url('https://res.cloudinary.com/dzadmlxnt/image/upload/v1586775578/i%20want%20to%20belive%20assets/midground_rzfzvc.png')
+  background: url('https://closure.vps.wbsprt.com/files/asteroids/midground_rzfzvc.png')
     repeat 20% 20%;
   pointer-events: none;
   animation-duration: 90s;
@@ -136,7 +136,7 @@ canvas {
   right: 0;
   bottom: 0;
   width: 4155px;
-  background: url('https://res.cloudinary.com/dzadmlxnt/image/upload/v1586775575/i%20want%20to%20belive%20assets/foreground_bynyta.png')
+  background: url('https://closure.vps.wbsprt.com/files/asteroids/foreground_bynyta.png')
     repeat 20% 20%;
   animation-duration: 30s;
 }

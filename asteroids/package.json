@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npx serve ."
+    "start": "npx serve .",
+    "build": "parcel build index.html --no-minify"
   },
   "author": "Marian Ban",
   "license": "MIT",

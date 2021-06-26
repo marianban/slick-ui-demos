@@ -1,12 +1,12 @@
 import './style.css';
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
-import Stats from 'three/examples/jsm/libs/stats.module.js';
-import * as dat from 'three/examples/jsm/libs/dat.gui.module.js';
-import { Noise } from 'noisejs';
+import * as THREE from 'https://unpkg.com/three@0.126.1/build/three.module.js';
+import * as dat from 'https://unpkg.com/three@0.126.1/examples/jsm/libs/dat.gui.module.js';
+import Stats from 'https://unpkg.com/three@0.126.1/examples/jsm/libs/stats.module.js';
+import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js';
+import { EffectComposer } from 'https://unpkg.com/three@0.126.1/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://unpkg.com/three@0.126.1/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'https://unpkg.com/three@0.126.1/examples/jsm/postprocessing/UnrealBloomPass';
+import { Noise } from './noise';
 
 let scene,
   camera,
@@ -46,12 +46,12 @@ function init() {
    * Textures
    */
   const urls = [
-    '/bg3/px.png',
-    '/bg3/nx.png',
-    '/bg3/py.png',
-    '/bg3/ny.png',
-    '/bg3/pz.png',
-    '/bg3/nz.png',
+    'https://closure.vps.wbsprt.com/files/spherecolorful/bg3/px.jpg',
+    'https://closure.vps.wbsprt.com/files/spherecolorful/bg3/nx.jpg',
+    'https://closure.vps.wbsprt.com/files/spherecolorful/bg3/py.jpg',
+    'https://closure.vps.wbsprt.com/files/spherecolorful/bg3/ny.jpg',
+    'https://closure.vps.wbsprt.com/files/spherecolorful/bg3/pz.jpg',
+    'https://closure.vps.wbsprt.com/files/spherecolorful/bg3/nz.jpg',
   ];
   const cubeTextureLoader = new THREE.CubeTextureLoader();
   const background = cubeTextureLoader.load(urls);

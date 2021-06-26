@@ -1,5 +1,15 @@
 # Slick 😎 UI demos
 
+## Morphing Sphere
+
+[![Morphing Sphere](MorphingSphere-optimized.gif)](http://marianban.github.io/sphere/index.html)
+
+Live Demo: [link](http://marianban.github.io/sphere/index.html)
+
+CodePen: [link](https://codepen.io/marianban/full/LYxLpmW)
+
+Uses: JS, Three.js
+
 ## 3D Earth
 
 [![3D Earth](earth-optimize.gif)](http://marianban.github.io/earth/index.html)

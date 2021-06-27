@@ -168,7 +168,7 @@ function init() {
       uSize: { value: parameters.particleSize },
       uPixelRatio: { value: sizes.pixelRatio },
       uTime: { value: 0 },
-      uSpeed: { value: 10 },
+      uSpeed: { value: 5 },
       uHeight: { value: parameters.height },
       uCurviness: { value: parameters.curviness },
       uCurvinessChangeRate: { value: parameters.curvinessChangeRate },
@@ -264,7 +264,7 @@ function init() {
 
   const debrisGeometry = new THREE.BufferGeometry();
 
-  const debrisCount = 1000;
+  const debrisCount = 500;
   const debrisRadius = parameters.radius;
 
   const debrisPositions = new Float32Array(debrisCount * 3);
@@ -280,7 +280,7 @@ function init() {
     const iz = iy + 1;
     const angle = Math.random() * Math.PI * 2;
     const y = debrisHeight * (i / debrisCount);
-    const radius = 3 + debrisRadius * (i / debrisCount);
+    const radius = 2 + debrisRadius * (i / debrisCount);
     debrisPositions[ix] = Math.sin(angle) * (radius + Math.random() * radius);
     debrisPositions[iy] = y;
     debrisPositions[iz] = Math.cos(angle) * (radius + Math.random() * radius);
@@ -304,7 +304,7 @@ function init() {
     uniforms: {
       uPixelRatio: { value: sizes.pixelRatio },
       uTime: { value: 0 },
-      uSpeed: { value: 10 },
+      uSpeed: { value: 2 },
       uHeight: { value: debrisHeight },
     },
     vertexShader: `

@@ -162,6 +162,7 @@ function init() {
 
   material = new THREE.ShaderMaterial({
     depthWrite: false,
+    // alphaTest: 0.001,
     transparent: true,
     side: THREE.FrontSide,
     uniforms: {
@@ -298,7 +299,7 @@ function init() {
   );
 
   debrisMaterial = new THREE.ShaderMaterial({
-    depthWrite: false,
+    // depthWrite: false,
     transparent: true,
     side: THREE.FrontSide,
     uniforms: {

@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import Experience from './Experience.js';
 import AmbientLight from './AmbientLight.js';
 import SunLight from './SunLight.js';
-import Asteroid from './Asteroid.js';
+import { Asteroids } from './Asteroids.js';
+import { Vector2 } from 'three';
 
 export default class World {
   constructor(_options) {
@@ -20,6 +21,8 @@ export default class World {
         this.ready = true;
       }
     });
+
+    this.intervalId = setInterval(this.generateAsteroid.bind(this), 1000);
   }
 
   setLights() {
@@ -31,21 +34,23 @@ export default class World {
     const axesHelper = new THREE.AxesHelper(10000);
     this.scene.add(axesHelper);
 
-    // reuse material for better performance
-    const asteroidMaterial = Asteroid.CreateMaterial(this.experience);
-
-    const asteroid = new Asteroid(this.experience, asteroidMaterial);
-    asteroid.addToScene();
-    this.asteroid = asteroid;
+    this.asteroids = new Asteroids(this.experience);
+    this.asteroids.add(new Vector2(0, 0));
   }
 
   resize() {}
 
   update() {
     if (this.ready) {
-      this.asteroid.update();
+      this.asteroids.update();
     }
   }
 
-  destroy() {}
+  generateAsteroid() {}
+
+  destroy() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+  }
 }

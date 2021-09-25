@@ -2,6 +2,9 @@ import * as THREE from 'three';
 import Experience from './Experience.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
+const CAMERA_DISTANCE = 3000;
+const CAMERA_FOW = 25;
+
 export default class Camera {
   constructor(_options) {
     // Options
@@ -18,18 +21,14 @@ export default class Camera {
 
     this.setInstance();
     this.setModes();
+    this.setViewport();
   }
 
   setInstance() {
     // Set up
-    this.instance = new THREE.PerspectiveCamera(
-      25,
-      this.config.width / this.config.height,
-      100,
-      10000
-    );
+    const aspect = this.config.width / this.config.height;
+    this.instance = new THREE.PerspectiveCamera(CAMERA_FOW, aspect, 100, 10000);
     this.instance.rotation.reorder('YXZ');
-
     this.scene.add(this.instance);
   }
 
@@ -68,6 +67,21 @@ export default class Camera {
 
     this.modes.debug.instance.aspect = this.config.width / this.config.height;
     this.modes.debug.instance.updateProjectionMatrix();
+    this.setViewport();
+  }
+
+  setViewport() {
+    const aspect = this.config.width / this.config.height;
+    const degToRadRatio = 360 / (Math.PI * 2);
+    const tanA = Math.tan(CAMERA_FOW / 2 / degToRadRatio);
+    const adjacent = CAMERA_DISTANCE;
+    const opposite = adjacent * tanA;
+
+    this.viewport = {};
+    this.viewport.top = opposite;
+    this.viewport.bottom = -opposite;
+    this.viewport.left = -opposite * aspect;
+    this.viewport.right = opposite * aspect;
   }
 
   update() {

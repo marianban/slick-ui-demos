@@ -1,36 +1,31 @@
 import * as THREE from 'three';
 import SimplexNoise from 'simplex-noise';
+import { random } from './utils';
 
 const simplex = new SimplexNoise();
 
-const ASTEROID_MIN_SPEED = 0.1;
-const ASTEROID_MAX_SPEED = 3.5;
+export class Asteroid {
+  constructor(experience, asteroidMaterial, location, velocity) {
+    // general
+    this.experience = experience;
+    this.config = this.experience.config;
+    this.location = location;
+    this.velocity = velocity;
+    this.angleX = 0;
+    this.angleY = 0;
+    this.angleZ = 0;
 
-class Asteroid {
-  constructor(experience, asteroidMaterial) {
-    this.scene = experience.scene;
+    const {
+      ASTEROID_MIN_SPEED,
+      ASTEROID_MAX_SPEED,
+      ASTEROID_MIN_HEALTH,
+      ASTEROID_MAX_HEALTH,
+    } = this.experience.config;
 
-    const segmentCount = 300;
-    this.radius = 30 + Math.random() * 100;
-    const asteroidGeometry = new THREE.SphereGeometry(
-      this.radius,
-      segmentCount,
-      segmentCount
-    );
-
-    const positions = this.randomizeGeometryPositions(asteroidGeometry);
-    // this.fixTopVertices(segmentCount, positions);
-    // this.fixBottomVertices(positions, segmentCount);
-
-    asteroidGeometry.computeVertexNormals();
-
-    // for uv map
-    asteroidGeometry.setAttribute(
-      'uv2',
-      new THREE.BufferAttribute(asteroidGeometry.attributes.uv.array, 2)
-    );
-
-    this.mesh = new THREE.Mesh(asteroidGeometry, asteroidMaterial);
+    const speed = this.location
+      .clone()
+      .sub(this.location.clone().add(this.velocity))
+      .length();
 
     this.aVelocityX = speed
       ? THREE.MathUtils.mapLinear(
@@ -50,6 +45,52 @@ class Asteroid {
           0.1
         )
       : 0;
+
+    this.aVelocityZ = speed
+      ? THREE.MathUtils.mapLinear(
+          speed,
+          ASTEROID_MIN_SPEED,
+          ASTEROID_MAX_SPEED,
+          0.01,
+          0.1
+        )
+      : 0;
+
+    this.isVisible = false;
+    this.isOut = false;
+
+    this.health = Math.round(random(ASTEROID_MIN_HEALTH, ASTEROID_MAX_HEALTH));
+
+    // 3.js
+
+    this.scene = experience.scene;
+
+    const segmentCount = 300;
+    this.radius = 30 + Math.random() * 100;
+    const asteroidGeometry = new THREE.SphereGeometry(
+      this.radius,
+      segmentCount,
+      segmentCount
+    );
+
+    const positions = this.randomizeGeometryPositions(asteroidGeometry);
+    this.fixTopVertices(segmentCount, positions);
+    this.fixBottomVertices(positions, segmentCount);
+
+    asteroidGeometry.computeVertexNormals();
+
+    // for uv map
+    asteroidGeometry.setAttribute(
+      'uv2',
+      new THREE.BufferAttribute(asteroidGeometry.attributes.uv.array, 2)
+    );
+
+    this.mesh = new THREE.Mesh(asteroidGeometry, asteroidMaterial);
+
+    this.mesh.position.set(this.location.x, this.location.y, 0);
+
+    // this.filmHeight = this.experience.camera.instance.getFilmHeight();
+    // this.filmWidth = this.experience.camera.instance.getFilmWidth();
   }
 
   static CreateMaterial(experience) {
@@ -173,7 +214,38 @@ class Asteroid {
     }
   }
 
-  update() {}
-}
+  update() {
+    this.angleX += this.aVelocityX;
+    this.angleY += this.aVelocityY;
+    this.angleZ += this.aVelocityZ;
 
-export default Asteroid;
+    this.location.add(this.velocity);
+
+    this.mesh.rotation.x = this.angleX;
+    this.mesh.rotation.y = this.angleY;
+    this.mesh.rotation.z = this.angleZ;
+
+    this.mesh.position.x = this.location.x;
+    this.mesh.position.y = this.location.y;
+
+    this.updateOut();
+  }
+
+  updateOut() {
+    if (!this.isVisible) {
+      return;
+    }
+    if (
+      this.location.x < 0 ||
+      this.location.x > this.config.width ||
+      this.location.y < 0 ||
+      this.location.y > this.config.height
+    ) {
+      this.isOut = true;
+    }
+  }
+
+  isDead() {
+    return this.health <= 0;
+  }
+}

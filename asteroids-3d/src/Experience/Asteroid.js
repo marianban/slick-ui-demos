@@ -233,19 +233,32 @@ export class Asteroid {
 
   updateOut() {
     if (!this.isVisible) {
+      if (!this.isOutOfViewport()) {
+        this.isVisible = true;
+      }
       return;
     }
-    if (
-      this.location.x < 0 ||
-      this.location.x > this.config.width ||
-      this.location.y < 0 ||
-      this.location.y > this.config.height
-    ) {
+    if (this.isOutOfViewport()) {
       this.isOut = true;
     }
   }
 
+  isOutOfViewport() {
+    const { top, bottom, left, right } = this.experience.camera.viewport;
+    const { VIEWPORT_OFFSET_FACTOR } = this.config;
+    return (
+      this.location.x < left * VIEWPORT_OFFSET_FACTOR ||
+      this.location.x > right * VIEWPORT_OFFSET_FACTOR ||
+      this.location.y > top * VIEWPORT_OFFSET_FACTOR ||
+      this.location.y < bottom * VIEWPORT_OFFSET_FACTOR
+    );
+  }
+
   isDead() {
     return this.health <= 0;
+  }
+
+  destroy() {
+    this.scene.remove(this.mesh);
   }
 }

@@ -35,7 +35,6 @@ export default class World {
     this.scene.add(axesHelper);
 
     this.asteroids = new Asteroids(this.experience);
-    this.asteroids.add(new Vector2(0, 0));
   }
 
   resize() {}
@@ -46,7 +45,9 @@ export default class World {
     }
   }
 
-  generateAsteroid() {}
+  generateAsteroid() {
+    this.asteroids.add(new Vector2(0, 0));
+  }
 
   destroy() {
     if (this.intervalId) {

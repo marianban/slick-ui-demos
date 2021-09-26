@@ -15,17 +15,9 @@ export class Asteroids {
   }
 
   add(target) {
-    // const value = random();
-    // if (value > 0.1) {
-    //   return;
-    // }
-
-    const { width, height } = this.config;
+    const { VIEWPORT_OFFSET_FACTOR } = this.config;
 
     const { top, bottom, left, right } = this.experience.camera.viewport;
-
-    const xOffset = width * 0.2;
-    const yOffset = height * 0.2;
 
     let xmin;
     let xmax;
@@ -38,22 +30,22 @@ export class Asteroids {
       xmin = left;
       xmax = right;
       ymin = top;
-      ymax = top + top * 0.2;
+      ymax = top * VIEWPORT_OFFSET_FACTOR;
     }
     if (side === 'R') {
       xmin = right;
-      xmax = right + right * 0.2;
+      xmax = right * VIEWPORT_OFFSET_FACTOR;
       ymin = bottom;
       ymax = top;
     }
     if (side === 'B') {
       xmin = left;
       xmax = right;
-      ymin = bottom + bottom * 0.2;
+      ymin = bottom * VIEWPORT_OFFSET_FACTOR;
       ymax = bottom;
     }
     if (side === 'L') {
-      xmin = left + left * 0.2;
+      xmin = left * VIEWPORT_OFFSET_FACTOR;
       xmax = left;
       ymin = bottom;
       ymax = top;
@@ -84,6 +76,7 @@ export class Asteroids {
     this.asteroids.forEach((a) => {
       a.update();
       if (a.isOut || a.isDead()) {
+        a.destroy();
         this.asteroids.delete(a);
       }
     });

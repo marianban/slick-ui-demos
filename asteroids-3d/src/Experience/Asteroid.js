@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import CANNON from 'cannon';
 import SimplexNoise from 'simplex-noise';
 import { random } from './utils';
 
@@ -15,46 +16,20 @@ export class Asteroid {
     this.angleY = 0;
     this.angleZ = 0;
 
-    const {
-      ASTEROID_MIN_SPEED,
-      ASTEROID_MAX_SPEED,
-      ASTEROID_MIN_HEALTH,
-      ASTEROID_MAX_HEALTH,
-    } = this.experience.config;
+    const { ASTEROID_MIN_HEALTH, ASTEROID_MAX_HEALTH } = this.experience.config;
 
     const speed = this.location
       .clone()
       .sub(this.location.clone().add(this.velocity))
       .length();
 
-    this.aVelocityX = speed
-      ? THREE.MathUtils.mapLinear(
-          speed,
-          ASTEROID_MIN_SPEED,
-          ASTEROID_MAX_SPEED,
-          0.01,
-          0.1
-        )
-      : 0;
-    this.aVelocityY = speed
-      ? THREE.MathUtils.mapLinear(
-          speed,
-          ASTEROID_MIN_SPEED,
-          ASTEROID_MAX_SPEED,
-          0.01,
-          0.1
-        )
-      : 0;
+    this.aVelocityX = this.computeAngularVelocity(speed);
+    this.aVelocityY = this.computeAngularVelocity(speed);
+    this.aVelocityZ = this.computeAngularVelocity(speed);
 
-    this.aVelocityZ = speed
-      ? THREE.MathUtils.mapLinear(
-          speed,
-          ASTEROID_MIN_SPEED,
-          ASTEROID_MAX_SPEED,
-          0.01,
-          0.1
-        )
-      : 0;
+    this.angleX = Math.random() * Math.PI;
+    this.angleY = Math.random() * Math.PI;
+    this.angleZ = Math.random() * Math.PI;
 
     this.isVisible = false;
     this.isOut = false;
@@ -64,6 +39,7 @@ export class Asteroid {
     // 3.js
 
     this.scene = experience.scene;
+    this.pWorld = experience.world.pWorld;
 
     const segmentCount = 300;
     this.radius = 30 + Math.random() * 100;
@@ -87,10 +63,40 @@ export class Asteroid {
 
     this.mesh = new THREE.Mesh(asteroidGeometry, asteroidMaterial);
 
+    // physics
+
+    const sphereShape = new CANNON.Sphere(this.radius + this.displacementAmp);
+    const sphereBody = new CANNON.Body({
+      mass: (4 / 3) * Math.PI * this.radius ** 3,
+      position: this.position,
+      shape: sphereShape,
+    });
+    this.body = sphereBody;
+    this.body.angularVelocity.set(
+      this.aVelocityX,
+      this.aVelocityY,
+      this.aVelocityZ
+    );
+
     this.mesh.position.set(this.location.x, this.location.y, 0);
+    this.body.position.set(location.x, location.y, 0);
 
     // this.filmHeight = this.experience.camera.instance.getFilmHeight();
     // this.filmWidth = this.experience.camera.instance.getFilmWidth();
+  }
+
+  computeAngularVelocity(speed) {
+    const { ASTEROID_MIN_SPEED, ASTEROID_MAX_SPEED } = this.experience.config;
+
+    return speed
+      ? THREE.MathUtils.mapLinear(
+          speed,
+          ASTEROID_MIN_SPEED,
+          ASTEROID_MAX_SPEED,
+          0.01,
+          0.1
+        )
+      : 0;
   }
 
   static CreateMaterial(experience) {
@@ -106,7 +112,13 @@ export class Asteroid {
   }
 
   addToScene() {
+    this.pWorld.addBody(this.body);
     this.scene.add(this.mesh);
+
+    this.body.applyLocalImpulse(
+      new CANNON.Vec3(this.velocity.x, this.velocity.y, this.velocity.z),
+      new CANNON.Vec3(0, 0, 0)
+    );
   }
 
   randomizeGeometryPositions(asteroidGeometry) {
@@ -117,7 +129,7 @@ export class Asteroid {
     let uvOffset = 0;
     const xFreq = 1 + Math.floor(Math.random() * 6);
     const yFreq = 1 + Math.floor(Math.random() * 6);
-    const displacementAmp = this.radius * (Math.random() * 0.4);
+    this.displacementAmp = this.radius * (Math.random() * 0.4);
     const xNoises = [];
     const yNoises = [];
 
@@ -145,7 +157,7 @@ export class Asteroid {
 
       position.add(
         normal.multiplyScalar(
-          simplex.noise2D(xNoise * xFreq, yNoise * yFreq) * displacementAmp
+          simplex.noise2D(xNoise * xFreq, yNoise * yFreq) * this.displacementAmp
         )
       );
 
@@ -215,18 +227,8 @@ export class Asteroid {
   }
 
   update() {
-    this.angleX += this.aVelocityX;
-    this.angleY += this.aVelocityY;
-    this.angleZ += this.aVelocityZ;
-
-    this.location.add(this.velocity);
-
-    this.mesh.rotation.x = this.angleX;
-    this.mesh.rotation.y = this.angleY;
-    this.mesh.rotation.z = this.angleZ;
-
-    this.mesh.position.x = this.location.x;
-    this.mesh.position.y = this.location.y;
+    this.mesh.position.copy(this.body.position);
+    this.mesh.quaternion.copy(this.body.quaternion);
 
     this.updateOut();
   }
@@ -247,10 +249,10 @@ export class Asteroid {
     const { top, bottom, left, right } = this.experience.camera.viewport;
     const { VIEWPORT_OFFSET_FACTOR } = this.config;
     return (
-      this.location.x < left * VIEWPORT_OFFSET_FACTOR ||
-      this.location.x > right * VIEWPORT_OFFSET_FACTOR ||
-      this.location.y > top * VIEWPORT_OFFSET_FACTOR ||
-      this.location.y < bottom * VIEWPORT_OFFSET_FACTOR
+      this.mesh.position.x < left * VIEWPORT_OFFSET_FACTOR ||
+      this.mesh.position.x > right * VIEWPORT_OFFSET_FACTOR ||
+      this.mesh.position.y > top * VIEWPORT_OFFSET_FACTOR ||
+      this.mesh.position.y < bottom * VIEWPORT_OFFSET_FACTOR
     );
   }
 
@@ -259,6 +261,9 @@ export class Asteroid {
   }
 
   destroy() {
+    this.pWorld.removeBody(this.body);
     this.scene.remove(this.mesh);
+    this.mesh.material.dispose();
+    this.mesh.geometry.dispose();
   }
 }

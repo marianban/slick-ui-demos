@@ -41,6 +41,8 @@ export default class Experience {
       this.resize();
     });
 
+    this.clock = new THREE.Clock();
+
     this.update();
   }
 

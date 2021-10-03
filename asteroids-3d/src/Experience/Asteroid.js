@@ -9,6 +9,7 @@ export class Asteroid {
   constructor(experience, asteroidMaterial, location, velocity) {
     // general
     this.experience = experience;
+    this.scene = experience.scene;
     this.config = this.experience.config;
     this.location = location;
     this.velocity = velocity;
@@ -38,7 +39,6 @@ export class Asteroid {
 
     // 3.js
 
-    this.scene = experience.scene;
     this.pWorld = experience.world.pWorld;
 
     const segmentCount = 300;
@@ -77,6 +77,9 @@ export class Asteroid {
       this.aVelocityY,
       this.aVelocityZ
     );
+    this.body.userData = {
+      type: 'asteroid',
+    };
 
     this.mesh.position.set(this.location.x, this.location.y, 0);
     this.body.position.set(location.x, location.y, 0);
@@ -114,8 +117,6 @@ export class Asteroid {
   addToScene() {
     this.pWorld.addBody(this.body);
     this.scene.add(this.mesh);
-
-    console.log(this.velocity);
 
     this.body.velocity.x = this.velocity.x;
     this.body.velocity.y = this.velocity.y;
@@ -237,12 +238,10 @@ export class Asteroid {
     if (!this.isVisible) {
       if (!this.isOutOfViewport()) {
         this.isVisible = true;
-        console.log('visible');
       }
       return;
     }
     if (this.isOutOfViewport()) {
-      console.log('isOUt');
       this.isOut = true;
     }
   }

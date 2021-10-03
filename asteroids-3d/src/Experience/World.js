@@ -63,6 +63,18 @@ export default class World {
       this.oldElapsedTime = elapsedTime;
 
       this.asteroids.update();
+
+      for (const contact of this.pWorld.contacts) {
+        const { bi, ri, bj } = contact;
+        const bodyPosition = bi.position.clone();
+        const contactPosition = bodyPosition.vadd(ri);
+        if (
+          bi.userData.type === 'asteroid' &&
+          bi.userData.type === bj.userData.type
+        ) {
+          // TODO: asteroid collision
+        }
+      }
     }
   }
 

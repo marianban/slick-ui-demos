@@ -67,7 +67,7 @@ export class Asteroid {
 
     const sphereShape = new CANNON.Sphere(this.radius + this.displacementAmp);
     const sphereBody = new CANNON.Body({
-      mass: (4 / 3) * Math.PI * this.radius ** 3,
+      mass: this.radius ** 2,
       position: this.position,
       shape: sphereShape,
     });
@@ -115,10 +115,10 @@ export class Asteroid {
     this.pWorld.addBody(this.body);
     this.scene.add(this.mesh);
 
-    this.body.applyLocalImpulse(
-      new CANNON.Vec3(this.velocity.x, this.velocity.y, this.velocity.z),
-      new CANNON.Vec3(0, 0, 0)
-    );
+    console.log(this.velocity);
+
+    this.body.velocity.x = this.velocity.x;
+    this.body.velocity.y = this.velocity.y;
   }
 
   randomizeGeometryPositions(asteroidGeometry) {
@@ -237,10 +237,12 @@ export class Asteroid {
     if (!this.isVisible) {
       if (!this.isOutOfViewport()) {
         this.isVisible = true;
+        console.log('visible');
       }
       return;
     }
     if (this.isOutOfViewport()) {
+      console.log('isOUt');
       this.isOut = true;
     }
   }

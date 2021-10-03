@@ -60,8 +60,8 @@ export default class Experience {
     this.config.width = boundings.width;
     this.config.height = boundings.height || window.innerHeight;
 
-    this.config.ASTEROID_MIN_SPEED = 0.1;
-    this.config.ASTEROID_MAX_SPEED = 3.5;
+    this.config.ASTEROID_MIN_SPEED = 50.1;
+    this.config.ASTEROID_MAX_SPEED = 300.5;
     this.config.ASTEROID_MIN_HEALTH = 1;
     this.config.ASTEROID_MAX_HEALTH = 10;
     this.config.ASTEROID_MIN_SIZE = 30;

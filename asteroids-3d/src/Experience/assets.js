@@ -28,7 +28,11 @@ export default [
         source: '/assets/ground_0010_2k/ground_0010_roughness_2k.jpg',
         type: 'texture',
       },
-      { name: 'smoke', source: '/assets/smoke/smoke_02.png', type: 'texture' },
+      {
+        name: 'asteroidCollision',
+        source: '/assets/smoke/smoke_02.png',
+        type: 'texture',
+      },
     ],
   },
 ];

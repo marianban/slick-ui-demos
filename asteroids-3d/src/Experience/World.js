@@ -4,7 +4,8 @@ import Experience from './Experience.js';
 import AmbientLight from './AmbientLight.js';
 import SunLight from './SunLight.js';
 import { Asteroids } from './Asteroids.js';
-import { Vector2 } from 'three';
+import { Collisions } from './Collisions.js';
+import { AsteroidCollision } from './AsteroidCollision.js';
 
 export default class World {
   constructor(_options) {
@@ -51,6 +52,16 @@ export default class World {
     this.scene.add(axesHelper);
 
     this.asteroids = new Asteroids(this.experience);
+
+    const collision = new AsteroidCollision(
+      this.experience,
+      new THREE.Vector3(0, 0, 0)
+    );
+    // this.collision = collision;
+
+    this.collisions = new Collisions(this.experience);
+
+    this.scene.add(collision.mesh);
   }
 
   resize() {}
@@ -63,23 +74,13 @@ export default class World {
       this.oldElapsedTime = elapsedTime;
 
       this.asteroids.update();
-
-      for (const contact of this.pWorld.contacts) {
-        const { bi, ri, bj } = contact;
-        const bodyPosition = bi.position.clone();
-        const contactPosition = bodyPosition.vadd(ri);
-        if (
-          bi.userData.type === 'asteroid' &&
-          bi.userData.type === bj.userData.type
-        ) {
-          // TODO: asteroid collision
-        }
-      }
+      this.collisions.update();
+      // this.collision.update();
     }
   }
 
   generateAsteroid() {
-    this.asteroids.add(new Vector2(0, 0));
+    this.asteroids.add(new THREE.Vector2(0, 0));
   }
 
   destroy() {

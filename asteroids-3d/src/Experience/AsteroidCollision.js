@@ -26,7 +26,7 @@ export class AsteroidCollision {
 
       positions[ix] = target.x;
       positions[iy] = target.y;
-      positions[iz] = target.z;
+      positions[iz] = target.z + 200;
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -34,7 +34,7 @@ export class AsteroidCollision {
     this.prevElapsedTime = this.experience.clock.getElapsedTime();
 
     const material = new THREE.ShaderMaterial({
-      depthWrite: false,
+      // depthWrite: false,
       transparent: true,
       uniforms: {
         uPixelRatio: { value: this.experience.config.pixelRatio },
@@ -56,7 +56,7 @@ export class AsteroidCollision {
   }
 
   update() {
-    this.mesh.position.copy(this.position);
+    // this.mesh.position.copy(this.position);
     const elapsedTime = this.experience.clock.getElapsedTime();
     const deltaTime = elapsedTime - this.prevElapsedTime;
     this.progress -= deltaTime;

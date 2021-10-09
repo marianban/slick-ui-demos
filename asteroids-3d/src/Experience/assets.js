@@ -33,6 +33,11 @@ export default [
         source: '/assets/smoke/smoke_02.png',
         type: 'texture',
       },
+      {
+        name: 'bg',
+        source: '/assets/bg.jpg',
+        type: 'texture',
+      },
     ],
   },
 ];

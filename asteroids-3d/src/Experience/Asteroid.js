@@ -104,6 +104,8 @@ export class Asteroid {
 
   static CreateMaterial(experience) {
     const resources = experience.resources;
+    const texture = resources.items.groundColor;
+    texture.encoding = THREE.sRGBEncoding;
     const asteroidMaterial = new THREE.MeshStandardMaterial({
       map: resources.items.groundColor,
       aoMap: resources.items.groundAo,

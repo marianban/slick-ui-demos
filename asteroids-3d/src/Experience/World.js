@@ -6,6 +6,7 @@ import SunLight from './SunLight.js';
 import { Asteroids } from './Asteroids.js';
 import { Collisions } from './Collisions.js';
 import { AsteroidCollision } from './AsteroidCollision.js';
+import { Background } from './Background.js';
 
 export default class World {
   constructor(_options) {
@@ -27,6 +28,8 @@ export default class World {
     this.intervalId = setInterval(this.generateAsteroid.bind(this), 1000);
 
     this.pWorld = new CANNON.World();
+    this.pWorld.solver = new CANNON.SplitSolver(this.pWorld.solver);
+
     const defaultMaterial = new CANNON.Material('default');
     const defaultContactMaterial = new CANNON.ContactMaterial(
       defaultMaterial,
@@ -49,7 +52,7 @@ export default class World {
 
   setScene() {
     const axesHelper = new THREE.AxesHelper(10000);
-    this.scene.add(axesHelper);
+    // this.scene.add(axesHelper);
 
     this.asteroids = new Asteroids(this.experience);
 
@@ -62,6 +65,9 @@ export default class World {
     this.collisions = new Collisions(this.experience);
 
     this.scene.add(collision.mesh);
+
+    const bg = new Background(this.experience);
+    bg.addToScene();
   }
 
   resize() {}

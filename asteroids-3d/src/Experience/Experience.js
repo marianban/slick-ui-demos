@@ -68,7 +68,7 @@ export default class Experience {
     this.config.ASTEROID_MAX_SIZE = 60;
     this.config.ASTEROID_MIN_POINTS = 7;
     this.config.ASTEROID_MAX_POINTS = 15;
-    this.config.ASTEROID_COLLISION_ANIMATION_DURATION = 1000;
+    this.config.ASTEROID_COLLISION_ANIMATION_DURATION = 500;
     this.config.VIEWPORT_OFFSET_FACTOR = 1.2;
   }
 

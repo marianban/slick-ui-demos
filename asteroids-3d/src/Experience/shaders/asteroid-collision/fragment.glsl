@@ -16,7 +16,7 @@ void main() {
 
   vec4 textureColor = texture2D(uTexture, uv);
 
-  vec4 transparent = vec4(textureColor.rgb, uProgress);
+  vec4 transparent = vec4(textureColor.rgb, min(textureColor.a, uProgress));
 
   gl_FragColor = transparent;
 }

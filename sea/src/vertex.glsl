@@ -84,21 +84,30 @@ void main() {
     vec4 modelPrevPosition = modelMatrix * vec4(aPrevPosition, 1.0);
     vec4 modelNextPosition = modelMatrix * vec4(aNextPosition, 1.0);
 
+    float noise = snoise(modelPosition.xz * 5. + uTime * 0.1) * .5 + .5;
+    vNoise = noise;
+
+    float noisePrev = snoise(modelPrevPosition.xz * 5. + uTime * 0.1) * .5 + .5;
+    float noiseNext = snoise(modelNextPosition.xz * 5. + uTime * 0.1) * .5 + .5;
+
+    modelPosition.y += noise * 0.1;
+    modelPrevPosition.y += noisePrev * 0.1;
+    modelNextPosition.y += noiseNext * 0.1;
+
     vec3 a = modelPrevPosition.xyz;
     vec3 b = modelPosition.xyz;
     vec3 c = modelNextPosition.xyz;
 
-    a = aPrevPosition.xyz;
-    b = position.xyz;
-    c = aNextPosition.xyz;
+    // a = aPrevPosition.xyz;
+    // b = position.xyz;
+    // c = aNextPosition.xyz;
 
     vec3 ab = a - b;
     vec3 cb = c - b;
 
-    vec3 n = normalize(cross(cb, ab));
+    vec3 n = abs(normalize(cross(cb, ab)));
 
-    float noise = snoise(modelPosition.xz * 5. + uTime) * .5 + .5;
-    vNoise = noise;
+
     // modelPosition.y += noise * 0.1;
 
     vNormal = n;

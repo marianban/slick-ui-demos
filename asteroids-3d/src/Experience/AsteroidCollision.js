@@ -34,7 +34,7 @@ export class AsteroidCollision {
     this.prevElapsedTime = this.experience.clock.getElapsedTime();
 
     const material = new THREE.ShaderMaterial({
-      // depthWrite: false,
+      depthWrite: false,
       transparent: true,
       uniforms: {
         uPixelRatio: { value: this.experience.config.pixelRatio },

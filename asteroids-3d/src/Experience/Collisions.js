@@ -22,6 +22,7 @@ export class Collisions {
       const bodyPosition = bi.position.clone();
       const contactPosition = bodyPosition.vadd(ri);
       if (
+        bi.userData &&
         bi.userData.type === 'asteroid' &&
         bi.userData.type === bj.userData.type
       ) {

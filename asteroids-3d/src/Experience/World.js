@@ -8,6 +8,8 @@ import { Collisions } from './Collisions.js';
 import { AsteroidCollision } from './AsteroidCollision.js';
 import { Background } from './Background.js';
 
+import { Ship } from './Ship.js';
+
 export default class World {
   constructor(_options) {
     this.experience = new Experience();
@@ -51,7 +53,7 @@ export default class World {
   }
 
   setScene() {
-    const axesHelper = new THREE.AxesHelper(10000);
+    //const axesHelper = new THREE.AxesHelper(10000);
     // this.scene.add(axesHelper);
 
     this.asteroids = new Asteroids(this.experience);
@@ -68,6 +70,11 @@ export default class World {
 
     const bg = new Background(this.experience);
     bg.addToScene();
+
+    this.ship = new Ship(this.experience, new THREE.Vector3(0, 0, 0));
+
+    this.ship.addToScene();
+    this.ship.group.position.z = 200;
   }
 
   resize() {}
@@ -81,7 +88,9 @@ export default class World {
 
       this.asteroids.update();
       this.collisions.update();
-      // this.collision.update();
+      if (this.ship) {
+        this.ship.update();
+      }
     }
   }
 

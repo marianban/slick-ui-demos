@@ -1,9 +1,27 @@
 uniform float uTime;
+uniform float uNoiseStrength;
+uniform float uNoiseFrequency;
+uniform float uNoiseScale;
+
+uniform float uWaveXStrength;
+uniform float uWaveXFrequency;
+uniform float uWaveYStrength;
+uniform float uWaveYFrequency;
+
 varying float vNoise;
 varying vec3 vNormal;
+varying vec3 vLightDir;
+varying vec3 vViewDir;
+varying float vDepth;
+
+
+varying vec3 normalInterp;
+varying vec3 vertPos;
+
 
 attribute vec3 aPrevPosition;
 attribute vec3 aNextPosition;
+
 
 // Some useful functions
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -84,35 +102,43 @@ void main() {
     vec4 modelPrevPosition = modelMatrix * vec4(aPrevPosition, 1.0);
     vec4 modelNextPosition = modelMatrix * vec4(aNextPosition, 1.0);
 
-    float noise = snoise(modelPosition.xz * 5. + uTime * 0.1) * .5 + .5;
+    float noise = snoise(modelPosition.xz * uNoiseScale + uTime * uNoiseFrequency) * uNoiseStrength;
     vNoise = noise;
+    float noisePrev = snoise(modelPrevPosition.xz * uNoiseScale + uTime * uNoiseFrequency) * uNoiseStrength;
+    float noiseNext = snoise(modelNextPosition.xz * uNoiseScale + uTime * uNoiseFrequency) * uNoiseStrength;
 
-    float noisePrev = snoise(modelPrevPosition.xz * 5. + uTime * 0.1) * .5 + .5;
-    float noiseNext = snoise(modelNextPosition.xz * 5. + uTime * 0.1) * .5 + .5;
+    float wave = sin(position.x * uWaveXFrequency + uTime)*uWaveXStrength;
+    wave += sin(position.y * uWaveYFrequency + uTime)*uWaveYStrength;
 
-    modelPosition.y += noise * 0.1;
-    modelPrevPosition.y += noisePrev * 0.1;
-    modelNextPosition.y += noiseNext * 0.1;
+    modelPosition.y += wave + noise;
+    modelPrevPosition.y += wave + noisePrev;
+    modelNextPosition.y += wave + noiseNext;
+
+    float maxDepth = uNoiseStrength + uWaveXStrength + uWaveYStrength;
+    vDepth = (wave + noise)/maxDepth;
 
     vec3 a = modelPrevPosition.xyz;
     vec3 b = modelPosition.xyz;
     vec3 c = modelNextPosition.xyz;
-
-    // a = aPrevPosition.xyz;
-    // b = position.xyz;
-    // c = aNextPosition.xyz;
 
     vec3 ab = a - b;
     vec3 cb = c - b;
 
     vec3 n = abs(normalize(cross(cb, ab)));
 
+    vNormal = n * normalMatrix;
+    normalInterp = vNormal;
 
-    // modelPosition.y += noise * 0.1;
-
-    vNormal = n;
+    vec4 lightPosition = viewMatrix * vec4(0., 0., 10., 1.0);
 
     vec4 viewPosition = viewMatrix * modelPosition;
+
+    vViewDir = normalize(vec3(0,0,0) - viewPosition.xyz);
+
+    vLightDir = normalize(lightPosition.xyz - viewPosition.xyz);
+
+    vertPos = vec3(viewPosition) / viewPosition.w;
+
     vec4 projectedPosition = projectionMatrix * viewPosition;
     gl_Position = projectedPosition;
 }

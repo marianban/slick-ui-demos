@@ -1,0 +1,11 @@
+Model Information:
+* title:	Gislinge Viking Boat
+* source:	https://sketchfab.com/3d-models/gislinge-viking-boat-01098ad7973647a9b558f41d2ebc5193
+* author:	Opus Poly (https://sketchfab.com/OpusPoly)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Gislinge Viking Boat" (https://sketchfab.com/3d-models/gislinge-viking-boat-01098ad7973647a9b558f41d2ebc5193) by Opus Poly (https://sketchfab.com/OpusPoly) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

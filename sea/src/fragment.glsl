@@ -1,3 +1,5 @@
+// #include <encodings_pars_fragment>
+
 varying float vNoise;
 varying vec3 vNormal;
 
@@ -15,9 +17,18 @@ uniform vec3 uSpecColor;
 uniform float uShininess;
 uniform float uScreenGamma;
 
+float near = 0.1;
+float far  = 100.0;
+
+float LinearizeDepth(float depth)
+{
+    float z = depth * 2.0 - 1.0; // back to NDC
+    return (2.0 * near * far) / (far + near - z * (far - near));
+}
+
+
 void main()
 {
-
     vec3 normal = normalize(normalInterp);
     vec3 lightDir = uLightPos - vertPos;
     float distance = length(lightDir);
@@ -42,11 +53,11 @@ void main()
                      diffuseColor * lambertian * uLightColor * uLightPower / distance +
                      uSpecColor * specular * uLightColor * uLightPower / distance;
 
-    // apply gamma correction (assume ambientColor, diffuseColor and specColor
-    // have been linearized, i.e. have no gamma correction in them)
-    vec3 colorGammaCorrected = pow(colorLinear, vec3(1.0 / uScreenGamma));
+    float depth = LinearizeDepth(gl_FragCoord.z) / far;
 
-    gl_FragColor = vec4(colorGammaCorrected, 1.0);
+    // colorLinear = vec3(depth);
+
+    gl_FragColor = vec4(colorLinear, 1.0 - depth - 0.1);
 
     #include <tonemapping_fragment>
     #include <encodings_fragment>

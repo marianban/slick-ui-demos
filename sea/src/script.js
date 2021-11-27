@@ -4,11 +4,45 @@ import * as THREE from 'three/src/Three';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Sky } from 'three/examples/jsm/objects/Sky';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import fragmentShader from './fragment.glsl';
 import vertexShader from './vertex.glsl';
 import { computeSiblingVertices } from './utils';
 
 const pane = new Pane({ title: 'Parameters' });
+
+/**
+ * Models
+ */
+const gltfLoader = new GLTFLoader();
+
+let ship = undefined;
+
+gltfLoader.load(
+  '/ship/scene.gltf',
+  (gltf) => {
+    const scalar = 0.0025;
+    ship = gltf.scene.children[0];
+    ship.traverse((child) => {
+      if (
+        child?.type === 'Mesh' &&
+        child?.material?.type === 'MeshStandardMaterial'
+      ) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+    ship.position.y = 0.03;
+    ship.scale.set(scalar, scalar, scalar);
+    scene.add(ship);
+  },
+  (progress) => {
+    console.log('progress');
+  },
+  (error) => {
+    console.log('error');
+  }
+);
 
 /**
  * Base
@@ -18,6 +52,16 @@ const canvas = document.querySelector('canvas.webgl');
 
 // Scene
 const scene = new THREE.Scene();
+// scene.background = background;
+
+// Lights
+var light = new THREE.AmbientLight(0x00fffc, 4.2);
+scene.add(light);
+
+const directionalLight = new THREE.DirectionalLight(0x00fffc, 6.08);
+directionalLight.castShadow = true;
+directionalLight.shadow.normalBias = 0.05;
+scene.add(directionalLight);
 
 /**
  * Sizes
@@ -46,15 +90,23 @@ window.addEventListener('resize', () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(
-  42,
+  50,
   sizes.width / sizes.height,
   0.1,
-  100
+  9
 );
 window.camera = camera;
-camera.position.x = 1.9894531139322313;
-camera.position.y = 0.6350605844920187;
-camera.position.z = 1.7650128324251322;
+camera.position.x = -1.2658957007660163;
+camera.position.y = 0.3550630876767142;
+camera.position.z = 2.7295812735649627;
+
+const cameraRotation = new THREE.Vector3(
+  -0.1293533695124764,
+  -0.4310517757038594,
+  -0.05429733203978356
+);
+camera.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
+
 scene.add(camera);
 
 // Controls
@@ -64,8 +116,8 @@ controls.enableDamping = true;
 /**
  * Cube
  */
-const segments = 255;
-const geometry = new THREE.PlaneGeometry(4, 4, segments, segments);
+const segments = 511;
+const geometry = new THREE.PlaneGeometry(16, 16, segments, segments);
 geometry.computeVertexNormals();
 
 const positions = geometry.attributes.position.array;
@@ -112,27 +164,28 @@ geometry.setAttribute(
 
 const inputs = {
   lightColor: '#86b1fb',
-  lightPower: 200,
-  ambientColor: '#001063',
-  diffuseColor: '#31439B',
-  diffuseDarkColor: '#2c3a80',
-  specColor: '#d6b1fc',
-  shininess: 200,
+  lightPower: 120.29,
+  ambientColor: '#3680af',
+  diffuseColor: '#3c99cb',
+  diffuseDarkColor: '#2d78a0',
+  specColor: '#6be3ff',
+  shininess: 166.69,
   noiseStrength: 0.01,
-  noiseFrequency: 0.5,
-  noiseScale: 11,
-  waveXStrength: 0.03,
-  waveXFrequency: 5.0,
-  waveYStrength: 0.015,
-  waveYFrequency: 4.0,
+  noiseFrequency: 0.65,
+  noiseScale: 12.97,
+  waveXStrength: 0.04,
+  waveXFrequency: 4.71,
+  waveYStrength: 0.084,
+  waveYFrequency: 2.75,
 };
 
 const material = new THREE.ShaderMaterial({
+  transparent: true,
   uniforms: {
     uTime: { value: 0 },
     uLightPos: {
       value: new THREE.Vector3(
-        5.078997303068221,
+        1.078997303068221,
         0.6350605844920187,
         4.211951517592416
       ),
@@ -236,30 +289,61 @@ window.sun = sun;
 scene.add(sun);
 
 const effectController = {
-  turbidity: 10,
-  rayleigh: 3,
-  mieCoefficient: 0.005,
-  mieDirectionalG: 0.7,
-  elevation: 2,
+  turbidity: 0.03,
+  rayleigh: 0.12,
+  mieCoefficient: 0.004,
+  mieDirectionalG: 0.508,
+  elevation: 12.39,
   azimuth: 180,
 };
+
+const skyFolder = pane.addFolder({
+  title: 'Sky',
+});
+
+skyFolder.addInput(effectController, 'turbidity', {
+  min: -1,
+  max: 3,
+});
+
+skyFolder.addInput(effectController, 'rayleigh', {
+  min: 0,
+  max: 3,
+});
+
+skyFolder.addInput(effectController, 'mieCoefficient', {
+  min: 0,
+  max: 0.01,
+});
+
+skyFolder.addInput(effectController, 'mieDirectionalG', {
+  min: -1,
+  max: 3,
+});
+
+skyFolder.addInput(effectController, 'elevation', {
+  min: 0,
+  max: 90,
+});
+
+skyFolder.addInput(effectController, 'azimuth', {
+  min: -180,
+  max: 180,
+});
 
 const sky = new Sky();
 
 const sunPosition = new THREE.Vector3();
-
-var theta = Math.PI * (0.49 - 0.5);
-var phi = 2 * Math.PI * (0.25 - 0.5);
-
-sunPosition.x = Math.cos(phi);
-sunPosition.y = Math.sin(phi) * Math.sin(theta);
-sunPosition.z = Math.sin(phi) * Math.cos(theta);
 
 const uniforms = sky.material.uniforms;
 uniforms.turbidity.value = effectController.turbidity;
 uniforms.rayleigh.value = effectController.rayleigh;
 uniforms.mieCoefficient.value = effectController.mieCoefficient;
 uniforms.mieDirectionalG.value = effectController.mieDirectionalG;
+
+const phi = THREE.MathUtils.degToRad(90 - effectController.elevation);
+const theta = THREE.MathUtils.degToRad(effectController.azimuth);
+sunPosition.setFromSphericalCoords(1, phi, theta);
 uniforms.sunPosition.value.copy(sunPosition);
 
 sky.scale.setScalar(450000);
@@ -272,9 +356,15 @@ const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
   antialias: true,
 });
+
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-// renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.physicallyCorrectLights = true;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.2;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 /**
  * Animate
@@ -306,8 +396,26 @@ const tick = () => {
 
   material.uniforms.uLightPos.value.copy(sun.position);
 
+  uniforms.turbidity.value = effectController.turbidity;
+  uniforms.rayleigh.value = effectController.rayleigh;
+  uniforms.mieCoefficient.value = effectController.mieCoefficient;
+  uniforms.mieDirectionalG.value = effectController.mieDirectionalG;
+
+  const phi = THREE.MathUtils.degToRad(90 - effectController.elevation);
+  const theta = THREE.MathUtils.degToRad(effectController.azimuth);
+  sunPosition.setFromSphericalCoords(1, phi, theta);
+  directionalLight.position.copy(sunPosition);
+  uniforms.sunPosition.value.copy(sunPosition);
+
+  if (ship) {
+    ship.rotation.x = Math.PI * -0.5 + Math.sin(elapsedTime) * 0.07;
+  }
+
+  camera.position.y += Math.sin(elapsedTime) * 0.0005;
+  camera.rotation.z = cameraRotation.z + Math.sin(elapsedTime) * 0.02;
+
   // Update controls
-  controls.update();
+  // controls.update();
   // Render
   renderer.render(scene, camera);
 

@@ -5,8 +5,8 @@ import { TransformControls } from 'three/examples/jsm/controls/TransformControls
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Sky } from 'three/examples/jsm/objects/Sky';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import fragmentShader from './fragment.glsl';
-import vertexShader from './vertex.glsl';
+import waterFragmentShader from './fragment.glsl';
+import waterVertexShader from './vertex.glsl';
 import starsFragmentShader from './stars-fragment.glsl';
 import starsVertexShader from './stars-vertex.glsl';
 import fogFragmentShader from './fog-fragment.glsl';
@@ -19,8 +19,21 @@ const pixelRatio = Math.min(window.devicePixelRatio, 2);
  * Textures
  */
 const textureLoader = new THREE.TextureLoader();
+
+const starTextures = [];
 const star7Texture = textureLoader.load('/star_07.png');
 star7Texture.encoding = THREE.sRGBEncoding;
+starTextures.push(star7Texture);
+const star6Texture = textureLoader.load('/star_06.png');
+star6Texture.encoding = THREE.sRGBEncoding;
+starTextures.push(star6Texture);
+const star8Texture = textureLoader.load('/star_08.png');
+star8Texture.encoding = THREE.sRGBEncoding;
+starTextures.push(star8Texture);
+const star4Texture = textureLoader.load('/star_04.png');
+star4Texture.encoding = THREE.sRGBEncoding;
+starTextures.push(star4Texture);
+
 const fog5Texture = textureLoader.load('/smoke_05.png');
 fog5Texture.encoding = THREE.sRGBEncoding;
 
@@ -212,8 +225,8 @@ const waterMaterial = new THREE.ShaderMaterial({
     uWaveYStrength: { value: waterParams.waveYStrength },
     uWaveYFrequency: { value: waterParams.waveYFrequency },
   },
-  vertexShader,
-  fragmentShader,
+  vertexShader: waterVertexShader,
+  fragmentShader: waterFragmentShader,
 });
 
 const lightFolder = pane.addFolder({
@@ -370,15 +383,25 @@ starsGeometry.setAttribute(
 );
 
 const starScales = new Float32Array(count);
+const starTextureIndex = new Float32Array(count);
 for (let i = 0; i < count; i++) {
   starScales[i] = 0.5 + Math.random() * 0.5;
+  starTextureIndex[i] = Math.floor(starTextures.length * Math.random());
 }
 starsGeometry.setAttribute('aScale', new THREE.BufferAttribute(starScales, 1));
+starsGeometry.setAttribute(
+  'aTextureIndex',
+  new THREE.BufferAttribute(starTextureIndex, 1)
+);
 
 const starsMaterial = new THREE.ShaderMaterial({
   transparent: true,
+  defines: {
+    texturesCount: starTextures.length,
+  },
   uniforms: {
     uTexture: { value: star7Texture },
+    uTextures: new THREE.Uniform(starTextures),
     uSize: { value: 10 * pixelRatio },
     uTime: { value: 0 },
   },

@@ -18,7 +18,9 @@ uniform float uShininess;
 uniform float uScreenGamma;
 
 float near = 0.1;
-float far  = 100.0;
+
+
+float far  = 15.0;
 
 float LinearizeDepth(float depth)
 {
@@ -57,7 +59,7 @@ void main()
 
     // colorLinear = vec3(depth);
 
-    gl_FragColor = vec4(colorLinear, 1.0 - depth - 0.1);
+    gl_FragColor = vec4(colorLinear * 1.0, 1.0 - depth - 0.1);
 
     #include <tonemapping_fragment>
     #include <encodings_fragment>

@@ -7,34 +7,56 @@ import { Sky } from 'three/examples/jsm/objects/Sky';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import fragmentShader from './fragment.glsl';
 import vertexShader from './vertex.glsl';
+import starsFragmentShader from './stars-fragment.glsl';
+import starsVertexShader from './stars-vertex.glsl';
+import fogFragmentShader from './fog-fragment.glsl';
+import fogVertexShader from './fog-vertex.glsl';
 import { computeSiblingVertices } from './utils';
 
+const pixelRatio = Math.min(window.devicePixelRatio, 2);
+
+/**
+ * Textures
+ */
+const textureLoader = new THREE.TextureLoader();
+const star7Texture = textureLoader.load('/star_07.png');
+star7Texture.encoding = THREE.sRGBEncoding;
+const fog5Texture = textureLoader.load('/smoke_05.png');
+fog5Texture.encoding = THREE.sRGBEncoding;
+
+/**
+ * Debug pane
+ */
 const pane = new Pane({ title: 'Parameters' });
 
 /**
- * Models
+ * Ship Model
  */
 const gltfLoader = new GLTFLoader();
 
-let ship = undefined;
+let shipModel = undefined;
 
 gltfLoader.load(
   '/ship/scene.gltf',
   (gltf) => {
     const scalar = 0.0025;
-    ship = gltf.scene.children[0];
-    ship.traverse((child) => {
+    shipModel = gltf.scene.children[0];
+    shipModel.traverse((child) => {
       if (
         child?.type === 'Mesh' &&
         child?.material?.type === 'MeshStandardMaterial'
       ) {
         child.castShadow = true;
         child.receiveShadow = true;
+
+        if (child?.material?.map) {
+          child.material.map.encoding = THREE.sRGBEncoding;
+        }
       }
     });
-    ship.position.y = 0.03;
-    ship.scale.set(scalar, scalar, scalar);
-    scene.add(ship);
+    shipModel.position.y = 0.03;
+    shipModel.scale.set(scalar, scalar, scalar);
+    scene.add(shipModel);
   },
   (progress) => {
     console.log('progress');
@@ -44,17 +66,15 @@ gltfLoader.load(
   }
 );
 
-/**
- * Base
- */
 // Canvas
 const canvas = document.querySelector('canvas.webgl');
 
 // Scene
 const scene = new THREE.Scene();
-// scene.background = background;
 
-// Lights
+/**
+ * Lights
+ */
 var light = new THREE.AmbientLight(0x00fffc, 4.2);
 scene.add(light);
 
@@ -82,18 +102,17 @@ window.addEventListener('resize', () => {
 
   // Update renderer
   renderer.setSize(sizes.width, sizes.height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(pixelRatio);
 });
 
 /**
  * Camera
  */
-// Base camera
 const camera = new THREE.PerspectiveCamera(
   50,
   sizes.width / sizes.height,
   0.1,
-  9
+  15
 );
 window.camera = camera;
 camera.position.x = -1.2658957007660163;
@@ -109,26 +128,20 @@ camera.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
 
 scene.add(camera);
 
-// Controls
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 
 /**
- * Cube
+ * Water
  */
 const segments = 511;
-const geometry = new THREE.PlaneGeometry(16, 16, segments, segments);
-geometry.computeVertexNormals();
+const waterGeometry = new THREE.PlaneGeometry(16, 16, segments, segments);
 
-const positions = geometry.attributes.position.array;
-
-const [as, cs, bs] = computeSiblingVertices(positions);
-
-const normals = [];
-
-const prevPositions = new Array(positions.length);
-const nextPositions = new Array(positions.length);
-
+// adjacent vertices used for normal computation of transformed geometry
+const waterPositions = waterGeometry.attributes.position.array;
+const [as, cs, bs] = computeSiblingVertices(waterPositions);
+const prevPositions = new Array(waterPositions.length);
+const nextPositions = new Array(waterPositions.length);
 for (let i = 0; i < bs.length; i++) {
   const a = as[i];
   const b = bs[i];
@@ -145,30 +158,23 @@ for (let i = 0; i < bs.length; i++) {
   nextPositions[ix] = c.x;
   nextPositions[iy] = c.y;
   nextPositions[iz] = c.z;
-
-  a.sub(b);
-  c.sub(b);
-
-  const normal = c.cross(a).normalize();
-  normals.push(normal);
 }
-
-geometry.setAttribute(
+waterGeometry.setAttribute(
   'aPrevPosition',
   new THREE.Float32BufferAttribute(prevPositions, 3)
 );
-geometry.setAttribute(
+waterGeometry.setAttribute(
   'aNextPosition',
   new THREE.Float32BufferAttribute(nextPositions, 3)
 );
 
-const inputs = {
+const waterParams = {
   lightColor: '#86b1fb',
   lightPower: 120.29,
   ambientColor: '#3680af',
   diffuseColor: '#3c99cb',
   diffuseDarkColor: '#2d78a0',
-  specColor: '#6be3ff',
+  specColor: '#ffffff',
   shininess: 166.69,
   noiseStrength: 0.01,
   noiseFrequency: 0.65,
@@ -179,7 +185,7 @@ const inputs = {
   waveYFrequency: 2.75,
 };
 
-const material = new THREE.ShaderMaterial({
+const waterMaterial = new THREE.ShaderMaterial({
   transparent: true,
   uniforms: {
     uTime: { value: 0 },
@@ -190,105 +196,102 @@ const material = new THREE.ShaderMaterial({
         4.211951517592416
       ),
     },
-    uLightColor: { value: new THREE.Color(inputs.lightColor) },
-    uLightPower: { value: inputs.lightPower },
-    uAmbientColor: { value: new THREE.Color(inputs.ambientColor) },
-    uDiffuseColor: { value: new THREE.Color(inputs.diffuseColor) },
-    uDiffuseDarkColor: { value: new THREE.Color(inputs.diffuseDarkColor) },
-    uSpecColor: { value: new THREE.Color(inputs.specColor) },
-    uShininess: { value: inputs.shininess },
+    uLightColor: { value: new THREE.Color(waterParams.lightColor) },
+    uLightPower: { value: waterParams.lightPower },
+    uAmbientColor: { value: new THREE.Color(waterParams.ambientColor) },
+    uDiffuseColor: { value: new THREE.Color(waterParams.diffuseColor) },
+    uDiffuseDarkColor: { value: new THREE.Color(waterParams.diffuseDarkColor) },
+    uSpecColor: { value: new THREE.Color(waterParams.specColor) },
+    uShininess: { value: waterParams.shininess },
     uScreenGamma: { value: 2.2 },
-    uNoiseStrength: { value: inputs.noiseStrength },
-    uNoiseFrequency: { value: inputs.noiseFrequency },
-    uNoiseScale: { value: inputs.noiseScale },
-    uWaveXStrength: { value: inputs.waveXStrength },
-    uWaveXFrequency: { value: inputs.waveXFrequency },
-    uWaveYStrength: { value: inputs.waveYStrength },
-    uWaveYFrequency: { value: inputs.waveYFrequency },
+    uNoiseStrength: { value: waterParams.noiseStrength },
+    uNoiseFrequency: { value: waterParams.noiseFrequency },
+    uNoiseScale: { value: waterParams.noiseScale },
+    uWaveXStrength: { value: waterParams.waveXStrength },
+    uWaveXFrequency: { value: waterParams.waveXFrequency },
+    uWaveYStrength: { value: waterParams.waveYStrength },
+    uWaveYFrequency: { value: waterParams.waveYFrequency },
   },
   vertexShader,
   fragmentShader,
 });
 
 const lightFolder = pane.addFolder({
-  title: 'Light',
+  title: 'Water Colors',
 });
-
-lightFolder.addInput(inputs, 'lightColor', {
+lightFolder.addInput(waterParams, 'lightColor', {
   view: 'color',
 });
-lightFolder.addInput(inputs, 'lightPower', {
+lightFolder.addInput(waterParams, 'lightPower', {
   min: 0,
   max: 400,
 });
-lightFolder.addInput(inputs, 'ambientColor', {
+lightFolder.addInput(waterParams, 'ambientColor', {
   view: 'color',
 });
-lightFolder.addInput(inputs, 'diffuseColor', {
+lightFolder.addInput(waterParams, 'diffuseColor', {
   view: 'color',
 });
-lightFolder.addInput(inputs, 'diffuseDarkColor', {
+lightFolder.addInput(waterParams, 'diffuseDarkColor', {
   view: 'color',
 });
-lightFolder.addInput(inputs, 'specColor', {
+lightFolder.addInput(waterParams, 'specColor', {
   view: 'color',
 });
-lightFolder.addInput(inputs, 'shininess', {
+lightFolder.addInput(waterParams, 'shininess', {
   min: 0.03,
   max: 500,
 });
 
 const waterFolder = pane.addFolder({
-  title: 'Water',
+  title: 'Water Geometry',
 });
-
-waterFolder.addInput(inputs, 'noiseStrength', {
+waterFolder.addInput(waterParams, 'noiseStrength', {
   min: 0.001,
   max: 0.02,
 });
-waterFolder.addInput(inputs, 'noiseFrequency', {
+waterFolder.addInput(waterParams, 'noiseFrequency', {
   min: 0,
   max: 1,
 });
-waterFolder.addInput(inputs, 'noiseScale', {
+waterFolder.addInput(waterParams, 'noiseScale', {
   min: 0,
   max: 20,
 });
-
-waterFolder.addInput(inputs, 'waveXStrength', {
+waterFolder.addInput(waterParams, 'waveXStrength', {
   min: 0.001,
   max: 0.1,
 });
-waterFolder.addInput(inputs, 'waveXFrequency', {
+waterFolder.addInput(waterParams, 'waveXFrequency', {
   min: 0,
   max: 20,
 });
-
-waterFolder.addInput(inputs, 'waveYStrength', {
+waterFolder.addInput(waterParams, 'waveYStrength', {
   min: 0.001,
   max: 0.1,
 });
-waterFolder.addInput(inputs, 'waveYFrequency', {
+waterFolder.addInput(waterParams, 'waveYFrequency', {
   min: 0,
   max: 20,
 });
 
-const cube = new THREE.Mesh(geometry, material);
-cube.rotateX(-Math.PI * 0.5);
-scene.add(cube);
+const waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
+waterMesh.rotateX(-Math.PI * 0.5);
+scene.add(waterMesh);
 
 const sunMaterial = new THREE.MeshBasicMaterial({
   color: '#990000',
 });
 const sunGeometry = new THREE.SphereGeometry(1, 32, 32);
 const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-sun.position.copy(material.uniforms.uLightPos.value);
-
+sun.position.copy(waterMaterial.uniforms.uLightPos.value);
 window.sun = sun;
-
 scene.add(sun);
 
-const effectController = {
+/**
+ * Sky
+ */
+const skyParams = {
   turbidity: 0.03,
   rayleigh: 0.12,
   mieCoefficient: 0.004,
@@ -300,33 +303,27 @@ const effectController = {
 const skyFolder = pane.addFolder({
   title: 'Sky',
 });
-
-skyFolder.addInput(effectController, 'turbidity', {
+skyFolder.addInput(skyParams, 'turbidity', {
   min: -1,
   max: 3,
 });
-
-skyFolder.addInput(effectController, 'rayleigh', {
+skyFolder.addInput(skyParams, 'rayleigh', {
   min: 0,
   max: 3,
 });
-
-skyFolder.addInput(effectController, 'mieCoefficient', {
+skyFolder.addInput(skyParams, 'mieCoefficient', {
   min: 0,
   max: 0.01,
 });
-
-skyFolder.addInput(effectController, 'mieDirectionalG', {
+skyFolder.addInput(skyParams, 'mieDirectionalG', {
   min: -1,
   max: 3,
 });
-
-skyFolder.addInput(effectController, 'elevation', {
+skyFolder.addInput(skyParams, 'elevation', {
   min: 0,
   max: 90,
 });
-
-skyFolder.addInput(effectController, 'azimuth', {
+skyFolder.addInput(skyParams, 'azimuth', {
   min: -180,
   max: 180,
 });
@@ -336,18 +333,109 @@ const sky = new Sky();
 const sunPosition = new THREE.Vector3();
 
 const uniforms = sky.material.uniforms;
-uniforms.turbidity.value = effectController.turbidity;
-uniforms.rayleigh.value = effectController.rayleigh;
-uniforms.mieCoefficient.value = effectController.mieCoefficient;
-uniforms.mieDirectionalG.value = effectController.mieDirectionalG;
+uniforms.turbidity.value = skyParams.turbidity;
+uniforms.rayleigh.value = skyParams.rayleigh;
+uniforms.mieCoefficient.value = skyParams.mieCoefficient;
+uniforms.mieDirectionalG.value = skyParams.mieDirectionalG;
 
-const phi = THREE.MathUtils.degToRad(90 - effectController.elevation);
-const theta = THREE.MathUtils.degToRad(effectController.azimuth);
+const phi = THREE.MathUtils.degToRad(90 - skyParams.elevation);
+const theta = THREE.MathUtils.degToRad(skyParams.azimuth);
 sunPosition.setFromSphericalCoords(1, phi, theta);
 uniforms.sunPosition.value.copy(sunPosition);
 
 sky.scale.setScalar(450000);
 scene.add(sky);
+
+/**
+ * Stars
+ */
+const starsGeometry = new THREE.BufferGeometry();
+const count = 500;
+
+const starPositions = new Float32Array(count * 3);
+for (let i = 0; i < count * 3; i += 3) {
+  const phi = THREE.MathUtils.degToRad(90 * Math.random());
+  const theta = THREE.MathUtils.degToRad(180 + Math.random() * 365);
+  const startPosition = new THREE.Vector3();
+  startPosition.setFromSphericalCoords(1, phi, theta);
+  startPosition.multiplyScalar(9);
+
+  starPositions[i] = startPosition.x;
+  starPositions[i + 1] = startPosition.y;
+  starPositions[i + 2] = startPosition.z;
+}
+starsGeometry.setAttribute(
+  'position',
+  new THREE.BufferAttribute(starPositions, 3)
+);
+
+const starScales = new Float32Array(count);
+for (let i = 0; i < count; i++) {
+  starScales[i] = 0.5 + Math.random() * 0.5;
+}
+starsGeometry.setAttribute('aScale', new THREE.BufferAttribute(starScales, 1));
+
+const starsMaterial = new THREE.ShaderMaterial({
+  transparent: true,
+  uniforms: {
+    uTexture: { value: star7Texture },
+    uSize: { value: 10 * pixelRatio },
+    uTime: { value: 0 },
+  },
+  fragmentShader: starsFragmentShader,
+  vertexShader: starsVertexShader,
+});
+
+const stars = new THREE.Points(starsGeometry, starsMaterial);
+scene.add(stars);
+
+/**
+ * Fog
+ */
+const fogGeometry = new THREE.BufferGeometry();
+const fogCount = 200;
+
+const fogPositions = new Float32Array(fogCount * 3);
+for (let i = 0; i < fogCount * 3; i += 3) {
+  const phi = THREE.MathUtils.degToRad(Math.abs(5 * Math.random() - 90));
+  const theta = THREE.MathUtils.degToRad(180 + Math.random() * 365);
+  const fogPosition = new THREE.Vector3();
+  fogPosition.setFromSphericalCoords(1, phi, theta);
+  fogPosition.multiplyScalar(5);
+
+  fogPositions[i] = fogPosition.x;
+  fogPositions[i + 1] = fogPosition.y;
+  fogPositions[i + 2] = fogPosition.z;
+}
+fogGeometry.setAttribute(
+  'position',
+  new THREE.BufferAttribute(fogPositions, 3)
+);
+
+const fogScales = new Float32Array(fogCount);
+const fogRand = new Float32Array(fogCount);
+for (let i = 0; i < fogCount; i++) {
+  fogScales[i] = 0.5 + Math.random() * 0.5;
+  fogRand[i] = (Math.random() - 0.5) * 5;
+}
+fogGeometry.setAttribute('aScale', new THREE.BufferAttribute(fogScales, 1));
+fogGeometry.setAttribute('aRand', new THREE.BufferAttribute(fogRand, 1));
+
+const fogMaterial = new THREE.ShaderMaterial({
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.NormalBlending,
+  uniforms: {
+    uTexture: { value: fog5Texture },
+    uSize: { value: 100 * pixelRatio },
+    uTime: { value: 0 },
+  },
+  fragmentShader: fogFragmentShader,
+  vertexShader: fogVertexShader,
+});
+
+const fog = new THREE.Points(fogGeometry, fogMaterial);
+scene.add(fog);
 
 /**
  * Renderer
@@ -358,7 +446,7 @@ const renderer = new THREE.WebGLRenderer({
 });
 
 renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(pixelRatio);
 renderer.physicallyCorrectLights = true;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -377,38 +465,42 @@ const tick = () => {
   const deltaTime = elapsedTime - lastElapsedTime;
   lastElapsedTime = elapsedTime;
 
-  material.uniforms.uTime.value += deltaTime;
+  waterMaterial.uniforms.uTime.value += deltaTime;
+  starsMaterial.uniforms.uTime.value += deltaTime;
+  fogMaterial.uniforms.uTime.value += deltaTime;
 
-  material.uniforms.uLightColor.value.set(inputs.lightColor);
-  material.uniforms.uLightPower.value = inputs.lightPower;
-  material.uniforms.uAmbientColor.value.set(inputs.ambientColor);
-  material.uniforms.uDiffuseColor.value.set(inputs.diffuseColor);
-  material.uniforms.uDiffuseDarkColor.value.set(inputs.diffuseDarkColor);
-  material.uniforms.uSpecColor.value.set(inputs.specColor);
-  material.uniforms.uShininess.value = inputs.shininess;
-  material.uniforms.uNoiseStrength.value = inputs.noiseStrength;
-  material.uniforms.uNoiseFrequency.value = inputs.noiseFrequency;
-  material.uniforms.uNoiseScale.value = inputs.noiseScale;
-  material.uniforms.uWaveXStrength.value = inputs.waveXStrength;
-  material.uniforms.uWaveXFrequency.value = inputs.waveXFrequency;
-  material.uniforms.uWaveYStrength.value = inputs.waveYStrength;
-  material.uniforms.uWaveYFrequency.value = inputs.waveYFrequency;
+  waterMaterial.uniforms.uLightColor.value.set(waterParams.lightColor);
+  waterMaterial.uniforms.uLightPower.value = waterParams.lightPower;
+  waterMaterial.uniforms.uAmbientColor.value.set(waterParams.ambientColor);
+  waterMaterial.uniforms.uDiffuseColor.value.set(waterParams.diffuseColor);
+  waterMaterial.uniforms.uDiffuseDarkColor.value.set(
+    waterParams.diffuseDarkColor
+  );
+  waterMaterial.uniforms.uSpecColor.value.set(waterParams.specColor);
+  waterMaterial.uniforms.uShininess.value = waterParams.shininess;
+  waterMaterial.uniforms.uNoiseStrength.value = waterParams.noiseStrength;
+  waterMaterial.uniforms.uNoiseFrequency.value = waterParams.noiseFrequency;
+  waterMaterial.uniforms.uNoiseScale.value = waterParams.noiseScale;
+  waterMaterial.uniforms.uWaveXStrength.value = waterParams.waveXStrength;
+  waterMaterial.uniforms.uWaveXFrequency.value = waterParams.waveXFrequency;
+  waterMaterial.uniforms.uWaveYStrength.value = waterParams.waveYStrength;
+  waterMaterial.uniforms.uWaveYFrequency.value = waterParams.waveYFrequency;
 
-  material.uniforms.uLightPos.value.copy(sun.position);
+  waterMaterial.uniforms.uLightPos.value.copy(sun.position);
 
-  uniforms.turbidity.value = effectController.turbidity;
-  uniforms.rayleigh.value = effectController.rayleigh;
-  uniforms.mieCoefficient.value = effectController.mieCoefficient;
-  uniforms.mieDirectionalG.value = effectController.mieDirectionalG;
+  uniforms.turbidity.value = skyParams.turbidity;
+  uniforms.rayleigh.value = skyParams.rayleigh;
+  uniforms.mieCoefficient.value = skyParams.mieCoefficient;
+  uniforms.mieDirectionalG.value = skyParams.mieDirectionalG;
 
-  const phi = THREE.MathUtils.degToRad(90 - effectController.elevation);
-  const theta = THREE.MathUtils.degToRad(effectController.azimuth);
+  const phi = THREE.MathUtils.degToRad(90 - skyParams.elevation);
+  const theta = THREE.MathUtils.degToRad(skyParams.azimuth);
   sunPosition.setFromSphericalCoords(1, phi, theta);
   directionalLight.position.copy(sunPosition);
   uniforms.sunPosition.value.copy(sunPosition);
 
-  if (ship) {
-    ship.rotation.x = Math.PI * -0.5 + Math.sin(elapsedTime) * 0.07;
+  if (shipModel) {
+    shipModel.rotation.x = Math.PI * -0.5 + Math.sin(elapsedTime) * 0.07;
   }
 
   camera.position.y += Math.sin(elapsedTime) * 0.0005;
@@ -428,7 +520,6 @@ transformControl.addEventListener('change', tick);
 transformControl.addEventListener('dragging-changed', function (event) {
   controls.enabled = !event.value;
 });
-
 transformControl.attach(sun);
 scene.add(transformControl);
 

@@ -56,10 +56,31 @@ void main()
                      uSpecColor * specular * uLightColor * uLightPower / distance;
 
     float depth = LinearizeDepth(gl_FragCoord.z) / far;
+    // 14 near
+    // 70 after ship (0.27)
 
     // colorLinear = vec3(depth);
 
-    gl_FragColor = vec4(colorLinear * 1.0, 1.0 - depth - 0.1);
+
+    float start = 0.18;
+    float end = 0.33;
+    float s1 = smoothstep(start, end, depth);
+    float s2 = smoothstep(start, end, depth + end - start);
+    float s = s1 - s2;
+
+    vec3 horizonColor = vec3(135./255.,160./255.,177./255.);
+
+    colorLinear = mix(colorLinear, horizonColor, smoothstep(0.4, 0.9, depth));
+
+    // (1.8 + clamp(0., 1., s))
+    gl_FragColor = vec4(colorLinear * 1.0, (1.8 + clamp(0., 1., s)));
+
+
+
+    //
+    // 1.0 - depth - 0.1
+    // float depth = LinearizeDepth(gl_FragCoord.z) / far;
+    // gl_FragColor = vec4(colorLinear * 1.0, 0.75 + depth);
 
     #include <tonemapping_fragment>
     #include <encodings_fragment>

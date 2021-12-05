@@ -1,8 +1,8 @@
 import './style.css';
 import { Pane } from 'tweakpane';
-import * as THREE from 'three/src/Three';
-import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import * as THREE from 'three';
+// import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
+// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Sky } from 'three/examples/jsm/objects/Sky';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import waterFragmentShader from './fragment.glsl';
@@ -11,6 +11,8 @@ import starsFragmentShader from './stars-fragment.glsl';
 import starsVertexShader from './stars-vertex.glsl';
 import fogFragmentShader from './fog-fragment.glsl';
 import fogVertexShader from './fog-vertex.glsl';
+import flagFragment from './flag-fragment.glsl';
+import flagVertex from './flag-vertex.glsl';
 import { computeSiblingVertices } from './utils';
 
 const pixelRatio = Math.min(window.devicePixelRatio, 2);
@@ -42,12 +44,58 @@ fog5Texture.encoding = THREE.sRGBEncoding;
  */
 const pane = new Pane({ title: 'Parameters' });
 
+// Canvas
+const canvas = document.querySelector('canvas.webgl');
+
+const sizes = {
+  width: window.innerWidth,
+  height: window.innerHeight,
+};
+
+// Scene
+const scene = new THREE.Scene();
+
+/**
+ * Camera
+ */
+const cameraPosition = new THREE.Vector3(
+  -1.2658957007660163,
+  0.3550630876767142,
+  2.7295812735649627
+);
+const camera = new THREE.PerspectiveCamera(
+  50,
+  sizes.width / sizes.height,
+  0.1,
+  15
+);
+window.camera = camera;
+
+camera.position.x = cameraPosition.x;
+camera.position.y = cameraPosition.y;
+camera.position.z = cameraPosition.z;
+
+const cameraRotation = new THREE.Vector3(
+  -0.1293533695124764,
+  -0.4310517757038594,
+  -0.05429733203978356
+);
+camera.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
+
+scene.add(camera);
+
+// const controls = new OrbitControls(camera, canvas);
+// controls.enabled = false;
+// controls.enableDamping = true;
+
 /**
  * Ship Model
  */
 const gltfLoader = new GLTFLoader();
 
 let shipModel = undefined;
+const shipY = 0.025;
+let cameraDistance = undefined;
 
 gltfLoader.load(
   '/ship/scene.gltf',
@@ -67,9 +115,13 @@ gltfLoader.load(
         }
       }
     });
-    shipModel.position.y = 0.03;
+    shipModel.position.y = shipY;
     shipModel.scale.set(scalar, scalar, scalar);
     scene.add(shipModel);
+
+    const cameraToShip = new THREE.Vector3();
+    cameraToShip.subVectors(shipModel.position, camera.position);
+    cameraDistance = cameraToShip.length();
   },
   (progress) => {
     console.log('progress');
@@ -79,30 +131,81 @@ gltfLoader.load(
   }
 );
 
-// Canvas
-const canvas = document.querySelector('canvas.webgl');
+/**
+ * Lantern Model
+ */
+let lanternModel = undefined;
+let lanternEmissiveMaterial = undefined;
+let lanternPivot = new THREE.Group();
+var pivotPosition = new THREE.Vector3(0, 0.35, 0.01);
+lanternPivot.position.copy(pivotPosition);
+scene.add(lanternPivot);
 
-// Scene
-const scene = new THREE.Scene();
+gltfLoader.load(
+  '/stylized_lantern/scene.gltf',
+  (gltf) => {
+    const scalar = 0.01;
+    lanternModel = gltf.scene.children[0];
+    lanternModel.traverse((child) => {
+      if (
+        child?.type === 'Mesh' &&
+        child?.material?.type === 'MeshStandardMaterial'
+      ) {
+        child.receiveShadow = true;
+
+        if (child.name === 'second_lambert2_0') {
+          child.material.emissiveIntensity = 30;
+          lanternEmissiveMaterial = child.material;
+        }
+
+        if (child?.material?.map) {
+          child.material.map.encoding = THREE.sRGBEncoding;
+        }
+      }
+    });
+    lanternModel.position.z = -0.01;
+    lanternModel.scale.set(scalar, scalar, scalar);
+    scene.add(lanternModel);
+    lanternPivot.add(lanternModel);
+  },
+  (progress) => {
+    console.log('progress');
+  },
+  (error) => {
+    console.log('error');
+  }
+);
+
+// VISUALISE PIVOT
+var pivotSphereGeo = new THREE.SphereGeometry(0.01);
+var pivotMaterial = new THREE.MeshBasicMaterial({ color: 'blue' });
+var pivotSphere = new THREE.Mesh(pivotSphereGeo, pivotMaterial);
+pivotSphere.position.copy(pivotPosition);
+scene.add(pivotSphere);
 
 /**
  * Lights
  */
-var light = new THREE.AmbientLight(0x00fffc, 4.2);
+var light = new THREE.AmbientLight(0xdddddd, 1.5);
 scene.add(light);
 
-const directionalLight = new THREE.DirectionalLight(0x00fffc, 6.08);
+const directionalLight = new THREE.DirectionalLight(0xdddddd, 4.08);
 directionalLight.castShadow = true;
 directionalLight.shadow.normalBias = 0.05;
 scene.add(directionalLight);
 
+const pointLightIntensity = 2;
+const pointLight = new THREE.PointLight(0xf0e1a5, pointLightIntensity, 1, 1);
+pointLight.position.y = shipY + 0.3;
+pointLight.position.z = -0.05;
+
+// const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.1);
+// scene.add(pointLightHelper);
+scene.add(pointLight);
+
 /**
  * Sizes
  */
-const sizes = {
-  width: window.innerWidth,
-  height: window.innerHeight,
-};
 
 window.addEventListener('resize', () => {
   // Update sizes
@@ -117,32 +220,6 @@ window.addEventListener('resize', () => {
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(pixelRatio);
 });
-
-/**
- * Camera
- */
-const camera = new THREE.PerspectiveCamera(
-  50,
-  sizes.width / sizes.height,
-  0.1,
-  15
-);
-window.camera = camera;
-camera.position.x = -1.2658957007660163;
-camera.position.y = 0.3550630876767142;
-camera.position.z = 2.7295812735649627;
-
-const cameraRotation = new THREE.Vector3(
-  -0.1293533695124764,
-  -0.4310517757038594,
-  -0.05429733203978356
-);
-camera.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
-
-scene.add(camera);
-
-const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true;
 
 /**
  * Water
@@ -182,11 +259,15 @@ waterGeometry.setAttribute(
 );
 
 const waterParams = {
-  lightColor: '#86b1fb',
   lightPower: 120.29,
-  ambientColor: '#3680af',
-  diffuseColor: '#3c99cb',
-  diffuseDarkColor: '#2d78a0',
+  lightColor: '#2d446b',
+  // lightColor: '#86b1fb',
+  ambientColor: '#18384d',
+  // ambientColor: '#3680af',
+  diffuseColor: '#205978',
+  // diffuseColor: '#3c99cb',
+  diffuseDarkColor: '#143547',
+  // diffuseDarkColor: '#2d78a0',
   specColor: '#ffffff',
   shininess: 166.69,
   noiseStrength: 0.01,
@@ -200,6 +281,8 @@ const waterParams = {
 
 const waterMaterial = new THREE.ShaderMaterial({
   transparent: true,
+  side: THREE.DoubleSide,
+  // blending: THREE.NoBlending,
   uniforms: {
     uTime: { value: 0 },
     uLightPos: {
@@ -292,14 +375,14 @@ const waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
 waterMesh.rotateX(-Math.PI * 0.5);
 scene.add(waterMesh);
 
-const sunMaterial = new THREE.MeshBasicMaterial({
-  color: '#990000',
-});
-const sunGeometry = new THREE.SphereGeometry(1, 32, 32);
-const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-sun.position.copy(waterMaterial.uniforms.uLightPos.value);
-window.sun = sun;
-scene.add(sun);
+// const sunMaterial = new THREE.MeshBasicMaterial({
+//   color: '#990000',
+// });
+// const sunGeometry = new THREE.SphereGeometry(1, 32, 32);
+// const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+// sun.position.copy(waterMaterial.uniforms.uLightPos.value);
+// window.sun = sun;
+// scene.add(sun);
 
 /**
  * Sky
@@ -416,11 +499,13 @@ scene.add(stars);
  * Fog
  */
 const fogGeometry = new THREE.BufferGeometry();
-const fogCount = 200;
+const fogCount = 2000;
 
 const fogPositions = new Float32Array(fogCount * 3);
 for (let i = 0; i < fogCount * 3; i += 3) {
-  const phi = THREE.MathUtils.degToRad(Math.abs(5 * Math.random() - 90));
+  const phi = THREE.MathUtils.degToRad(
+    90 - 10 * (Math.random() * Math.random() * Math.random())
+  );
   const theta = THREE.MathUtils.degToRad(180 + Math.random() * 365);
   const fogPosition = new THREE.Vector3();
   fogPosition.setFromSphericalCoords(1, phi, theta);
@@ -447,7 +532,7 @@ fogGeometry.setAttribute('aRand', new THREE.BufferAttribute(fogRand, 1));
 const fogMaterial = new THREE.ShaderMaterial({
   transparent: true,
   depthWrite: false,
-  blending: THREE.NormalBlending,
+  // blending: THREE.AdditiveBlending,
   uniforms: {
     uTexture: { value: fog5Texture },
     uSize: { value: 100 * pixelRatio },
@@ -459,6 +544,23 @@ const fogMaterial = new THREE.ShaderMaterial({
 
 const fog = new THREE.Points(fogGeometry, fogMaterial);
 scene.add(fog);
+
+/**
+ * Flag
+ */
+
+/**
+ * Controls
+ */
+
+let cameraAngle = 0;
+let angularVelocity = 0;
+
+window.addEventListener('mousemove', (event) => {
+  const x = (event.x / sizes.width - 0.5) * 2;
+
+  angularVelocity = -(x * 0.1);
+});
 
 /**
  * Renderer
@@ -473,7 +575,7 @@ renderer.setPixelRatio(pixelRatio);
 renderer.physicallyCorrectLights = true;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.2;
+renderer.toneMappingExposure = 0.3;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -509,7 +611,7 @@ const tick = () => {
   waterMaterial.uniforms.uWaveYStrength.value = waterParams.waveYStrength;
   waterMaterial.uniforms.uWaveYFrequency.value = waterParams.waveYFrequency;
 
-  waterMaterial.uniforms.uLightPos.value.copy(sun.position);
+  // waterMaterial.uniforms.uLightPos.value.copy(sun.position);
 
   uniforms.turbidity.value = skyParams.turbidity;
   uniforms.rayleigh.value = skyParams.rayleigh;
@@ -523,27 +625,61 @@ const tick = () => {
   uniforms.sunPosition.value.copy(sunPosition);
 
   if (shipModel) {
-    shipModel.rotation.x = Math.PI * -0.5 + Math.sin(elapsedTime) * 0.07;
+    const shipXRotation = Math.PI * -0.5 + Math.sin(elapsedTime) * 0.07;
+    shipModel.rotation.x = shipXRotation;
+    // 1.5708 = 90 deg
+    lanternPivot.rotation.x = (-shipXRotation - 1.5708) * -2;
+    lanternPivot.position.z =
+      pivotPosition.z + 0.3 * Math.sin(elapsedTime) * 0.07;
+    pivotSphere.position.z =
+      pivotPosition.z + 0.3 * Math.sin(elapsedTime) * 0.07;
+    // pointLight.rotation.x = Math.PI * -0.5 + Math.sin(elapsedTime) * 0.07;
   }
 
-  camera.position.y += Math.sin(elapsedTime) * 0.0005;
-  camera.rotation.z = cameraRotation.z + Math.sin(elapsedTime) * 0.02;
+  if (cameraDistance) {
+    camera.rotation.z = camera.rotation.z + Math.sin(elapsedTime) * 0.02;
 
-  // Update controls
-  // controls.update();
+    cameraAngle += angularVelocity * deltaTime;
+
+    camera.position.x =
+      shipModel.position.x + Math.cos(cameraAngle) * cameraDistance;
+    camera.position.z =
+      shipModel.position.z + Math.sin(cameraAngle) * cameraDistance;
+  }
+
+  camera.position.y = cameraPosition.y + Math.sin(elapsedTime) * 0.1;
+
+  const lightChange =
+    (Math.sin(elapsedTime * 3) - Math.sin(elapsedTime * 10)) * 0.5;
+
+  pointLight.intensity = pointLightIntensity + lightChange;
+
+  if (lanternEmissiveMaterial) {
+    // console.log(lightChange * 10);
+    lanternEmissiveMaterial.emissiveIntensity = 30 + lightChange * 25;
+  }
+
   // Render
   renderer.render(scene, camera);
+
+  if (shipModel) {
+    camera.lookAt(shipModel.position);
+  }
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
 };
 
-const transformControl = new TransformControls(camera, renderer.domElement);
-transformControl.addEventListener('change', tick);
-transformControl.addEventListener('dragging-changed', function (event) {
-  controls.enabled = !event.value;
-});
-transformControl.attach(sun);
-scene.add(transformControl);
+setInterval(() => {
+  console.log(THREE.MathUtils.radToDeg(lanternPivot.rotation.x));
+}, 250);
+
+// const transformControl = new TransformControls(camera, renderer.domElement);
+// transformControl.addEventListener('change', tick);
+// transformControl.addEventListener('dragging-changed', function (event) {
+//   controls.enabled = !event.value;
+// });
+// transformControl.attach(sun);
+// scene.add(transformControl);
 
 tick();

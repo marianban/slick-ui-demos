@@ -1,7 +1,7 @@
 import './style.css';
 import { Pane } from 'tweakpane';
 import * as THREE from 'three';
-// import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 // import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Sky } from 'three/examples/jsm/objects/Sky';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -38,6 +38,9 @@ starTextures.push(star4Texture);
 
 const fog5Texture = textureLoader.load('/smoke_05.png');
 fog5Texture.encoding = THREE.sRGBEncoding;
+
+const flagTexture = textureLoader.load('/flag3.jpg');
+flagTexture.encoding = THREE.sRGBEncoding;
 
 /**
  * Debug pane
@@ -96,7 +99,7 @@ directionalLight.shadow.normalBias = 0.05;
 scene.add(directionalLight);
 
 const pointLightIntensity = 1;
-const pointLightPower = 40;
+const pointLightPower = 20;
 const pointLight = new THREE.PointLight(0xf0e1a5, pointLightIntensity, 1, 1);
 pointLight.power = pointLightPower;
 
@@ -538,6 +541,33 @@ scene.add(fog);
 /**
  * Flag
  */
+const flagSize = 0.15;
+const flagGeometry = new THREE.PlaneGeometry(
+  flagSize,
+  flagSize / 1.9,
+  100,
+  100
+);
+const flagMaterial = new THREE.ShaderMaterial({
+  side: THREE.DoubleSide,
+  uniforms: {
+    uTime: { value: 0 },
+    uTexture: { value: flagTexture },
+    uDarkColor: { value: new THREE.Color('#73000c').convertSRGBToLinear() },
+  },
+  vertexShader: flagVertex,
+  fragmentShader: flagFragment,
+});
+const flag = new THREE.Mesh(flagGeometry, flagMaterial);
+
+flag.position.y = 1.112;
+flag.position.x = 0.0627;
+flag.position.z = 0.051;
+flag.rotation.y = -0.6;
+flag.scale.x = -1;
+window.flag = flag;
+
+shipGroup.add(flag);
 
 /**
  * Controls
@@ -583,6 +613,7 @@ const tick = () => {
   waterMaterial.uniforms.uTime.value += deltaTime;
   starsMaterial.uniforms.uTime.value += deltaTime;
   fogMaterial.uniforms.uTime.value += deltaTime;
+  flagMaterial.uniforms.uTime.value += deltaTime;
 
   waterMaterial.uniforms.uLightColor.value.set(waterParams.lightColor);
   waterMaterial.uniforms.uLightPower.value = waterParams.lightPower;
@@ -616,6 +647,7 @@ const tick = () => {
 
   if (shipGroup) {
     const shipXRotation = Math.sin(elapsedTime) * 0.07;
+    shipGroup.position.y = Math.sin(elapsedTime) * 0.05;
     shipGroup.rotation.x = shipXRotation;
   }
 
@@ -633,13 +665,13 @@ const tick = () => {
   camera.position.y = cameraPosition.y + Math.sin(elapsedTime) * 0.1;
 
   const lightChange =
-    (Math.sin(elapsedTime * 3) - Math.sin(elapsedTime * 10)) * 10;
+    (Math.sin(elapsedTime * 3) - Math.sin(elapsedTime * 10)) * 4;
 
   pointLight.power = pointLightPower + lightChange;
 
   if (lanternEmissiveMaterial) {
     // console.log(lightChange * 10);
-    lanternEmissiveMaterial.emissiveIntensity = 30 + lightChange;
+    lanternEmissiveMaterial.emissiveIntensity = 20 + lightChange * 2;
   }
 
   // Render
@@ -653,16 +685,12 @@ const tick = () => {
   window.requestAnimationFrame(tick);
 };
 
-setInterval(() => {
-  console.log(THREE.MathUtils.radToDeg(lanternPivot.rotation.x));
-}, 250);
-
 // const transformControl = new TransformControls(camera, renderer.domElement);
 // transformControl.addEventListener('change', tick);
-// transformControl.addEventListener('dragging-changed', function (event) {
-//   controls.enabled = !event.value;
-// });
-// transformControl.attach(sun);
+// // transformControl.addEventListener('dragging-changed', function (event) {
+// //   //controls.enabled = !event.value;
+// // });
+// transformControl.attach(flag);
 // scene.add(transformControl);
 
 tick();

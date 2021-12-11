@@ -84,13 +84,32 @@ camera.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
 
 scene.add(camera);
 
-// const controls = new OrbitControls(camera, canvas);
-// controls.enabled = false;
-// controls.enableDamping = true;
+/**
+ * Lights
+ */
+var light = new THREE.AmbientLight(0xdddddd, 1.5);
+scene.add(light);
+
+const directionalLight = new THREE.DirectionalLight(0xdddddd, 4.08);
+directionalLight.castShadow = true;
+directionalLight.shadow.normalBias = 0.05;
+scene.add(directionalLight);
+
+const pointLightIntensity = 1;
+const pointLightPower = 40;
+const pointLight = new THREE.PointLight(0xf0e1a5, pointLightIntensity, 1, 1);
+pointLight.power = pointLightPower;
+
+// const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.1);
+// scene.add(pointLightHelper);
+scene.add(pointLight);
 
 /**
  * Ship Model
  */
+const shipGroup = new THREE.Group();
+scene.add(shipGroup);
+
 const gltfLoader = new GLTFLoader();
 
 let shipModel = undefined;
@@ -115,9 +134,10 @@ gltfLoader.load(
         }
       }
     });
-    shipModel.position.y = shipY;
+
     shipModel.scale.set(scalar, scalar, scalar);
-    scene.add(shipModel);
+    shipGroup.position.y = shipY;
+    shipGroup.add(shipModel);
 
     const cameraToShip = new THREE.Vector3();
     cameraToShip.subVectors(shipModel.position, camera.position);
@@ -136,10 +156,6 @@ gltfLoader.load(
  */
 let lanternModel = undefined;
 let lanternEmissiveMaterial = undefined;
-let lanternPivot = new THREE.Group();
-var pivotPosition = new THREE.Vector3(0, 0.35, 0.01);
-lanternPivot.position.copy(pivotPosition);
-scene.add(lanternPivot);
 
 gltfLoader.load(
   '/stylized_lantern/scene.gltf',
@@ -164,9 +180,10 @@ gltfLoader.load(
       }
     });
     lanternModel.position.z = -0.01;
+    lanternModel.position.y = 0.3;
     lanternModel.scale.set(scalar, scalar, scalar);
-    scene.add(lanternModel);
-    lanternPivot.add(lanternModel);
+    lanternModel.add(pointLight);
+    shipGroup.add(lanternModel);
   },
   (progress) => {
     console.log('progress');
@@ -175,33 +192,6 @@ gltfLoader.load(
     console.log('error');
   }
 );
-
-// VISUALISE PIVOT
-var pivotSphereGeo = new THREE.SphereGeometry(0.01);
-var pivotMaterial = new THREE.MeshBasicMaterial({ color: 'blue' });
-var pivotSphere = new THREE.Mesh(pivotSphereGeo, pivotMaterial);
-pivotSphere.position.copy(pivotPosition);
-scene.add(pivotSphere);
-
-/**
- * Lights
- */
-var light = new THREE.AmbientLight(0xdddddd, 1.5);
-scene.add(light);
-
-const directionalLight = new THREE.DirectionalLight(0xdddddd, 4.08);
-directionalLight.castShadow = true;
-directionalLight.shadow.normalBias = 0.05;
-scene.add(directionalLight);
-
-const pointLightIntensity = 2;
-const pointLight = new THREE.PointLight(0xf0e1a5, pointLightIntensity, 1, 1);
-pointLight.position.y = shipY + 0.3;
-pointLight.position.z = -0.05;
-
-// const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.1);
-// scene.add(pointLightHelper);
-scene.add(pointLight);
 
 /**
  * Sizes
@@ -624,16 +614,9 @@ const tick = () => {
   directionalLight.position.copy(sunPosition);
   uniforms.sunPosition.value.copy(sunPosition);
 
-  if (shipModel) {
-    const shipXRotation = Math.PI * -0.5 + Math.sin(elapsedTime) * 0.07;
-    shipModel.rotation.x = shipXRotation;
-    // 1.5708 = 90 deg
-    lanternPivot.rotation.x = (-shipXRotation - 1.5708) * -2;
-    lanternPivot.position.z =
-      pivotPosition.z + 0.3 * Math.sin(elapsedTime) * 0.07;
-    pivotSphere.position.z =
-      pivotPosition.z + 0.3 * Math.sin(elapsedTime) * 0.07;
-    // pointLight.rotation.x = Math.PI * -0.5 + Math.sin(elapsedTime) * 0.07;
+  if (shipGroup) {
+    const shipXRotation = Math.sin(elapsedTime) * 0.07;
+    shipGroup.rotation.x = shipXRotation;
   }
 
   if (cameraDistance) {
@@ -642,28 +625,28 @@ const tick = () => {
     cameraAngle += angularVelocity * deltaTime;
 
     camera.position.x =
-      shipModel.position.x + Math.cos(cameraAngle) * cameraDistance;
+      shipGroup.position.x + Math.cos(cameraAngle) * cameraDistance;
     camera.position.z =
-      shipModel.position.z + Math.sin(cameraAngle) * cameraDistance;
+      shipGroup.position.z + Math.sin(cameraAngle) * cameraDistance;
   }
 
   camera.position.y = cameraPosition.y + Math.sin(elapsedTime) * 0.1;
 
   const lightChange =
-    (Math.sin(elapsedTime * 3) - Math.sin(elapsedTime * 10)) * 0.5;
+    (Math.sin(elapsedTime * 3) - Math.sin(elapsedTime * 10)) * 10;
 
-  pointLight.intensity = pointLightIntensity + lightChange;
+  pointLight.power = pointLightPower + lightChange;
 
   if (lanternEmissiveMaterial) {
     // console.log(lightChange * 10);
-    lanternEmissiveMaterial.emissiveIntensity = 30 + lightChange * 25;
+    lanternEmissiveMaterial.emissiveIntensity = 30 + lightChange;
   }
 
   // Render
   renderer.render(scene, camera);
 
-  if (shipModel) {
-    camera.lookAt(shipModel.position);
+  if (shipGroup) {
+    camera.lookAt(shipGroup.position);
   }
 
   // Call tick again on the next frame

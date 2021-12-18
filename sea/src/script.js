@@ -1,8 +1,6 @@
 import './style.css';
 import { Pane } from 'tweakpane';
 import * as THREE from 'three';
-import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
-// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Sky } from 'three/examples/jsm/objects/Sky';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import waterFragmentShader from './fragment.glsl';
@@ -18,18 +16,14 @@ import { select } from 'd3-selection';
 import 'd3-transition';
 import { easeSinInOut } from 'd3-ease';
 
-const pixelRatio = Math.min(window.devicePixelRatio, 2);
-
+/* Text filter effect */
 const turbulence = select('#turbulence');
 const duration = 3000;
 
 let next = 0.03;
 let prev = 0.02;
 
-function animate() {
-  // safari specific hack
-  // text.style('filter', 'url(#filter)');
-
+function animateText() {
   turbulence
     .attr('baseFrequency', next)
     .transition()
@@ -37,16 +31,15 @@ function animate() {
     .duration(duration * 2)
     .attr('baseFrequency', prev)
     .on('end', () => {
-      // force filter rest in safari
-      // text.style('filter', 'none');
-
       [next, prev] = [prev, next];
 
-      window.requestAnimationFrame(animate);
+      window.requestAnimationFrame(animateText);
     });
 }
 
-window.requestAnimationFrame(animate);
+window.requestAnimationFrame(animateText);
+
+const pixelRatio = Math.min(window.devicePixelRatio, 2);
 
 /**
  * Textures
@@ -54,23 +47,23 @@ window.requestAnimationFrame(animate);
 const textureLoader = new THREE.TextureLoader();
 
 const starTextures = [];
-const star7Texture = textureLoader.load('/star_07.png');
+const star7Texture = textureLoader.load('star_07.png');
 star7Texture.encoding = THREE.sRGBEncoding;
 starTextures.push(star7Texture);
-const star6Texture = textureLoader.load('/star_06.png');
+const star6Texture = textureLoader.load('star_06.png');
 star6Texture.encoding = THREE.sRGBEncoding;
 starTextures.push(star6Texture);
-const star8Texture = textureLoader.load('/star_08.png');
+const star8Texture = textureLoader.load('star_08.png');
 star8Texture.encoding = THREE.sRGBEncoding;
 starTextures.push(star8Texture);
-const star4Texture = textureLoader.load('/star_04.png');
+const star4Texture = textureLoader.load('star_04.png');
 star4Texture.encoding = THREE.sRGBEncoding;
 starTextures.push(star4Texture);
 
-const fog5Texture = textureLoader.load('/smoke_05.png');
+const fog5Texture = textureLoader.load('smoke_05.png');
 fog5Texture.encoding = THREE.sRGBEncoding;
 
-const flagTexture = textureLoader.load('/flag3.jpg');
+const flagTexture = textureLoader.load('flag3.jpg');
 flagTexture.encoding = THREE.sRGBEncoding;
 
 /**
@@ -150,40 +143,28 @@ let shipModel = undefined;
 const shipY = 0.025;
 let cameraDistance = undefined;
 
-gltfLoader.load(
-  '/ship/scene.gltf',
-  (gltf) => {
-    const scalar = 0.0025;
-    shipModel = gltf.scene.children[0];
-    shipModel.traverse((child) => {
-      if (
-        child?.type === 'Mesh' &&
-        child?.material?.type === 'MeshStandardMaterial'
-      ) {
-        // child.castShadow = true;
-        // child.receiveShadow = true;
-
-        if (child?.material?.map) {
-          child.material.map.encoding = THREE.sRGBEncoding;
-        }
+gltfLoader.load('ship/scene.gltf', (gltf) => {
+  const scalar = 0.0025;
+  shipModel = gltf.scene.children[0];
+  shipModel.traverse((child) => {
+    if (
+      child?.type === 'Mesh' &&
+      child?.material?.type === 'MeshStandardMaterial'
+    ) {
+      if (child?.material?.map) {
+        child.material.map.encoding = THREE.sRGBEncoding;
       }
-    });
+    }
+  });
 
-    shipModel.scale.set(scalar, scalar, scalar);
-    shipGroup.position.y = shipY;
-    shipGroup.add(shipModel);
+  shipModel.scale.set(scalar, scalar, scalar);
+  shipGroup.position.y = shipY;
+  shipGroup.add(shipModel);
 
-    const cameraToShip = new THREE.Vector3();
-    cameraToShip.subVectors(shipModel.position, camera.position);
-    cameraDistance = cameraToShip.length();
-  },
-  (progress) => {
-    console.log('progress');
-  },
-  (error) => {
-    console.log('error');
-  }
-);
+  const cameraToShip = new THREE.Vector3();
+  cameraToShip.subVectors(shipModel.position, camera.position);
+  cameraDistance = cameraToShip.length();
+});
 
 /**
  * Lantern Model
@@ -191,39 +172,30 @@ gltfLoader.load(
 let lanternModel = undefined;
 let lanternEmissiveMaterial = undefined;
 
-gltfLoader.load(
-  '/stylized_lantern/scene.gltf',
-  (gltf) => {
-    const scalar = 0.01;
-    lanternModel = gltf.scene.children[0];
-    lanternModel.traverse((child) => {
-      if (
-        child?.type === 'Mesh' &&
-        child?.material?.type === 'MeshStandardMaterial'
-      ) {
-        if (child.name === 'second_lambert2_0') {
-          child.material.emissiveIntensity = 30;
-          lanternEmissiveMaterial = child.material;
-        }
-
-        if (child?.material?.map) {
-          child.material.map.encoding = THREE.sRGBEncoding;
-        }
+gltfLoader.load('stylized_lantern/scene.gltf', (gltf) => {
+  const scalar = 0.01;
+  lanternModel = gltf.scene.children[0];
+  lanternModel.traverse((child) => {
+    if (
+      child?.type === 'Mesh' &&
+      child?.material?.type === 'MeshStandardMaterial'
+    ) {
+      if (child.name === 'second_lambert2_0') {
+        child.material.emissiveIntensity = 30;
+        lanternEmissiveMaterial = child.material;
       }
-    });
-    lanternModel.position.z = -0.01;
-    lanternModel.position.y = 0.3;
-    lanternModel.scale.set(scalar, scalar, scalar);
-    lanternModel.add(pointLight);
-    shipGroup.add(lanternModel);
-  },
-  (progress) => {
-    console.log('progress');
-  },
-  (error) => {
-    console.log('error');
-  }
-);
+
+      if (child?.material?.map) {
+        child.material.map.encoding = THREE.sRGBEncoding;
+      }
+    }
+  });
+  lanternModel.position.z = -0.01;
+  lanternModel.position.y = 0.3;
+  lanternModel.scale.set(scalar, scalar, scalar);
+  lanternModel.add(pointLight);
+  shipGroup.add(lanternModel);
+});
 
 /**
  * Sizes
@@ -396,15 +368,6 @@ waterFolder.addInput(waterParams, 'waveYFrequency', {
 const waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
 waterMesh.rotateX(-Math.PI * 0.5);
 scene.add(waterMesh);
-
-// const sunMaterial = new THREE.MeshBasicMaterial({
-//   color: '#990000',
-// });
-// const sunGeometry = new THREE.SphereGeometry(1, 32, 32);
-// const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-// sun.position.copy(waterMaterial.uniforms.uLightPos.value);
-// window.sun = sun;
-// scene.add(sun);
 
 /**
  * Sky
@@ -661,8 +624,6 @@ const tick = () => {
   waterMaterial.uniforms.uWaveYStrength.value = waterParams.waveYStrength;
   waterMaterial.uniforms.uWaveYFrequency.value = waterParams.waveYFrequency;
 
-  // waterMaterial.uniforms.uLightPos.value.copy(sun.position);
-
   uniforms.turbidity.value = skyParams.turbidity;
   uniforms.rayleigh.value = skyParams.rayleigh;
   uniforms.mieCoefficient.value = skyParams.mieCoefficient;
@@ -699,7 +660,6 @@ const tick = () => {
   pointLight.power = pointLightPower + lightChange;
 
   if (lanternEmissiveMaterial) {
-    // console.log(lightChange * 10);
     lanternEmissiveMaterial.emissiveIntensity = 20 + lightChange * 2;
   }
 
@@ -710,16 +670,7 @@ const tick = () => {
     camera.lookAt(shipGroup.position);
   }
 
-  // Call tick again on the next frame
   window.requestAnimationFrame(tick);
 };
-
-// const transformControl = new TransformControls(camera, renderer.domElement);
-// transformControl.addEventListener('change', tick);
-// // transformControl.addEventListener('dragging-changed', function (event) {
-// //   //controls.enabled = !event.value;
-// // });
-// transformControl.attach(flag);
-// scene.add(transformControl);
 
 tick();

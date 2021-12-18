@@ -1,19 +1,54 @@
-*
-{
-    margin: 0;
-    padding: 0;
+* {
+  margin: 0;
+  padding: 0;
 }
 
 html,
-body
-{
-    overflow: hidden;
+body {
+  overflow: hidden;
 }
 
-.webgl
-{
-    position: fixed;
-    top: 0;
-    left: 0;
-    outline: none;
+.webgl {
+  position: fixed;
+  top: 0;
+  left: 0;
+  outline: none;
+}
+
+@font-face {
+  font-family: runenglish;
+  src: url('/static/runenglish/RUNENG1.ttf');
+}
+
+.text {
+  filter: url(#filter);
+  display: block;
+
+  -webkit-appearance: none;
+  appearance: none;
+
+  font-family: runenglish, Arial, sans-serif;
+
+  color: #9f927a;
+  color: #a3000d;
+  color: #48341a;
+  position: absolute;
+  bottom: 10vmin;
+  width: 100%;
+  text-align: center;
+  font-size: 5em;
+
+  background: url('/static/ship/textures/Ship_Oak_Aged_baseColor.jpeg') 0 0 /
+    cover no-repeat;
+
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  text-shadow: -2px 3px #00000099;
+  user-select: none;
+}
+
+.attributions {
+  position: absolute;
 }

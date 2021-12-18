@@ -14,8 +14,39 @@ import fogVertexShader from './fog-vertex.glsl';
 import flagFragment from './flag-fragment.glsl';
 import flagVertex from './flag-vertex.glsl';
 import { computeSiblingVertices } from './utils';
+import { select } from 'd3-selection';
+import 'd3-transition';
+import { easeSinInOut } from 'd3-ease';
 
 const pixelRatio = Math.min(window.devicePixelRatio, 2);
+
+const turbulence = select('#turbulence');
+const duration = 3000;
+
+let next = 0.03;
+let prev = 0.02;
+
+function animate() {
+  // safari specific hack
+  // text.style('filter', 'url(#filter)');
+
+  turbulence
+    .attr('baseFrequency', next)
+    .transition()
+    .ease(easeSinInOut)
+    .duration(duration * 2)
+    .attr('baseFrequency', prev)
+    .on('end', () => {
+      // force filter rest in safari
+      // text.style('filter', 'none');
+
+      [next, prev] = [prev, next];
+
+      window.requestAnimationFrame(animate);
+    });
+}
+
+window.requestAnimationFrame(animate);
 
 /**
  * Textures
@@ -94,7 +125,7 @@ var light = new THREE.AmbientLight(0xdddddd, 1.5);
 scene.add(light);
 
 const directionalLight = new THREE.DirectionalLight(0xdddddd, 4.08);
-directionalLight.castShadow = true;
+// directionalLight.castShadow = true;
 directionalLight.shadow.normalBias = 0.05;
 scene.add(directionalLight);
 
@@ -129,8 +160,8 @@ gltfLoader.load(
         child?.type === 'Mesh' &&
         child?.material?.type === 'MeshStandardMaterial'
       ) {
-        child.castShadow = true;
-        child.receiveShadow = true;
+        // child.castShadow = true;
+        // child.receiveShadow = true;
 
         if (child?.material?.map) {
           child.material.map.encoding = THREE.sRGBEncoding;
@@ -170,8 +201,6 @@ gltfLoader.load(
         child?.type === 'Mesh' &&
         child?.material?.type === 'MeshStandardMaterial'
       ) {
-        child.receiveShadow = true;
-
         if (child.name === 'second_lambert2_0') {
           child.material.emissiveIntensity = 30;
           lanternEmissiveMaterial = child.material;
@@ -439,11 +468,11 @@ scene.add(sky);
  * Stars
  */
 const starsGeometry = new THREE.BufferGeometry();
-const count = 500;
+const count = 1500;
 
 const starPositions = new Float32Array(count * 3);
 for (let i = 0; i < count * 3; i += 3) {
-  const phi = THREE.MathUtils.degToRad(90 * Math.random());
+  const phi = THREE.MathUtils.degToRad(85 * Math.sqrt(Math.random()));
   const theta = THREE.MathUtils.degToRad(180 + Math.random() * 365);
   const startPosition = new THREE.Vector3();
   startPosition.setFromSphericalCoords(1, phi, theta);
@@ -461,7 +490,7 @@ starsGeometry.setAttribute(
 const starScales = new Float32Array(count);
 const starTextureIndex = new Float32Array(count);
 for (let i = 0; i < count; i++) {
-  starScales[i] = 0.5 + Math.random() * 0.5;
+  starScales[i] = 0.5 + Math.random();
   starTextureIndex[i] = Math.floor(starTextures.length * Math.random());
 }
 starsGeometry.setAttribute('aScale', new THREE.BufferAttribute(starScales, 1));

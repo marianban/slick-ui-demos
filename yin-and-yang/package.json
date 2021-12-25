@@ -1,0 +1,18 @@
+{
+  "name": "yin-and-yang",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "prebuild": "node scripts/pre-build.js",
+    "build": "esbuild src/index.js --outdir=build/static --entry-names=[dir]/[name]-[hash] --bundle --minify --sourcemap",
+    "postbuild": "node scripts/post-build.js",
+    "start": "esbuild src/index.js --outdir=public/static --bundle --servedir=public --serve=3001"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "esbuild": "^0.14.8",
+    "three": "^0.136.0"
+  }
+}

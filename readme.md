@@ -1,5 +1,25 @@
 # Slick 😎 UI demos
 
+## Viking Ship
+
+[![Viking Ship](vikingShip.gif)](http://marianban.github.io/sea/index.html)
+
+Live Demo: [link](http://marianban.github.io/sea/index.html)
+
+CodePen: [link](https://codepen.io/marianban/full/MWEogJv)
+
+Uses: JS, Three.js
+
+## Yin and Yang
+
+[![Yin and Yang](YinYang3D.gif)](http://marianban.github.io/yin-and-yang/index.html)
+
+Live Demo: [link](http://marianban.github.io/yin-and-yang/index.html)
+
+CodePen: [link](https://codepen.io/marianban/full/jOLGOjM)
+
+Uses: JS, Three.js
+
 ## Tornado
 
 [![Tornado](tornado-optimized.gif)](http://marianban.github.io/tornado/index.html)

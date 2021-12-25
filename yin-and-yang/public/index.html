@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yin and Yang</title>
+  <link rel="stylesheet" href="static/index.css" />
+</head>
+
+<body>
+  <script id="fragmentShader" type="x-shader/x-fragment">
+
+  uniform vec2 u_resolution;
+  uniform float u_time;
+
+  #define TWO_PI 6.28318530718
+
+  // functions form https://thebookofshaders.com/
+  mat2 rotate2d(float _angle){
+      return mat2(cos(_angle),-sin(_angle),
+                  sin(_angle),cos(_angle));
+  }
+
+  float smoothStep(float step, float value) {
+    return smoothstep(step-(step*0.005), step+(step*0.005), value);
+  }
+
+  varying vec2 vUv;
+  varying vec3 vNormal;
+  varying vec3 vAbsNormal;
+  varying vec3 vLightDir;
+
+  void main() {
+      float light = max(0.0, dot(normalize(vNormal), normalize(vLightDir)));
+      vec3 r = reflect(-normalize(vLightDir), normalize(vNormal));
+      float sl = dot(vLightDir, r);
+      float specularLight = clamp(sl, 0., 1.);
+      float glossiness = pow(specularLight, 20.);
+
+      vec3 glossColor = vec3(0.9, 0.9, 0.9) * glossiness;
+
+
+      if (!(vAbsNormal.r < 0.001 && vAbsNormal.g > 0.999 && vAbsNormal.b < 0.001)) {
+        gl_FragColor = vec4(vec3(0.1,0.1,0.1) * light + glossColor, 1.);
+        return;
+      }
+
+      vec2 st = vUv;
+      float aspectRatio = u_resolution.x/u_resolution.y;
+
+      float dis = length(vec2(.5) - st);
+
+      float size = 0.5;
+      float innerSize = 0.49;
+
+      // rotation
+      st -= vec2(0.5);
+      float c = (1.0 - step(size, dis));
+      st = rotate2d(c + sin(u_time)*TWO_PI) * st;
+      st += vec2(0.5);
+
+
+      vec3 color = vec3(1.);
+
+
+
+      // border
+      color *= smoothStep(size, dis);
+      color += clamp(0., 1., 1.0 - smoothStep(innerSize, dis));
+
+      // base circle color
+      float pivot = step(st.x, 0.5);
+      color -= (1.0 - pivot) * (1.0 - smoothStep(innerSize, dis));
+
+      float delta = 0.25 * sin(u_time);
+
+      float multA = 0.5 + delta;
+      float multB = 0.5 - delta;
+
+      // black circle 1
+      vec2 stb1 = st;
+      stb1 += vec2(0.0, innerSize*multB);
+      float disb1 = length(vec2(.5) - stb1);
+      color *= smoothStep(innerSize*multA, disb1);
+
+      // white circle 1
+      vec2 stw1 = st;
+      stw1 -= vec2(0.0, innerSize*multA);
+      float disw1 = length(vec2(.5) - stw1);
+      color += 1.0 - smoothStep(innerSize*multB, disw1);
+
+      // white circle 2
+      vec2 stb2 = st;
+      stb2 += vec2(0.0, innerSize*multB);
+      float disb2 = length(vec2(.5) - stb2);
+      color += (1.0 - smoothStep(innerSize*multA*0.25*multA, disb2));
+
+      // black circle 2
+      vec2 stw2 = st;
+      stw2 -= vec2(0.0, innerSize*multA);
+      float disw2 = length(vec2(.5) - stw2);
+      color *= smoothStep(innerSize*multB*0.25*multB, disw2);
+
+      gl_FragColor = vec4(color,1.);
+
+      gl_FragColor = vec4(1.0, 0., 0., 1.);
+
+      color = clamp(color, vec3(0.), vec3(1.));
+
+      gl_FragColor = vec4(color * light + glossColor,1.);
+
+
+  }
+  </script>
+  <script id="vertexShader" type="x-shader/x-vertex">
+    varying vec2 vUv;
+    varying vec3 vNormal;
+    varying vec3 vAbsNormal;
+    varying vec3 vLightDir;
+    void main()	{
+      vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+      vec4 viewPosition = viewMatrix * modelPosition;
+      vec4 projectedPosition = projectionMatrix * viewPosition;
+      gl_Position = projectedPosition;
+      vec4 lightPosition = viewMatrix * vec4(0., 0., 10., 1.0);
+      vNormal = normalize(normalMatrix * normal);
+      vAbsNormal = abs(normal);
+      vUv = uv;
+      vLightDir = normalize(lightPosition.xyz - viewPosition.xyz);
+
+    }
+  </script>
+
+  <script id="vertexShaderVignette" type="x-shader/x-vertex">
+    varying vec2 vUv;
+
+
+    void main()	{
+      vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+      vec4 viewPosition = viewMatrix * modelPosition;
+      vec4 projectedPosition = projectionMatrix * viewPosition;
+      gl_Position = vec4(position, 1.0);
+
+      vUv = (uv - 0.5) * 2.;
+    }
+
+  </script>
+  <script id="fragmentShaderVignette" type="x-shader/x-fragment">
+    varying vec2 vUv;
+
+    void main() {
+      float distToCenter = length(vec2(0.0) - vUv);
+      gl_FragColor = vec4(0., 0., 0., distToCenter * distToCenter * 0.3);
+
+    }
+  </script>
+
+  <div id="container"></div>
+  <div id="controls">
+    <label for="resolution">resolution: </label>
+    <select id="resolution" value="1">
+      <option value="0.5">0.5x</option>
+
+
+      <option value="1" selected>1x</option>
+      <option value="2">2x</option>
+      <option value="4">4x</option>
+      <option value="8">8x</option>
+    </select>
+  </div>
+
+  <script src="static/index.js"></script>
+</body>
+
+</html>

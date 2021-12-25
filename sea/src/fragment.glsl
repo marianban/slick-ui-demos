@@ -20,7 +20,7 @@ uniform float uScreenGamma;
 float near = 0.1;
 
 
-float far  = 15.0;
+float far  = 13.0;
 
 float LinearizeDepth(float depth)
 {

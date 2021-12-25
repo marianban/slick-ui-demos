@@ -41,35 +41,38 @@ window.requestAnimationFrame(animateText);
 
 const pixelRatio = Math.min(window.devicePixelRatio, 2);
 
+const publicPath = '';
+
 /**
  * Textures
  */
 const textureLoader = new THREE.TextureLoader();
 
 const starTextures = [];
-const star7Texture = textureLoader.load('star_07.png');
+const star7Texture = textureLoader.load(publicPath + 'star_07.png');
 star7Texture.encoding = THREE.sRGBEncoding;
 starTextures.push(star7Texture);
-const star6Texture = textureLoader.load('star_06.png');
+const star6Texture = textureLoader.load(publicPath + 'star_06.png');
 star6Texture.encoding = THREE.sRGBEncoding;
 starTextures.push(star6Texture);
-const star8Texture = textureLoader.load('star_08.png');
+const star8Texture = textureLoader.load(publicPath + 'star_08.png');
 star8Texture.encoding = THREE.sRGBEncoding;
 starTextures.push(star8Texture);
-const star4Texture = textureLoader.load('star_04.png');
+const star4Texture = textureLoader.load(publicPath + 'star_04.png');
 star4Texture.encoding = THREE.sRGBEncoding;
 starTextures.push(star4Texture);
 
-const fog5Texture = textureLoader.load('smoke_05.png');
+const fog5Texture = textureLoader.load(publicPath + 'smoke_05.png');
 fog5Texture.encoding = THREE.sRGBEncoding;
 
-const flagTexture = textureLoader.load('flag3.jpg');
+const flagTexture = textureLoader.load(publicPath + 'flag3.jpg');
 flagTexture.encoding = THREE.sRGBEncoding;
 
 /**
  * Debug pane
  */
 const pane = new Pane({ title: 'Parameters' });
+pane.expanded = false;
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl');
@@ -143,7 +146,7 @@ let shipModel = undefined;
 const shipY = 0.025;
 let cameraDistance = undefined;
 
-gltfLoader.load('ship/scene.gltf', (gltf) => {
+gltfLoader.load(publicPath + 'ship/scene.gltf', (gltf) => {
   const scalar = 0.0025;
   shipModel = gltf.scene.children[0];
   shipModel.traverse((child) => {
@@ -172,7 +175,7 @@ gltfLoader.load('ship/scene.gltf', (gltf) => {
 let lanternModel = undefined;
 let lanternEmissiveMaterial = undefined;
 
-gltfLoader.load('stylized_lantern/scene.gltf', (gltf) => {
+gltfLoader.load(publicPath + 'stylized_lantern/scene.gltf', (gltf) => {
   const scalar = 0.01;
   lanternModel = gltf.scene.children[0];
   lanternModel.traverse((child) => {
@@ -218,8 +221,8 @@ window.addEventListener('resize', () => {
 /**
  * Water
  */
-const segments = 511;
-const waterGeometry = new THREE.PlaneGeometry(16, 16, segments, segments);
+const segments = 255;
+const waterGeometry = new THREE.PlaneGeometry(14, 14, segments, segments);
 
 // adjacent vertices used for normal computation of transformed geometry
 const waterPositions = waterGeometry.attributes.position.array;
@@ -275,8 +278,6 @@ const waterParams = {
 
 const waterMaterial = new THREE.ShaderMaterial({
   transparent: true,
-  side: THREE.DoubleSide,
-  // blending: THREE.NoBlending,
   uniforms: {
     uTime: { value: 0 },
     uLightPos: {
@@ -431,7 +432,7 @@ scene.add(sky);
  * Stars
  */
 const starsGeometry = new THREE.BufferGeometry();
-const count = 1500;
+const count = 1000;
 
 const starPositions = new Float32Array(count * 3);
 for (let i = 0; i < count * 3; i += 3) {
@@ -566,7 +567,7 @@ shipGroup.add(flag);
  */
 
 let cameraAngle = 0;
-let angularVelocity = 0;
+let angularVelocity = -0.1;
 
 window.addEventListener('mousemove', (event) => {
   const x = (event.x / sizes.width - 0.5) * 2;
@@ -588,8 +589,6 @@ renderer.physicallyCorrectLights = true;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.3;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 /**
  * Animate

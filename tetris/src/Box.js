@@ -3,13 +3,11 @@ import matcap from './matcap.png';
 import { clamp } from './utils';
 
 export class Box extends THREE.Object3D {
-  constructor({ x, y, size, xOffset, yOffset, color, _x, _y }) {
+  constructor({ x, y, size, xOffset, yOffset, color }) {
     super();
 
     this.x = x;
     this.y = y;
-    this._x = _x;
-    this._y = _y;
     this.size = size;
     this.xOffset = xOffset;
     this.yOffset = yOffset;
@@ -57,26 +55,21 @@ export class Box extends THREE.Object3D {
     this.add(mesh);
   };
 
-  moveDown = () => {
-    this.y--;
-    this.updatePosition();
+  nextMoveDown = () => {
+    return { y: this.y - 1, x: this.x };
   };
 
-  moveLeft = () => {
-    this.x--;
-    this.updatePosition();
+  nextMoveLeft = () => {
+    return { y: this.y, x: this.x - 1 };
   };
 
-  moveRight = () => {
-    this.x++;
-    this.updatePosition();
+  nextMoveRight = () => {
+    return { y: this.y, x: this.x + 1 };
   };
 
-  setPosition = (x, y, _x, _y) => {
+  setPosition = (x, y) => {
     this.x = x;
     this.y = y;
-    this._x = _x;
-    this._y = _y;
     this.updatePosition();
   };
 

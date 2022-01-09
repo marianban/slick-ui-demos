@@ -3,10 +3,12 @@ import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Piece } from './Piece';
+import { shapes } from './constants';
 
 class Sketch {
   constructor({ container }) {
     this.container = container;
+    this.boxes = [];
 
     this.initScene();
     this.initBoard();
@@ -14,6 +16,8 @@ class Sketch {
     this.render();
 
     window.addEventListener('keydown', this.handleKeyDown);
+
+    window.setInterval(this.gameTick, 1000);
   }
 
   initScene = () => {
@@ -55,14 +59,19 @@ class Sketch {
   };
 
   addPiece = () => {
+    let shape = shapes[Math.floor(shapes.length * Math.random())];
+    // shape = shapes.find((s) => s.name === 'T');
+    const maxX = Math.max.apply(
+      Math,
+      shape.positions.map((p) => p.x)
+    );
     this.piece = new Piece({
-      x: Math.round(Math.random() * this.board.cols),
+      x: Math.round(Math.random() * (this.board.cols - maxX)),
       y: this.board.rows,
       yOffset: this.board.yOffset,
       xOffset: this.board.xOffset,
       size: this.board.boxSize,
-      maxX: this.board.cols,
-      maxY: this.board.rows,
+      shape,
     });
     this.scene.add(this.piece);
   };
@@ -70,18 +79,80 @@ class Sketch {
   handleKeyDown = (event) => {
     switch (event.code) {
       case 'ArrowUp':
-        this.piece.rotateRight();
-        break;
+        this.rotatePiece();
       case 'ArrowDown':
-        this.piece.moveDown();
+        this.movePieceDown();
         break;
       case 'ArrowLeft':
-        this.piece.moveLeft();
+        this.movePieceLeft();
         break;
       case 'ArrowRight':
-        this.piece.moveRight();
+        this.movePieceRight();
         break;
     }
+  };
+
+  gameTick = () => {
+    this.movePieceDown();
+  };
+
+  movePieceDown = () => {
+    const nextPositions = this.piece.nextMoveDown();
+    if (this.isValidMove(nextPositions)) {
+      this.piece.applyPositions(nextPositions);
+    } else {
+      this.boxes.push(...this.piece.boxes);
+      this.addPiece();
+    }
+  };
+
+  movePieceLeft = () => {
+    const nextPositions = this.piece.nextMoveLeft();
+    if (this.isValidMove(nextPositions)) {
+      this.piece.applyPositions(nextPositions);
+    }
+  };
+
+  movePieceRight = () => {
+    const nextPositions = this.piece.nextMoveRight();
+    if (this.isValidMove(nextPositions)) {
+      this.piece.applyPositions(nextPositions);
+    }
+  };
+
+  rotatePiece = () => {
+    const nextPositions = this.piece.nextRotation();
+    if (this.isValidMove(nextPositions)) {
+      this.piece.applyPositions(nextPositions);
+    }
+  };
+
+  isValidMove = (positions) => {
+    let isValid = true;
+
+    loop: for (const position of positions) {
+      if (position.x < 0 || position.x > this.board.cols) {
+        isValid = false;
+        console.log('outside colls', position);
+        break;
+      }
+
+      if (position.y < 0) {
+        isValid = false;
+        console.log('down');
+        break;
+      }
+
+      for (const box of this.boxes) {
+        if (box.x === position.x && box.y === position.y) {
+          isValid = false;
+          console.log('collision');
+          break loop;
+        }
+      }
+    }
+
+    return isValid;
   };
 
   resizeRendererToDisplaySize = () => {

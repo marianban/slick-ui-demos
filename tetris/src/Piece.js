@@ -1,15 +1,25 @@
 import * as THREE from 'three';
 import matcap from './matcap.png';
+import { clamp } from './utils';
 
 export class Piece extends THREE.Object3D {
-  constructor({ x, y, size }) {
+  constructor({ x, y, size, xOffset, yOffset, maxX, maxY }) {
     super();
 
     this.x = x;
     this.y = y;
+    this.size = size;
+    this.xOffset = xOffset;
+    this.yOffset = yOffset;
+    this.maxX = maxX;
+    this.maxY = maxY;
+    this.updatePosition();
+    this.initMesh();
+  }
 
-    const bevel = size * 0.1;
-    const innerSize = size - bevel * 1.5;
+  initMesh = () => {
+    const bevel = this.size * 0.1;
+    const innerSize = this.size - bevel * 1.5;
 
     const shape = new THREE.Shape();
     shape.moveTo(0, 0);
@@ -31,10 +41,6 @@ export class Piece extends THREE.Object3D {
     let geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
     geometry.center();
 
-    // geometry = new THREE.BoxBufferGeometry(1, 1, 1);
-
-    // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-
     const textureLoader = new THREE.TextureLoader();
     const matcapTexture = textureLoader.load(`static/${matcap}`);
 
@@ -43,18 +49,30 @@ export class Piece extends THREE.Object3D {
 
     const material = new THREE.MeshMatcapMaterial({ color });
     material.matcap = matcapTexture;
+
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.z = -0.5;
+
     this.add(mesh);
-  }
+  };
 
   moveDown = () => {
-    this.y--;
+    this.y = clamp(0, this.maxY, --this.y);
+    this.updatePosition();
   };
+
   moveLeft = () => {
-    this.x--;
+    this.x = clamp(0, this.maxX, --this.x);
+    this.updatePosition();
   };
+
   moveRight = () => {
-    this.x++;
+    this.x = clamp(0, this.maxX, ++this.x);
+    this.updatePosition();
+  };
+
+  updatePosition = () => {
+    this.position.x = this.xOffset + this.x * this.size;
+    this.position.y = this.yOffset + this.y * this.size;
   };
 }

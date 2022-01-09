@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "chroma-js": "^2.1.2",
     "esbuild": "^0.14.10",
     "three": "^0.136.0"
   },

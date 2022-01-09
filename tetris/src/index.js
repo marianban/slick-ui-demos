@@ -69,6 +69,9 @@ class Sketch {
 
   handleKeyDown = (event) => {
     switch (event.code) {
+      case 'ArrowUp':
+        this.piece.rotateRight();
+        break;
       case 'ArrowDown':
         this.piece.moveDown();
         break;

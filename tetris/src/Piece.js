@@ -1,87 +1,17 @@
 import * as THREE from 'three';
 import { Box } from './Box';
-
-const makeShape = (name, ...positions) => {
-  return {
-    name,
-    positions,
-  };
-};
-
-const shapes = [
-  makeShape(
-    'O',
-    { x: 0, y: 0 },
-    { x: 1, y: 0 },
-    { x: 0, y: -1 },
-    { x: 1, y: -1 }
-  ),
-  makeShape(
-    'I',
-    { x: 0, y: 0 },
-    { x: 0, y: -1 },
-    { x: 0, y: -2 },
-    { x: 0, y: -3 }
-  ),
-  makeShape(
-    'S',
-    { x: 0, y: -1 },
-    { x: 1, y: 0 },
-    { x: 1, y: -1 },
-    { x: 2, y: 0 }
-  ),
-  makeShape(
-    'Z',
-    { x: 0, y: 0 },
-    { x: 1, y: 0 },
-    { x: 1, y: -1 },
-    { x: 2, y: -1 }
-  ),
-  makeShape(
-    'L',
-    { x: 0, y: 0 },
-    { x: 0, y: -1 },
-    { x: 0, y: -2 },
-    { x: 1, y: -2 }
-  ),
-  makeShape(
-    'L',
-    { x: 1, y: 0 },
-    { x: 1, y: -1 },
-    { x: 1, y: -2 },
-    { x: 0, y: -2 }
-  ),
-  makeShape(
-    'T',
-    { x: 0, y: 0 },
-    { x: 1, y: 0 },
-    { x: 1, y: -1 },
-    { x: 2, y: 0 }
-  ),
-];
-
-const colors = [
-  '#a6cee3',
-  '#1f78b4',
-  '#b2df8a',
-  '#33a02c',
-  '#fb9a99',
-  '#e31a1c',
-  '#fdbf6f',
-  '#ff7f00',
-  '#cab2d6',
-  '#6a3d9a',
-  '#ffff99',
-  '#b15928',
-];
+import { shapes, colors } from './constants';
 
 export class Piece extends THREE.Object3D {
   constructor({ x, y, size, xOffset, yOffset, maxX, maxY }) {
     super();
+    this.x = x;
+    this.y = y;
     this.boxes = [];
     this.maxX = maxX;
 
-    const shape = shapes[Math.floor(shapes.length * Math.random())];
+    let shape = shapes[Math.floor(shapes.length * Math.random())];
+    shape = shapes.find((s) => s.name === 'T');
 
     const color = colors[Math.floor(colors.length * Math.random())];
 
@@ -89,11 +19,11 @@ export class Piece extends THREE.Object3D {
       const box = new Box({
         x: x + position.x,
         y: y + position.y,
+        _x: position.x,
+        _y: position.y,
         size,
         xOffset,
         yOffset,
-        maxX,
-        maxY,
         color,
       });
       this.boxes.push(box);
@@ -105,6 +35,7 @@ export class Piece extends THREE.Object3D {
     if (!this.canMoveDown()) {
       return;
     }
+    this.y--;
     for (const box of this.boxes) {
       box.moveDown();
     }
@@ -122,6 +53,7 @@ export class Piece extends THREE.Object3D {
     if (!this.canMoveLeft()) {
       return;
     }
+    this.x--;
     for (const box of this.boxes) {
       box.moveLeft();
     }
@@ -139,6 +71,7 @@ export class Piece extends THREE.Object3D {
     if (!this.canMoveRight()) {
       return;
     }
+    this.x++;
     for (const box of this.boxes) {
       box.moveRight();
     }
@@ -150,5 +83,62 @@ export class Piece extends THREE.Object3D {
       this.boxes.map((b) => b.x)
     );
     return maxX < this.maxX;
+  };
+
+  rotateRight = () => {
+    // helper grid
+    const grid = new Array(4);
+    for (let y = 0; y < 4; y++) {
+      grid[y] = grid[y] || Array.from({ length: 4 }, () => null);
+    }
+
+    for (const box of this.boxes) {
+      grid[Math.abs(box._y)][box._x] = box;
+    }
+
+    // grid rotation
+    const rotatedGrid = new Array(4);
+    for (let y = 0; y < 4; y++) {
+      rotatedGrid[y] = rotatedGrid[y] || Array.from({ length: 4 }, () => null);
+      for (let x = 0; x < 4; x++) {
+        rotatedGrid[y][x] = grid[3 - x][y];
+      }
+    }
+
+    // compute offsets for top left alignment
+    let yOffset = 0;
+    loop1: for (let y = 0; y < 4; y++) {
+      for (let x = 0; x < 4; x++) {
+        if (rotatedGrid[y][x] !== null) {
+          yOffset = y;
+          break loop1;
+        }
+      }
+    }
+
+    let xOffset = 0;
+    loop2: for (let x = 0; x < 4; x++) {
+      for (let y = 0; y < 4; y++) {
+        if (rotatedGrid[y][x] !== null) {
+          xOffset = x;
+          break loop2;
+        }
+      }
+    }
+
+    // update boxes
+    for (let y = 0; y < 4; y++) {
+      for (let x = 0; x < 4; x++) {
+        if (rotatedGrid[y][x] !== null) {
+          const box = rotatedGrid[y][x];
+          box.setPosition(
+            this.x + x - xOffset,
+            this.y + yOffset - y,
+            x - xOffset,
+            yOffset - y
+          );
+        }
+      }
+    }
   };
 }

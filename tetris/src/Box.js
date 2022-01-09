@@ -6,13 +6,11 @@ export class Box extends THREE.Object3D {
   constructor({ x, y, size, xOffset, yOffset, color }) {
     super();
 
-    this.x = x;
-    this.y = y;
     this.size = size;
     this.xOffset = xOffset;
     this.yOffset = yOffset;
     this.color = color;
-    this.updatePosition();
+    this.setPosition(x, y);
     this.initMesh();
   }
 
@@ -70,10 +68,6 @@ export class Box extends THREE.Object3D {
   setPosition = (x, y) => {
     this.x = x;
     this.y = y;
-    this.updatePosition();
-  };
-
-  updatePosition = () => {
     this.position.x = this.xOffset + this.x * this.size;
     this.position.y = this.yOffset + this.y * this.size;
   };

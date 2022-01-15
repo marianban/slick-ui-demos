@@ -125,27 +125,31 @@ class Sketch {
     const boxes = [...this.boxes];
     let removedRows = [];
 
+    const removeAnimations = [];
     // remove completed rows
     for (let row = 0; row < this.board.rows; row++) {
       const rowBoxes = boxes.filter((b) => b.y === row);
       if (rowBoxes.length === this.board.cols + 1) {
         removedRows.push(row);
         for (const box of rowBoxes) {
-          box.removeBox();
+          removeAnimations.push(box.removeBox());
           this.boxes.delete(box);
         }
       }
     }
-    // fill gaps and shift remaining boxes down
-    for (let row = 1; row < this.board.rows; row++) {
-      const offset = removedRows.filter((r) => r < row).length;
-      const rowBoxes = boxes.filter((b) => b.y === row);
-      if (rowBoxes.length) {
-        for (const box of rowBoxes) {
-          box.setPosition(box.x, box.y - offset);
+
+    Promise.all(removeAnimations).then(() => {
+      // fill gaps and shift remaining boxes down
+      for (let row = 1; row < this.board.rows; row++) {
+        const offset = removedRows.filter((r) => r < row).length;
+        const rowBoxes = boxes.filter((b) => b.y === row);
+        if (rowBoxes.length) {
+          for (const box of rowBoxes) {
+            box.setPosition(box.x, box.y - offset);
+          }
         }
       }
-    }
+    });
   };
 
   movePieceLeft = () => {

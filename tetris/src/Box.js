@@ -1,6 +1,6 @@
 import * as THREE from 'three';
+import gsap from 'gsap';
 import matcap from './matcap6.png';
-import { clamp } from './utils';
 
 export class Box extends THREE.Object3D {
   constructor({ x, y, size, xOffset, yOffset, color }) {
@@ -10,7 +10,8 @@ export class Box extends THREE.Object3D {
     this.xOffset = xOffset;
     this.yOffset = yOffset;
     this.color = color;
-    this.setPosition(x, y);
+    this.setPosition2(x, y);
+
     this.initMesh();
   }
 
@@ -65,7 +66,23 @@ export class Box extends THREE.Object3D {
     return { y: this.y, x: this.x + 1 };
   };
 
-  setPosition = (x, y) => {
+  setPosition = (x, y, delay = 0) => {
+    if (this.animation && this.animation.progress() < 1) {
+      this.animation.progress(1).kill();
+    }
+    this.x = x;
+    this.y = y;
+    this.animation = gsap.to(this.position, {
+      delay,
+      duration: 0.2,
+      x: this.xOffset + this.x * this.size,
+      y: this.yOffset + this.y * this.size,
+      ease: 'power2.inOut',
+    });
+    return this.animation;
+  };
+
+  setPosition2 = (x, y) => {
     this.x = x;
     this.y = y;
     this.position.x = this.xOffset + this.x * this.size;
@@ -73,8 +90,17 @@ export class Box extends THREE.Object3D {
   };
 
   removeBox = () => {
-    this.removeFromParent();
-    this.dispose();
+    gsap.to(this.scale, {
+      ease: 'power2',
+      duration: 0.15,
+      x: 0,
+      y: 0,
+      z: 0,
+      onComplete: () => {
+        this.removeFromParent();
+        this.dispose();
+      },
+    });
   };
 
   dispose = () => {

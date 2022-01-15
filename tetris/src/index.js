@@ -8,7 +8,7 @@ import { shapes } from './constants';
 class Sketch {
   constructor({ container }) {
     this.container = container;
-    this.boxes = [];
+    this.boxes = new Set();
 
     this.initScene();
     this.initBoard();
@@ -33,7 +33,7 @@ class Sketch {
     );
     this.camera.position.z = 10;
 
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     this.renderer.physicallyCorrectLights = true;
     this.container.appendChild(this.renderer.domElement);
@@ -49,13 +49,24 @@ class Sketch {
     const rows = 30;
     const cols = 10;
     const boxSize = viewHeight / rows;
+    const viewWidth = cols * boxSize;
     this.board = {
       rows,
       cols,
       boxSize,
       yOffset: -viewHeight / 2,
-      xOffset: -(cols * boxSize) / 2,
+      xOffset: -viewWidth / 2,
     };
+
+    const geometry = new THREE.PlaneBufferGeometry(viewWidth, viewHeight);
+    const boardBgColor = new THREE.Color('#333333').convertSRGBToLinear();
+    const material = new THREE.MeshBasicMaterial({
+      color: boardBgColor,
+      depthWrite: false,
+    });
+    const planeMesh = new THREE.Mesh(geometry, material);
+    planeMesh.position.z = boxSize * 2.15;
+    this.scene.add(planeMesh);
   };
 
   addPiece = () => {
@@ -80,6 +91,7 @@ class Sketch {
     switch (event.code) {
       case 'ArrowUp':
         this.rotatePiece();
+        break;
       case 'ArrowDown':
         this.movePieceDown();
         break;
@@ -94,6 +106,7 @@ class Sketch {
 
   gameTick = () => {
     this.movePieceDown();
+    this.clearCompletedRows();
   };
 
   movePieceDown = () => {
@@ -101,8 +114,37 @@ class Sketch {
     if (this.isValidMove(nextPositions)) {
       this.piece.applyPositions(nextPositions);
     } else {
-      this.boxes.push(...this.piece.boxes);
+      for (const box of this.piece.boxes) {
+        this.boxes.add(box);
+      }
       this.addPiece();
+    }
+  };
+
+  clearCompletedRows = () => {
+    const boxes = [...this.boxes];
+    let removedRows = [];
+
+    // remove completed rows
+    for (let row = 0; row < this.board.rows; row++) {
+      const rowBoxes = boxes.filter((b) => b.y === row);
+      if (rowBoxes.length === this.board.cols + 1) {
+        removedRows.push(row);
+        for (const box of rowBoxes) {
+          box.removeBox();
+          this.boxes.delete(box);
+        }
+      }
+    }
+    // fill gaps and shift remaining boxes down
+    for (let row = 1; row < this.board.rows; row++) {
+      const offset = removedRows.filter((r) => r < row).length;
+      const rowBoxes = boxes.filter((b) => b.y === row);
+      if (rowBoxes.length) {
+        for (const box of rowBoxes) {
+          box.setPosition(box.x, box.y - offset);
+        }
+      }
     }
   };
 
@@ -121,9 +163,25 @@ class Sketch {
   };
 
   rotatePiece = () => {
-    const nextPositions = this.piece.nextRotation();
-    if (this.isValidMove(nextPositions)) {
-      this.piece.applyPositions(nextPositions);
+    const maxDimension = this.piece.getMaxDimension();
+    const minX = this.board.cols - (maxDimension - 1);
+    const delta = this.piece.x - minX;
+    if (delta > 0) {
+      // in case we are close the right side of the board
+      // the rotation may be blocked so we try to move the
+      // piece to left before we rotate it
+      for (let xShift = 0; xShift <= delta; xShift++) {
+        const nextPositions = this.piece.nextRotation(xShift);
+        if (this.isValidMove(nextPositions)) {
+          this.piece.applyPositions(nextPositions);
+          break;
+        }
+      }
+    } else {
+      const nextPositions = this.piece.nextRotation();
+      if (this.isValidMove(nextPositions)) {
+        this.piece.applyPositions(nextPositions);
+      }
     }
   };
 

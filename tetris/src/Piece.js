@@ -6,10 +6,11 @@ export class Piece extends THREE.Object3D {
   constructor({ x, y, size, xOffset, yOffset, shape }) {
     super();
     this.boxes = [];
+    this.shape = shape;
 
     const color = colors[Math.floor(colors.length * Math.random())];
 
-    for (const position of shape.positions) {
+    for (const position of this.shape.positions) {
       const box = new Box({
         x: x + position.x,
         y: y + position.y,
@@ -21,6 +22,14 @@ export class Piece extends THREE.Object3D {
       this.boxes.push(box);
       this.add(box);
     }
+  }
+
+  get x() {
+    return Math.min(...this.boxes.map((b) => b.x));
+  }
+
+  get y() {
+    return Math.min(...this.boxes.map((b) => b.y));
   }
 
   nextMoveDown = () => {
@@ -58,14 +67,15 @@ export class Piece extends THREE.Object3D {
     }
   };
 
-  nextRotation = () => {
+  nextRotation = (xShift = 0) => {
     // helper grid
     const grid = new Array(4);
     for (let y = 0; y < 4; y++) {
       grid[y] = grid[y] || Array.from({ length: 4 }, () => null);
     }
 
-    const [minX, maxY] = this.getMinXMaxY();
+    let [minX, maxY] = this.getMinXMaxY();
+    minX = minX - xShift;
 
     for (const box of this.boxes) {
       // grid[Math.abs(box._y)][box._x] = box;
@@ -123,8 +133,8 @@ export class Piece extends THREE.Object3D {
   };
 
   getMinXMaxY = () => {
-    let minX = Number.MAX_VALUE;
-    let maxY = Number.MIN_VALUE;
+    let minX = Infinity;
+    let maxY = -Infinity;
     for (const box of this.boxes) {
       if (box.x < minX) {
         minX = box.x;
@@ -134,5 +144,19 @@ export class Piece extends THREE.Object3D {
       }
     }
     return [minX, maxY];
+  };
+
+  getMaxDimension = () => {
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const position of this.shape.positions) {
+      if (position.x > maxX) {
+        maxX = position.x;
+      }
+      if (Math.abs(position.y) > maxY) {
+        maxY = Math.abs(position.y);
+      }
+    }
+    return Math.max(maxX + 1, maxY + 1);
   };
 }

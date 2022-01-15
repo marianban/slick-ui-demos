@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import matcap from './matcap.png';
+import matcap from './matcap6.png';
 import { clamp } from './utils';
 
 export class Box extends THREE.Object3D {
@@ -35,7 +35,7 @@ export class Box extends THREE.Object3D {
       bevelSegments: 1,
     };
 
-    let geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
     geometry.center();
 
     const textureLoader = new THREE.TextureLoader();
@@ -47,10 +47,10 @@ export class Box extends THREE.Object3D {
     const material = new THREE.MeshMatcapMaterial({ color });
     material.matcap = matcapTexture;
 
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.z = -0.5;
+    this.mesh = new THREE.Mesh(geometry, material);
+    this.mesh.position.z = -0.5;
 
-    this.add(mesh);
+    this.add(this.mesh);
   };
 
   nextMoveDown = () => {
@@ -70,5 +70,15 @@ export class Box extends THREE.Object3D {
     this.y = y;
     this.position.x = this.xOffset + this.x * this.size;
     this.position.y = this.yOffset + this.y * this.size;
+  };
+
+  removeBox = () => {
+    this.removeFromParent();
+    this.dispose();
+  };
+
+  dispose = () => {
+    this.mesh.geometry.dispose();
+    this.mesh.material.dispose();
   };
 }

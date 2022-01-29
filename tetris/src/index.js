@@ -5,11 +5,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Piece } from './Piece';
 import { shapes } from './constants';
 import { Board } from './Board';
+import { Time } from './Time';
 
 class Sketch {
   constructor({ container }) {
     this.container = container;
     this.boxes = new Set();
+    this.time = new Time();
 
     this.initScene();
     this.initBoard();
@@ -69,6 +71,7 @@ class Sketch {
       boxSize,
       viewWidth,
       viewHeight,
+      time: this.time,
     });
 
     this.scene.add(this.board);
@@ -238,9 +241,9 @@ class Sketch {
 
   render = () => {
     this.resizeRendererToDisplaySize();
+    this.board.update(this.piece.x, this.piece.y, this.piece.width);
 
     this.renderer.render(this.scene, this.camera);
-
     requestAnimationFrame(this.render);
   };
 }

@@ -1,11 +1,22 @@
 uniform vec3 uBoardBgColor;
 uniform float uRows;
 uniform float uCols;
+uniform float uPlayhead;
+uniform float uPx;
+uniform float uPy;
+uniform float uPw;
+uniform float uTime;
 
 varying vec3 vBoardBgColor;
 varying vec2 vUv;
 varying float vRows;
 varying float vCols;
+varying float vPlayhead;
+varying float vPx;
+varying float vPy;
+varying float vPw;
+varying float vTime;
+
 
 void main()
 {
@@ -17,6 +28,11 @@ void main()
   vUv = uv;
   vRows = uRows;
   vCols = uCols;
+  vPlayhead = uPlayhead;
+  vPx = uPx;
+  vPy = uPy;
+  vPw = uPw;
+  vTime = uTime;
 
   gl_Position = projectedPosition;
 }

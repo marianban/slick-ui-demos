@@ -45,11 +45,14 @@ export class Box extends THREE.Object3D {
     const color = new THREE.Color(this.color);
     color.convertLinearToSRGB();
 
-    const material = new THREE.MeshMatcapMaterial({ color });
+    let material = new THREE.MeshMatcapMaterial({ color });
     material.matcap = matcapTexture;
 
+    // material = new THREE.MeshBasicMaterial({ color: 'red' });
+
     this.mesh = new THREE.Mesh(geometry, material);
-    this.mesh.position.z = -0.5;
+    this.mesh.position.y = +this.size * 0.5;
+    // this.mesh.position.z = -0.4;
 
     this.add(this.mesh);
   };

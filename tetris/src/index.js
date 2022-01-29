@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Piece } from './Piece';
 import { shapes } from './constants';
+import { Board } from './Board';
 
 class Sketch {
   constructor({ container }) {
@@ -24,7 +25,7 @@ class Sketch {
     this.pixelRatio = Math.max(window.devicePixelRatio, 2);
     this.scene = new THREE.Scene();
 
-    const fov = 45;
+    const fov = 10;
     this.camera = new THREE.PerspectiveCamera(
       fov,
       this.container.clientWidth / this.container.clientHeight,
@@ -32,6 +33,17 @@ class Sketch {
       1000
     );
     this.camera.position.z = 10;
+
+    // this.camera = new THREE.OrthographicCamera(
+    //   this.container.clientWidth / -2,
+    //   this.container.clientWidth / 2,
+    //   this.container.clientHeight / 2,
+    //   this.container.clientHeight / -2,
+    //   0.1,
+    //   1000
+    // );
+    // this.camera.position.z = 500;
+    // this.camera.updateProjectionMatrix();
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.outputEncoding = THREE.sRGBEncoding;
@@ -50,28 +62,20 @@ class Sketch {
     const cols = 10;
     const boxSize = viewHeight / rows;
     const viewWidth = cols * boxSize;
-    this.board = {
-      rows,
+
+    this.board = new Board({
+      rows: rows - 1,
       cols,
       boxSize,
-      yOffset: -viewHeight / 2,
-      xOffset: -viewWidth / 2,
-    };
-
-    const geometry = new THREE.PlaneBufferGeometry(viewWidth, viewHeight);
-    const boardBgColor = new THREE.Color('#333333').convertSRGBToLinear();
-    const material = new THREE.MeshBasicMaterial({
-      color: boardBgColor,
-      depthWrite: false,
+      viewWidth,
+      viewHeight,
     });
-    const planeMesh = new THREE.Mesh(geometry, material);
-    planeMesh.position.z = boxSize * 2.15;
-    this.scene.add(planeMesh);
+
+    this.scene.add(this.board);
   };
 
   addPiece = () => {
     let shape = shapes[Math.floor(shapes.length * Math.random())];
-    // shape = shapes.find((s) => s.name === 'T');
     const maxX = Math.max.apply(
       Math,
       shape.positions.map((p) => p.x)

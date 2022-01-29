@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "prebuild": "node scripts/pre-build.js",
-    "build": "esbuild src/index.js --outdir=build/static --entry-names=[dir]/[name]-[hash] --bundle --minify --sourcemap --loader:.png=file",
+    "build": "esbuild src/index.js --outdir=build/static --entry-names=[dir]/[name]-[hash] --bundle --minify --sourcemap --loader:.png=file --loader:.glsl=text",
     "postbuild": "node scripts/post-build.js",
-    "start": "esbuild src/index.js --outdir=public/static --bundle --servedir=public --serve=3001 --loader:.png=file"
+    "start": "esbuild src/index.js --outdir=public/static --bundle --servedir=public --serve=3001 --loader:.png=file --loader:.glsl=text"
   },
   "author": "",
   "license": "ISC",

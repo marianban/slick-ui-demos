@@ -50,6 +50,7 @@ class Sketch {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     this.renderer.physicallyCorrectLights = true;
+    this.renderer.setClearColor('#181819');
     this.container.appendChild(this.renderer.domElement);
 
     const controls = new OrbitControls(this.camera, this.renderer.domElement);

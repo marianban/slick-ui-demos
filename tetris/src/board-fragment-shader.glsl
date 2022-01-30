@@ -68,5 +68,5 @@ void main()
 
   // color = vec3(min(l, r));
 
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragColor = vec4(max(vBoardBgColor, color), 1.0);
 }

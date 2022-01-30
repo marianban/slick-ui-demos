@@ -38,7 +38,7 @@ export class Board extends THREE.Object3D {
     }
 
     const geometry = new THREE.PlaneBufferGeometry(viewWidth, viewHeight);
-    const boardBgColor = new THREE.Color('#333333');
+    const boardBgColor = new THREE.Color('#181819');
     this.material = new THREE.ShaderMaterial({
       uniforms: {
         uBoardBgColor: { value: boardBgColor },

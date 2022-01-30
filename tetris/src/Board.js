@@ -67,7 +67,7 @@ export class Board extends THREE.Object3D {
     this.add(planeMesh);
   }
 
-  update = (px, py, pw) => {
+  render = (px, py, pw) => {
     this.material.uniforms.uPx.value = px;
     this.material.uniforms.uPy.value = py;
     this.material.uniforms.uPw.value = pw;

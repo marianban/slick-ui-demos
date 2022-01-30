@@ -11,8 +11,17 @@
 <body>
 
   <div id="container"></div>
-  <div class="game-over">
-    <div class="game-over-content">
+
+  <div class="game-state" data-state="INITIAL">
+    <div class="game-state-content" data-state="INITIAL">
+      TETRIS
+      <button id="btn-start-game" type="button">Start Game</button>
+    </div>
+    <div class="game-state-content" data-state="PAUSED">
+      PAUSED
+      <button id="btn-resume-game" type="button">Resume Game</button>
+    </div>
+    <div class="game-state-content" data-state="OVER">
       Game Over
       <button id="btn-restart-game" type="button">Restart Game</button>
     </div>

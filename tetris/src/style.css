@@ -20,7 +20,7 @@ canvas {
   src: url('./BebasNeue-Regular.ttf') format('truetype');
 }
 
-.game-over {
+.game-state {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -33,16 +33,34 @@ canvas {
   display: grid;
   place-items: center;
   text-shadow: #444 3px 0 3px;
-  display: none;
+  transition: transform 250ms ease-in-out;
+  will-change: transform;
 }
 
-.game-over-content {
+.game-state-content {
   display: flex;
   flex-direction: column;
   align-items: center;
+  display: none;
 }
 
-.game-over button {
+.game-state[data-state='INITIAL'] {
+  transform: translateY(0);
+}
+
+.game-state[data-state='STARTED'] {
+  transform: translateY(-100%);
+}
+
+.game-state[data-state='OVER'] {
+  transform: translateY(0);
+}
+
+.game-state[data-state='PAUSED'] {
+  transform: translateY(0);
+}
+
+.game-state button {
   font-size: 3vw;
   padding: 0.5vw 2vw;
   color: #9b9b9b;
@@ -52,13 +70,13 @@ canvas {
   box-shadow: #333 3px 0 3px;
 }
 
-.game-over button:hover {
+.game-state button:hover {
   color: #cbcbcb;
   border: 0.5vw solid #cbcbcb;
   background-color: #33333388;
 }
 
-.game-over button:active {
+.game-state button:active {
   color: #9b9b9b;
   border: 0.5vw solid #9b9b9b;
   background-color: #33333388;

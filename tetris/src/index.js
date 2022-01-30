@@ -1,15 +1,12 @@
 import './reset.css';
 import './style.css';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Piece } from './Piece';
 import { shapes } from './constants';
 import { Board } from './Board';
 import { Time } from './Time';
 import { Score } from './Score';
-
-const btnRestartGame = document.getElementById('btn-restart-game');
-const gameOver = document.querySelector('.game-over');
+import { GameState } from './GameState';
 
 class Sketch {
   constructor({ container }) {
@@ -17,19 +14,25 @@ class Sketch {
     this.boxes = new Set();
     this.time = new Time();
 
+    this.initGameState();
     this.initScene();
     this.initBoard();
     this.initScore();
-
     this.addPiece();
 
     this.render();
 
     window.addEventListener('keydown', this.handleKeyDown);
-    btnRestartGame.addEventListener('click', this.handleRestartGame);
 
     window.setInterval(this.gameTick, 1000);
   }
+
+  initGameState = () => {
+    this.gameState = new GameState({
+      onRestart: this.handleStartGame,
+      onStart: this.handleStartGame,
+    });
+  };
 
   initScene = () => {
     this.pixelRatio = Math.max(window.devicePixelRatio, 2);
@@ -49,8 +52,6 @@ class Sketch {
     this.renderer.physicallyCorrectLights = true;
     this.renderer.setClearColor('#181819');
     this.container.appendChild(this.renderer.domElement);
-
-    const controls = new OrbitControls(this.camera, this.renderer.domElement);
   };
 
   initBoard = () => {
@@ -121,6 +122,10 @@ class Sketch {
   };
 
   gameTick = () => {
+    if (this.gameState.isPaused()) {
+      return;
+    }
+
     this.movePieceDown();
     this.clearCompletedRows();
   };
@@ -137,7 +142,7 @@ class Sketch {
     }
   };
 
-  handleRestartGame = () => {
+  handleStartGame = () => {
     this.score.resetScore();
     const boxes = [...this.boxes];
     for (const box of boxes) {
@@ -146,7 +151,6 @@ class Sketch {
     }
     this.piece.removeFromParent();
     this.addPiece();
-    gameOver.style.display = 'none';
   };
 
   clearCompletedRows = () => {
@@ -186,7 +190,7 @@ class Sketch {
     const boxes = [...this.boxes];
     const lastRowElements = boxes.filter((b) => b.y === this.board.rows);
     if (lastRowElements.length) {
-      gameOver.style.display = 'grid';
+      this.gameState.over();
     }
   };
 
@@ -274,9 +278,11 @@ class Sketch {
 
   render = () => {
     this.resizeRendererToDisplaySize();
-    this.board.update(this.piece.x, this.piece.y, this.piece.width);
-    this.score.update();
     this.checkGameEnd();
+
+    this.board.render(this.piece.x, this.piece.y, this.piece.width);
+    this.score.render();
+    this.gameState.render();
 
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render);

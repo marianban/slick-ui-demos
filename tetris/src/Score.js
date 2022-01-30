@@ -47,7 +47,7 @@ export class Score extends THREE.Object3D {
     this.score = 0;
   };
 
-  update = () => {
+  render = () => {
     this.updateText();
   };
 }

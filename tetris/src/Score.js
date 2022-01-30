@@ -43,6 +43,10 @@ export class Score extends THREE.Object3D {
     this.score += points;
   };
 
+  resetScore = () => {
+    this.score = 0;
+  };
+
   update = () => {
     this.updateText();
   };

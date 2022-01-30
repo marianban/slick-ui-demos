@@ -8,6 +8,9 @@ import { Board } from './Board';
 import { Time } from './Time';
 import { Score } from './Score';
 
+const btnRestartGame = document.getElementById('btn-restart-game');
+const gameOver = document.querySelector('.game-over');
+
 class Sketch {
   constructor({ container }) {
     this.container = container;
@@ -23,6 +26,7 @@ class Sketch {
     this.render();
 
     window.addEventListener('keydown', this.handleKeyDown);
+    btnRestartGame.addEventListener('click', this.handleRestartGame);
 
     window.setInterval(this.gameTick, 1000);
   }
@@ -133,6 +137,18 @@ class Sketch {
     }
   };
 
+  handleRestartGame = () => {
+    this.score.resetScore();
+    const boxes = [...this.boxes];
+    for (const box of boxes) {
+      box.removeBox();
+      this.boxes.delete(box);
+    }
+    this.piece.removeFromParent();
+    this.addPiece();
+    gameOver.style.display = 'none';
+  };
+
   clearCompletedRows = () => {
     const boxes = [...this.boxes];
     let removedRows = [];
@@ -164,6 +180,14 @@ class Sketch {
         }
       }
     });
+  };
+
+  checkGameEnd = () => {
+    const boxes = [...this.boxes];
+    const lastRowElements = boxes.filter((b) => b.y === this.board.rows);
+    if (lastRowElements.length) {
+      gameOver.style.display = 'grid';
+    }
   };
 
   movePieceLeft = () => {
@@ -252,6 +276,7 @@ class Sketch {
     this.resizeRendererToDisplaySize();
     this.board.update(this.piece.x, this.piece.y, this.piece.width);
     this.score.update();
+    this.checkGameEnd();
 
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render);

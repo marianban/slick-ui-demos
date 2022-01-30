@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "prebuild": "node scripts/pre-build.js",
-    "build": "esbuild src/index.js --outdir=build/static --entry-names=[dir]/[name]-[hash] --bundle --minify --sourcemap --loader:.png=file --loader:.glsl=text",
+    "build": "esbuild src/index.js --outdir=build/static --entry-names=[dir]/[name]-[hash] --bundle --minify --sourcemap --loader:.png=file --loader:.glsl=text --loader:.ttf=file",
     "postbuild": "node scripts/post-build.js",
-    "start": "esbuild src/index.js --outdir=public/static --bundle --servedir=public --serve=3001 --loader:.png=file --loader:.glsl=text"
+    "start": "esbuild src/index.js --outdir=public/static --bundle --servedir=public --serve=3001 --loader:.png=file --loader:.glsl=text --loader:.ttf=file"
   },
   "author": "",
   "license": "ISC",
@@ -15,7 +15,8 @@
     "chroma-js": "^2.1.2",
     "esbuild": "^0.14.10",
     "gsap": "^3.9.1",
-    "three": "^0.136.0"
+    "three": "^0.136.0",
+    "troika-three-text": "^0.45.0"
   },
   "devDependencies": {
     "prettier": "2.5.1"

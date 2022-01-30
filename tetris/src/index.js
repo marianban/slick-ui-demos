@@ -6,6 +6,7 @@ import { Piece } from './Piece';
 import { shapes } from './constants';
 import { Board } from './Board';
 import { Time } from './Time';
+import { Score } from './Score';
 
 class Sketch {
   constructor({ container }) {
@@ -15,7 +16,10 @@ class Sketch {
 
     this.initScene();
     this.initBoard();
+    this.initScore();
+
     this.addPiece();
+
     this.render();
 
     window.addEventListener('keydown', this.handleKeyDown);
@@ -27,7 +31,7 @@ class Sketch {
     this.pixelRatio = Math.max(window.devicePixelRatio, 2);
     this.scene = new THREE.Scene();
 
-    const fov = 10;
+    const fov = 13;
     this.camera = new THREE.PerspectiveCamera(
       fov,
       this.container.clientWidth / this.container.clientHeight,
@@ -35,17 +39,6 @@ class Sketch {
       1000
     );
     this.camera.position.z = 10;
-
-    // this.camera = new THREE.OrthographicCamera(
-    //   this.container.clientWidth / -2,
-    //   this.container.clientWidth / 2,
-    //   this.container.clientHeight / 2,
-    //   this.container.clientHeight / -2,
-    //   0.1,
-    //   1000
-    // );
-    // this.camera.position.z = 500;
-    // this.camera.updateProjectionMatrix();
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.outputEncoding = THREE.sRGBEncoding;
@@ -76,6 +69,17 @@ class Sketch {
     });
 
     this.scene.add(this.board);
+  };
+
+  initScore = () => {
+    this.score = new Score({
+      xOffset: this.board.xOffset,
+      yOffset: this.board.yOffset,
+      boxSize: this.board.boxSize,
+      viewHeight: this.board.viewHeight,
+      aspect: this.camera.aspect,
+    });
+    this.scene.add(this.score);
   };
 
   addPiece = () => {
@@ -145,6 +149,8 @@ class Sketch {
         }
       }
     }
+
+    this.score.updateScore(removedRows.length);
 
     Promise.all(removeAnimations).then(() => {
       // fill gaps and shift remaining boxes down
@@ -235,7 +241,9 @@ class Sketch {
     const needResize = width !== nextWidth || height !== nextHeight;
     if (needResize) {
       this.renderer.setSize(nextWidth, nextHeight, false);
-      this.camera.aspect = nextWidth / nextHeight;
+      const aspect = nextWidth / nextHeight;
+      this.camera.aspect = aspect;
+      this.score.updatePosition(aspect);
       this.camera.updateProjectionMatrix();
     }
   };
@@ -243,6 +251,7 @@ class Sketch {
   render = () => {
     this.resizeRendererToDisplaySize();
     this.board.update(this.piece.x, this.piece.y, this.piece.width);
+    this.score.update();
 
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render);

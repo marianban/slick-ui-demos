@@ -10,6 +10,7 @@ export class Board extends THREE.Object3D {
     this.rows = rows;
     this.cols = cols;
     this.boxSize = boxSize;
+    this.viewHeight = viewHeight;
     viewWidth = viewWidth + boxSize;
     this.yOffset = -viewHeight / 2;
     this.xOffset = -viewWidth / 2 + boxSize * 0.5;

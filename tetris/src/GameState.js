@@ -14,7 +14,7 @@ const gameStates = {
 
 export class GameState {
   constructor({ onRestart, onStart }) {
-    this.state = gameStates.INITIAL;
+    this.state = gameStates.STARTED;
     this.onRestart = onRestart;
     this.onStart = onStart;
     btnRestartGame.addEventListener('click', this.handleOnRestart);

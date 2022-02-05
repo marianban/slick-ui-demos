@@ -28,12 +28,16 @@ export class Piece extends THREE.Object3D {
     return Math.min(...this.boxes.map((b) => b.x));
   }
 
+  get y() {
+    return Math.min(...this.boxes.map((b) => b.y));
+  }
+
   get width() {
     return Math.max(...this.boxes.map((b) => b.x)) - this.x + 1;
   }
 
-  get y() {
-    return Math.min(...this.boxes.map((b) => b.y));
+  get height() {
+    return Math.max(...this.boxes.map((b) => b.y)) - this.y + 1;
   }
 
   nextMoveDown = () => {

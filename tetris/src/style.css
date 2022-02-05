@@ -33,7 +33,7 @@ canvas {
   display: grid;
   place-items: center;
   text-shadow: #444 3px 0 3px;
-  transition: transform 250ms ease-in-out;
+  transition: transform 250ms;
   will-change: transform;
 }
 
@@ -46,18 +46,22 @@ canvas {
 
 .game-state[data-state='INITIAL'] {
   transform: translateY(0);
+  transition-timing-function: ease-in;
 }
 
 .game-state[data-state='STARTED'] {
   transform: translateY(-100%);
+  transition-timing-function: ease-out;
 }
 
 .game-state[data-state='OVER'] {
   transform: translateY(0);
+  transition-timing-function: ease-in;
 }
 
 .game-state[data-state='PAUSED'] {
   transform: translateY(0);
+  transition-timing-function: ease-in;
 }
 
 .game-state button {

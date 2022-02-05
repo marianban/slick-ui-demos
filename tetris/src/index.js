@@ -1,12 +1,13 @@
 import './reset.css';
 import './style.css';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Piece } from './Piece';
-import { shapes } from './constants';
 import { Board } from './Board';
 import { Time } from './Time';
 import { Score } from './Score';
 import { GameState } from './GameState';
+import { ShapeQueue } from './ShapeQueue';
 
 class Sketch {
   constructor({ container }) {
@@ -18,6 +19,7 @@ class Sketch {
     this.initScene();
     this.initBoard();
     this.initScore();
+    this.initShapeQueue();
     this.addPiece();
 
     this.render();
@@ -52,6 +54,8 @@ class Sketch {
     this.renderer.physicallyCorrectLights = true;
     this.renderer.setClearColor('#181819');
     this.container.appendChild(this.renderer.domElement);
+
+    const controls = new OrbitControls(this.camera, this.renderer.domElement);
   };
 
   initBoard = () => {
@@ -78,7 +82,6 @@ class Sketch {
 
   initScore = () => {
     this.score = new Score({
-      xOffset: this.board.xOffset,
       yOffset: this.board.yOffset,
       boxSize: this.board.boxSize,
       viewHeight: this.board.viewHeight,
@@ -87,12 +90,20 @@ class Sketch {
     this.scene.add(this.score);
   };
 
+  initShapeQueue = () => {
+    this.shapeQueue = new ShapeQueue({
+      yOffset: this.board.yOffset,
+      boxSize: this.board.boxSize,
+      viewHeight: this.board.viewHeight,
+      aspect: this.camera.aspect,
+      time: this.time,
+    });
+    this.scene.add(this.shapeQueue);
+  };
+
   addPiece = () => {
-    let shape = shapes[Math.floor(shapes.length * Math.random())];
-    const maxX = Math.max.apply(
-      Math,
-      shape.positions.map((p) => p.x)
-    );
+    const shape = this.shapeQueue.getNextShape();
+    const maxX = Math.max(...shape.positions.map((p) => p.x));
     this.piece = new Piece({
       x: Math.round(Math.random() * (this.board.cols - maxX)),
       y: this.board.rows,
@@ -272,6 +283,7 @@ class Sketch {
       const aspect = nextWidth / nextHeight;
       this.camera.aspect = aspect;
       this.score.updatePosition(aspect);
+      this.shapeQueue.updatePosition(aspect);
       this.camera.updateProjectionMatrix();
     }
   };
@@ -283,6 +295,7 @@ class Sketch {
     this.board.render(this.piece.x, this.piece.y, this.piece.width);
     this.score.render();
     this.gameState.render();
+    this.shapeQueue.render();
 
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render);

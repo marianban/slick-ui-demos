@@ -10,9 +10,9 @@ export class Box extends THREE.Object3D {
     this.xOffset = xOffset;
     this.yOffset = yOffset;
     this.color = color;
-    this.setPosition2(x, y);
 
     this.initMesh();
+    this.setPosition2(x, y);
   }
 
   initMesh = () => {

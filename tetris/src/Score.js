@@ -3,10 +3,9 @@ import { Text } from 'troika-three-text';
 import fontUrl from './BebasNeue-Regular.ttf';
 
 export class Score extends THREE.Object3D {
-  constructor({ xOffset, yOffset, boxSize, viewHeight, aspect }) {
+  constructor({ yOffset, boxSize, viewHeight, aspect }) {
     super();
     this.score = 0;
-    this.xOffset = xOffset;
     this.yOffset = yOffset;
     this.viewHeight = viewHeight;
     this.boxSize = boxSize;

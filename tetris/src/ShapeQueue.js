@@ -18,6 +18,7 @@ export class ShapeQueue extends THREE.Object3D {
     this.shapes = [randomShape(), randomShape(), randomShape()];
     this.pieces = [];
     this.pivots = [];
+    this.pivots2 = [];
     this.rotationDirection = 1;
 
     let y = -2.5;
@@ -32,14 +33,24 @@ export class ShapeQueue extends THREE.Object3D {
         yOffset: 0,
       });
       const halfWidth = (piece.width * this.boxSize) / 2;
-      piece.position.x = piece.position.x - halfWidth;
 
-      var pivot = new THREE.Group();
-      pivot.add(piece);
-      this.pivots.push(pivot);
-      this.add(pivot);
+      piece.position.x = -halfWidth;
 
       this.pieces.push(piece);
+
+      const pivot = new THREE.Group();
+
+      pivot.position.x =
+        this.boxSize * (3 - piece.width + piece.width) + this.boxSize * 2.5;
+
+      pivot.add(piece);
+      this.pivots.push(pivot);
+
+      const pivot2 = new THREE.Group();
+      pivot2.add(pivot);
+      this.pivots2.push(pivot2);
+
+      this.add(pivot2);
 
       y -= piece.height + 2;
     }
@@ -51,16 +62,19 @@ export class ShapeQueue extends THREE.Object3D {
   };
 
   updatePosition = (aspect) => {
-    this.position.x = (this.viewHeight / 2) * aspect;
+    this.position.x = (this.viewHeight / 2) * aspect - this.boxSize * 10;
     this.position.y = -this.yOffset;
     console.log(this.viewHeight * aspect, this.boxSize);
   };
 
   render = () => {
-    for (const pivot of this.pivots) {
-      // const halfWidth = (piece.width * this.boxSize) / 2;
-      // piece.applyMatrix4(new THREE.Matrix4().makeTranslation(halfWidth, 0, 0));
-      pivot.rotation.x = (this.time.elapsed % 2) - 1;
+    for (let i = 0; i < this.pivots.length; i++) {
+      const pivot2 = this.pivots2[i];
+
+      const duration = 10;
+      let progress = ((i * 0.5 + this.time.elapsed) % duration) / duration;
+      // progress = Math.sin(progress * Math.PI * 2);
+      pivot2.rotation.y = progress * Math.PI * 2;
     }
   };
 }

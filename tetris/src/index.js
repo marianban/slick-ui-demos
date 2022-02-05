@@ -83,6 +83,7 @@ class Sketch {
   initScore = () => {
     this.score = new Score({
       yOffset: this.board.yOffset,
+      xOffset: this.board.xOffset,
       boxSize: this.board.boxSize,
       viewHeight: this.board.viewHeight,
       aspect: this.camera.aspect,
@@ -93,8 +94,11 @@ class Sketch {
   initShapeQueue = () => {
     this.shapeQueue = new ShapeQueue({
       yOffset: this.board.yOffset,
+      xOffset: this.board.xOffset,
+      cols: this.board.cols,
       boxSize: this.board.boxSize,
       viewHeight: this.board.viewHeight,
+      rows: this.board.rows,
       aspect: this.camera.aspect,
       time: this.time,
     });

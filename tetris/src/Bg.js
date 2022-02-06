@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import vertex from './bg-vertex-shader.glsl';
 import fragment from './bg-fragment-shader.glsl';
-import { colors } from './constants';
 
 export class Bg extends THREE.Object3D {
   constructor({ viewWidth, viewHeight, time }) {
@@ -11,7 +10,14 @@ export class Bg extends THREE.Object3D {
     this.viewWidth = viewWidth;
     this.time = time;
 
-    const geometry = new THREE.PlaneBufferGeometry(viewWidth, viewHeight, 6, 6);
+    const size = 7;
+    this.size = size;
+    const geometry = new THREE.PlaneBufferGeometry(
+      viewWidth,
+      viewHeight,
+      size - 1,
+      size - 1
+    );
     const boardBgColor = new THREE.Color('#1c2940');
     const boardBgColorDark = new THREE.Color('#060c10');
     this.material = new THREE.ShaderMaterial({
@@ -25,32 +31,23 @@ export class Bg extends THREE.Object3D {
       vertexShader: vertex,
       fragmentShader: fragment,
       depthWrite: false,
+      precision: 'highp',
       // wireframe: true,
     });
 
-    this.allColors = [];
-    this.allColors.push(new THREE.Color('#121929'));
-    this.allColors.push(new THREE.Color('#1d293f'));
-    this.allColors.push(new THREE.Color('#101A26'));
-    this.allColors.push(new THREE.Color('#060B12'));
-    this.allColors.push(new THREE.Color('#16263D'));
-    this.allColors.push(new THREE.Color('#1B263A'));
+    this.setRandomColors();
+    this.fromColors = new Array(size * size);
+    this.toColors = new Array(size * size);
 
-    this.fromColors = [];
-    this.toColors = [];
+    this.generateColors(this.fromColors, size);
+    this.setMissingColors(this.fromColors, size);
 
-    for (let i = 0; i < geometry.attributes.position.count; i++) {
-      const c =
-        this.allColors[Math.floor(Math.random() * this.allColors.length)];
-      const c2 =
-        this.allColors[Math.floor(Math.random() * this.allColors.length)];
-      this.fromColors.push(c);
-      this.toColors.push(c2);
-    }
+    this.generateColors(this.toColors, size);
+    this.setMissingColors(this.toColors, size);
 
     const colors = new Float32Array(geometry.attributes.position.count * 3);
 
-    for (let i = 0; i < this.fromColors.length; i++) {
+    for (let i = 0; i < size * size; i++) {
       const c = this.fromColors[i];
       this.setColor(colors, i, c);
     }
@@ -60,6 +57,81 @@ export class Bg extends THREE.Object3D {
     this.planeMesh = new THREE.Mesh(geometry, this.material);
     this.add(this.planeMesh);
   }
+
+  setRandomColors = () => {
+    this.allColors = [];
+    this.allColors.push(new THREE.Color('#121929'));
+    this.allColors.push(new THREE.Color('#1d293f'));
+    this.allColors.push(new THREE.Color('#101A26'));
+    this.allColors.push(new THREE.Color('#060B12'));
+    this.allColors.push(new THREE.Color('#16263D'));
+    this.allColors.push(new THREE.Color('#1B263A'));
+  };
+
+  generateColors = (colors, size) => {
+    for (let i = 0; i < size * size; i++) {
+      const row = Math.floor(i / size);
+      const col = i % size;
+      if ((col + (row % 2)) % 2) {
+        const c =
+          this.allColors[Math.floor(Math.random() * this.allColors.length)];
+        const c2 =
+          this.allColors[Math.floor(Math.random() * this.allColors.length)];
+        colors[i] = c;
+      } else {
+        colors[i] = null;
+      }
+    }
+  };
+
+  setMissingColors = (colors, size) => {
+    for (let i = 0; i < size * size; i++) {
+      const row = Math.floor(i / size);
+      const col = i % size;
+
+      const fc = colors[i];
+      if (fc === null) {
+        const [tx, ty] = [col, row - 1 < 0 ? row + 1 : row - 1];
+        const tc = colors[ty * size + tx];
+
+        if (tc === undefined || tc === null) {
+          throw new Error(row + '_' + col);
+        }
+
+        const [bx, by] = [col, row + 1 >= size ? row - 1 : row + 1];
+        const bc = colors[by * size + bx];
+
+        if (bc === undefined || bc === null) {
+          throw new Error(row + '_' + col);
+        }
+
+        const tbc = new THREE.Color();
+        tbc.lerpColors(tc, bc, 0.5);
+
+        const [lx, ly] = [col - 1 < 0 ? col + 1 : col - 1, row];
+        const lc = colors[ly * size + lx];
+
+        if (lc === undefined || lc === null) {
+          throw new Error(row + '_' + col);
+        }
+
+        const [rx, ry] = [col + 1 >= size ? col - 1 : col + 1, row];
+        const rc = colors[ry * size + rx];
+
+        if (rc === undefined || rc === null) {
+          throw new Error(row + '_' + col);
+        }
+
+        const lrc = new THREE.Color();
+        lrc.lerpColors(lc, rc, 0.5);
+
+        const c = new THREE.Color();
+        c.lerpColors(tbc, lrc, 0.5);
+
+        colors[row * size + col] = c;
+      }
+    }
+  };
 
   setColor = (colors, i, color) => {
     colors[3 * i] = color.r;
@@ -82,11 +154,8 @@ export class Bg extends THREE.Object3D {
       if (playhead2 > 0.99) {
         if (!this.setFrom) {
           this.setFrom = true;
-          for (let j = 0; j < this.fromColors.length; j++) {
-            const c =
-              this.allColors[Math.floor(Math.random() * this.allColors.length)];
-            this.fromColors[j] = c;
-          }
+          this.generateColors(this.fromColors, this.size);
+          this.setMissingColors(this.fromColors, this.size);
         }
       } else {
         this.setFrom = false;
@@ -95,11 +164,8 @@ export class Bg extends THREE.Object3D {
       if (playhead2 < 0.01) {
         if (!this.setTo) {
           this.setTo = true;
-          for (let j = 0; j < this.toColors.length; j++) {
-            const c =
-              this.allColors[Math.floor(Math.random() * this.allColors.length)];
-            this.toColors[j] = c;
-          }
+          this.generateColors(this.toColors, this.size);
+          this.setMissingColors(this.toColors, this.size);
         }
       } else {
         this.setTo = false;

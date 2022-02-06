@@ -8,6 +8,7 @@ import { Time } from './Time';
 import { Score } from './Score';
 import { GameState } from './GameState';
 import { ShapeQueue } from './ShapeQueue';
+import { Bg } from './Bg';
 
 class Sketch {
   constructor({ container }) {
@@ -17,6 +18,8 @@ class Sketch {
 
     this.initGameState();
     this.initScene();
+    this.initDimensions();
+    this.initBg();
     this.initBoard();
     this.initScore();
     this.initShapeQueue();
@@ -58,14 +61,26 @@ class Sketch {
     const controls = new OrbitControls(this.camera, this.renderer.domElement);
   };
 
-  initBoard = () => {
+  initDimensions = () => {
     const halfFov = (this.camera.fov / 2) * (Math.PI / 180);
     const opposite = this.camera.position.z * Math.tan(halfFov);
     const viewHeight = opposite * 2;
+    this.viewHeight = viewHeight;
+  };
 
+  initBg = () => {
+    this.bg = new Bg({
+      time: this.time,
+      viewHeight: this.viewHeight,
+      viewWidth: this.camera.aspect * this.viewHeight,
+    });
+    this.scene.add(this.bg);
+  };
+
+  initBoard = () => {
     const rows = 30;
     const cols = 10;
-    const boxSize = viewHeight / rows;
+    const boxSize = this.viewHeight / rows;
     const viewWidth = cols * boxSize;
 
     this.board = new Board({
@@ -73,7 +88,7 @@ class Sketch {
       cols,
       boxSize,
       viewWidth,
-      viewHeight,
+      viewHeight: this.viewHeight,
       time: this.time,
     });
 
@@ -300,6 +315,7 @@ class Sketch {
     this.score.render();
     this.gameState.render();
     this.shapeQueue.render();
+    this.bg.render();
 
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render);

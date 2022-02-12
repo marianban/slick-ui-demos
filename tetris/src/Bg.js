@@ -2,6 +2,12 @@ import * as THREE from 'three';
 import vertex from './bg-vertex-shader.glsl';
 import fragment from './bg-fragment-shader.glsl';
 
+// https://github.com/tromero/BayerMatrix
+import bayer8tile4 from './bayer8tile4.png';
+import bayer16tile16 from './bayer16tile16.png';
+import bayer16 from './bayer16.png';
+import bayer16tile2 from './bayer16tile2.png';
+
 export class Bg extends THREE.Object3D {
   constructor({ viewWidth, viewHeight, time }) {
     super();
@@ -27,11 +33,15 @@ export class Bg extends THREE.Object3D {
         uTime: {
           value: 0,
         },
+        uBayerTexture: {
+          value: new THREE.TextureLoader().load(`static/${bayer16tile16}`),
+        },
       },
       vertexShader: vertex,
       fragmentShader: fragment,
       depthWrite: false,
       precision: 'highp',
+      // transparent: true,
       // wireframe: true,
     });
 
@@ -60,12 +70,24 @@ export class Bg extends THREE.Object3D {
 
   setRandomColors = () => {
     this.allColors = [];
-    this.allColors.push(new THREE.Color('#121929'));
-    this.allColors.push(new THREE.Color('#1d293f'));
-    this.allColors.push(new THREE.Color('#101A26'));
-    this.allColors.push(new THREE.Color('#060B12'));
-    this.allColors.push(new THREE.Color('#16263D'));
-    this.allColors.push(new THREE.Color('#1B263A'));
+    // this.allColors.push(new THREE.Color('#121929'));
+    // this.allColors.push(new THREE.Color('#1d293f'));
+    // this.allColors.push(new THREE.Color('#101A26'));
+    // this.allColors.push(new THREE.Color('#060B12'));
+    // this.allColors.push(new THREE.Color('#16263D'));
+    // this.allColors.push(new THREE.Color('#1B263A'));
+
+    // this.allColors.push(new THREE.Color('#061E3E'));
+    // this.allColors.push(new THREE.Color('#251E3E'));
+    // this.allColors.push(new THREE.Color('#451E3E'));
+    // this.allColors.push(new THREE.Color('#651E3E'));
+    // // this.allColors.push(new THREE.Color('#851E3E'));
+    // // this.allColors.push(new THREE.Color('#1B263A'));
+
+    this.allColors.push(new THREE.Color('#111625'));
+    this.allColors.push(new THREE.Color('#341931'));
+    this.allColors.push(new THREE.Color('#571B3C'));
+    this.allColors.push(new THREE.Color('#7A1E48'));
   };
 
   generateColors = (colors, size) => {

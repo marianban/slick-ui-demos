@@ -121,7 +121,7 @@ class Sketch {
   };
 
   addPiece = () => {
-    const shape = this.shapeQueue.getNextShape();
+    const [shape, color] = this.shapeQueue.getNextShape();
     const maxX = Math.max(...shape.positions.map((p) => p.x));
     this.piece = new Piece({
       x: Math.round(Math.random() * (this.board.cols - maxX)),
@@ -130,6 +130,7 @@ class Sketch {
       xOffset: this.board.xOffset,
       size: this.board.boxSize,
       shape,
+      color,
     });
     this.scene.add(this.piece);
   };
@@ -267,20 +268,17 @@ class Sketch {
     loop: for (const position of positions) {
       if (position.x < 0 || position.x > this.board.cols) {
         isValid = false;
-        console.log('outside colls', position);
         break;
       }
 
       if (position.y < 0) {
         isValid = false;
-        console.log('down');
         break;
       }
 
       for (const box of this.boxes) {
         if (box.x === position.x && box.y === position.y) {
           isValid = false;
-          console.log('collision');
           break loop;
         }
       }

@@ -3,12 +3,12 @@ import { Box } from './Box';
 import { colors } from './constants';
 
 export class Piece extends THREE.Object3D {
-  constructor({ x, y, size, xOffset, yOffset, shape }) {
+  constructor({ x, y, size, xOffset, yOffset, shape, color = null }) {
     super();
     this.boxes = [];
     this.shape = shape;
 
-    const color = colors[Math.floor(colors.length * Math.random())];
+    this.color = color || colors[Math.floor(colors.length * Math.random())];
 
     for (const position of this.shape.positions) {
       const box = new Box({
@@ -17,7 +17,7 @@ export class Piece extends THREE.Object3D {
         size,
         xOffset,
         yOffset,
-        color,
+        color: this.color,
       });
       this.boxes.push(box);
       this.add(box);
@@ -73,6 +73,16 @@ export class Piece extends THREE.Object3D {
       const box = this.boxes[i];
       box.setPosition(position.x, position.y);
     }
+  };
+
+  applyPosition = (x, y) => {
+    const animations = [];
+    for (let i = 0; i < this.shape.positions.length; i++) {
+      const position = this.shape.positions[i];
+      const box = this.boxes[i];
+      animations.push(box.setPosition(x + position.x, y + position.y));
+    }
+    return animations;
   };
 
   nextRotation = (xShift = 0) => {
@@ -166,5 +176,11 @@ export class Piece extends THREE.Object3D {
       }
     }
     return Math.max(maxX + 1, maxY + 1);
+  };
+
+  dispose = () => {
+    for (const box of this.boxes) {
+      box.dispose();
+    }
   };
 }

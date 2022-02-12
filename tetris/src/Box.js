@@ -3,6 +3,8 @@ import gsap from 'gsap';
 import matcap from './matcap6.png';
 
 export class Box extends THREE.Object3D {
+  static geometry;
+
   constructor({ x, y, size, xOffset, yOffset, color }) {
     super();
 
@@ -14,6 +16,11 @@ export class Box extends THREE.Object3D {
     this.initMesh();
     this.setPosition2(x, y);
   }
+
+  initGeometry = () => {
+    if (!Box.geometry) {
+    }
+  };
 
   initMesh = () => {
     const bevel = this.size * 0.1;

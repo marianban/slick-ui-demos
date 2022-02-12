@@ -2,6 +2,9 @@ import * as THREE from 'three';
 import gsap from 'gsap';
 import matcap from './matcap6.png';
 
+const textureLoader = new THREE.TextureLoader();
+const matcapTexture = textureLoader.load(`static/${matcap}`);
+
 export class Box extends THREE.Object3D {
   static geometry;
 
@@ -13,53 +16,49 @@ export class Box extends THREE.Object3D {
     this.yOffset = yOffset;
     this.color = color;
 
+    this.initGeometry();
     this.initMesh();
     this.setPosition2(x, y);
   }
 
   initGeometry = () => {
     if (!Box.geometry) {
+      const bevel = this.size * 0.1;
+      const innerSize = this.size - bevel * 1.5;
+
+      const shape = new THREE.Shape();
+      shape.moveTo(0, 0);
+      shape.lineTo(0, innerSize);
+      shape.lineTo(innerSize, innerSize);
+      shape.lineTo(innerSize, 0);
+      shape.lineTo(0, 0);
+
+      const extrudeSettings = {
+        steps: 1,
+        depth: innerSize,
+        bevelEnabled: true,
+        bevelThickness: bevel,
+        bevelSize: bevel,
+        bevelOffset: 0,
+        bevelSegments: 1,
+      };
+
+      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      geometry.center();
+
+      Box.geometry = geometry;
     }
   };
 
   initMesh = () => {
-    const bevel = this.size * 0.1;
-    const innerSize = this.size - bevel * 1.5;
-
-    const shape = new THREE.Shape();
-    shape.moveTo(0, 0);
-    shape.lineTo(0, innerSize);
-    shape.lineTo(innerSize, innerSize);
-    shape.lineTo(innerSize, 0);
-    shape.lineTo(0, 0);
-
-    const extrudeSettings = {
-      steps: 1,
-      depth: innerSize,
-      bevelEnabled: true,
-      bevelThickness: bevel,
-      bevelSize: bevel,
-      bevelOffset: 0,
-      bevelSegments: 1,
-    };
-
-    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    geometry.center();
-
-    const textureLoader = new THREE.TextureLoader();
-    const matcapTexture = textureLoader.load(`static/${matcap}`);
-
     const color = new THREE.Color(this.color);
     color.convertLinearToSRGB();
 
     let material = new THREE.MeshMatcapMaterial({ color });
     material.matcap = matcapTexture;
 
-    // material = new THREE.MeshBasicMaterial({ color: 'red' });
-
-    this.mesh = new THREE.Mesh(geometry, material);
+    this.mesh = new THREE.Mesh(Box.geometry, material);
     this.mesh.position.y = +this.size * 0.5;
-    // this.mesh.position.z = -0.4;
 
     this.add(this.mesh);
   };

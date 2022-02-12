@@ -41,8 +41,6 @@ export class Bg extends THREE.Object3D {
       fragmentShader: fragment,
       depthWrite: false,
       precision: 'highp',
-      // transparent: true,
-      // wireframe: true,
     });
 
     this.setRandomColors();
@@ -84,10 +82,15 @@ export class Bg extends THREE.Object3D {
     // // this.allColors.push(new THREE.Color('#851E3E'));
     // // this.allColors.push(new THREE.Color('#1B263A'));
 
-    this.allColors.push(new THREE.Color('#111625'));
-    this.allColors.push(new THREE.Color('#341931'));
-    this.allColors.push(new THREE.Color('#571B3C'));
-    this.allColors.push(new THREE.Color('#7A1E48'));
+    // this.allColors.push(new THREE.Color('#111625'));
+    // this.allColors.push(new THREE.Color('#341931'));
+    // this.allColors.push(new THREE.Color('#571B3C'));
+    // this.allColors.push(new THREE.Color('#7A1E48'));
+
+    this.allColors.push(new THREE.Color('#323E59'));
+    this.allColors.push(new THREE.Color('#1D3444'));
+    this.allColors.push(new THREE.Color('#213359'));
+    this.allColors.push(new THREE.Color('#18193D'));
   };
 
   generateColors = (colors, size) => {
@@ -163,7 +166,7 @@ export class Bg extends THREE.Object3D {
 
   render = () => {
     this.material.uniforms.uTime.value = this.time.elapsed;
-    const duration = 6;
+    const duration = 9;
     let playhead = (this.time.elapsed % duration) / duration;
     const colors = this.planeMesh.geometry.attributes.color.array;
     for (let i = 0; i < this.fromColors.length; i++) {

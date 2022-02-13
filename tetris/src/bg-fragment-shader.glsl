@@ -14,26 +14,16 @@ float random (vec2 st) {
 
 void main()
 {
-  // vec2 nUv = (vUv - 0.5) * 2.;
-
-  // float c = length(vUv - vec2(0.5, vUv.y));
-
-
-  // vec3 color = vBoardBgColor;
-  // color = vec3(c*c);
-
-  // float d = length(vec2(0.) - nUv);
-
-  // color = vec3(d);
-
-  // color = mix(vBoardBgColorDark, vBoardBgColor, d);
-
   vec4 color = vec4(vColor, 1.0);
 
-  vec4 dither = vec4(texture2D(uBayerTexture, vUv / 24.0).r / 32.0 - (1.0 / 128.0));
-  color += dither;
+  vec2 nUv = (vUv - 0.5) * 2.;
+  float d = length(vec2(nUv));
+  float vignete = smoothstep(0.9, 2., d);
 
-  // color.r = (floor(color*63. + 0.5)/63.).r;
+  // https://www.anisopteragames.com/how-to-fix-color-banding-with-dithering/
+  vec4 dither = vec4(texture2D(uBayerTexture,  gl_FragCoord.xy / 8.0).r / 32.0 - (1.0 / 128.0));
+  color += dither;
+  color -= vignete * 0.2;
 
   gl_FragColor = color;
 }

@@ -19,7 +19,7 @@ export class Score extends THREE.Object3D {
     this.text.fontSize = boxSize;
     this.text.position.z = 0;
     this.text.position.y = -this.boxSize - yOffset;
-    this.text.color = new THREE.Color('#6b6b6b').convertSRGBToLinear();
+    this.text.color = new THREE.Color('#8b8b8b').convertSRGBToLinear();
     this.text.material.depthWrite = false;
     this.text.material.depthTest = false;
     this.updatePosition(aspect);

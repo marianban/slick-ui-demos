@@ -24,6 +24,8 @@ export class Bg extends THREE.Object3D {
       size - 1,
       size - 1
     );
+    const texture = new THREE.TextureLoader().load(`static/${bayer16}`);
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     const boardBgColor = new THREE.Color('#1c2940');
     const boardBgColorDark = new THREE.Color('#060c10');
     this.material = new THREE.ShaderMaterial({
@@ -34,7 +36,7 @@ export class Bg extends THREE.Object3D {
           value: 0,
         },
         uBayerTexture: {
-          value: new THREE.TextureLoader().load(`static/${bayer16tile16}`),
+          value: texture,
         },
       },
       vertexShader: vertex,
@@ -63,6 +65,7 @@ export class Bg extends THREE.Object3D {
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     this.planeMesh = new THREE.Mesh(geometry, this.material);
+    this.planeMesh.renderOrder = -1;
     this.add(this.planeMesh);
   }
 
@@ -203,4 +206,9 @@ export class Bg extends THREE.Object3D {
     }
     this.planeMesh.geometry.attributes.color.needsUpdate = true;
   };
+
+  dispose() {
+    this.planeMesh.material.dispose();
+    this.planeMesh.geometry.dispose();
+  }
 }

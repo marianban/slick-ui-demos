@@ -4,6 +4,16 @@ body {
   background-color: #181819;
 }
 
+:root {
+  /* --color-light: #cbcbcb;
+  --color: #9b9b9b;
+  --color-dark: #9b9b9b; */
+
+  --color-light: #94c7dd;
+  --color: #7ba5b7;
+  --color-dark: #577683;
+}
+
 #container {
   display: block;
   width: 100vw;
@@ -28,7 +38,7 @@ canvas {
   backdrop-filter: blur(10px);
   font-family: 'BebasNeue';
   font-size: 15vw;
-  color: #9b9b9b;
+  color: var(--color);
   user-select: none;
   display: grid;
   place-items: center;
@@ -67,21 +77,21 @@ canvas {
 .game-state button {
   font-size: 3vw;
   padding: 0.5vw 2vw;
-  color: #9b9b9b;
-  border: 0.5vw solid #9b9b9b;
+  color: var(--color);
+  border: 0.5vw solid var(--color);
   background-color: #44444488;
   transition: all 150ms ease-in-out;
   box-shadow: #333 3px 0 3px;
 }
 
 .game-state button:hover {
-  color: #cbcbcb;
-  border: 0.5vw solid #cbcbcb;
+  color: var(--color-light);
+  border: 0.5vw solid var(--color-light);
   background-color: #33333388;
 }
 
 .game-state button:active {
-  color: #9b9b9b;
-  border: 0.5vw solid #9b9b9b;
+  color: var(--color);
+  border: 0.5vw solid var(--color);
   background-color: #33333388;
 }

@@ -110,7 +110,7 @@ export class ShapeQueue extends THREE.Object3D {
     this.text.font = `static/${fontUrl}`;
     this.text.fontSize = this.boxSize;
     this.text.position.z = 0;
-    this.text.color = new THREE.Color('#6b6b6b').convertSRGBToLinear();
+    this.text.color = new THREE.Color('#8b8b8b').convertSRGBToLinear();
     this.text.material.depthWrite = false;
     this.text.material.depthTest = false;
     this.text.fontSize = this.boxSize;

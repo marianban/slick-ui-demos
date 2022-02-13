@@ -299,6 +299,10 @@ class Sketch {
       this.renderer.setSize(nextWidth, nextHeight, false);
       const aspect = nextWidth / nextHeight;
       this.camera.aspect = aspect;
+      this.initDimensions();
+      this.bg.removeFromParent();
+      this.bg.dispose();
+      this.initBg();
       this.score.updatePosition(aspect);
       this.shapeQueue.updatePosition(aspect);
       this.camera.updateProjectionMatrix();

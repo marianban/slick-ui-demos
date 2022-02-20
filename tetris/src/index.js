@@ -29,6 +29,11 @@ class Sketch {
 
     window.addEventListener('keydown', this.handleKeyDown);
 
+    window.addEventListener('touchstart', this.handleTouchStart, false);
+    window.addEventListener('touchmove', this.handleTouchMove, false);
+    window.addEventListener('touchend', this.handleTouchEnd, false);
+    // window.addEventListener('touchcancel', this.handleTouchCancel, false);
+
     window.setInterval(this.gameTick, 1000);
   }
 
@@ -58,7 +63,7 @@ class Sketch {
     this.renderer.setClearColor('#181819');
     this.container.appendChild(this.renderer.domElement);
 
-    const controls = new OrbitControls(this.camera, this.renderer.domElement);
+    // const controls = new OrbitControls(this.camera, this.renderer.domElement);
   };
 
   initDimensions = () => {
@@ -80,7 +85,7 @@ class Sketch {
   initBoard = () => {
     const rows = 30;
     const cols = 10;
-    const boxSize = this.viewHeight / rows;
+    let boxSize = this.viewHeight / rows;
     const viewWidth = cols * boxSize;
 
     this.board = new Board({
@@ -134,6 +139,63 @@ class Sketch {
     });
     this.scene.add(this.piece);
   };
+
+  handleTouchStart = (event) => {
+    this.touchStart = event.touches[0];
+    this.touchStartTime = Date.now();
+  };
+
+  handleLongPress = () => {
+    if (this.isLongPress()) {
+      this.movePieceDown();
+    }
+  };
+
+  isLongPress = () => {
+    return this.touchStartTime && Date.now() - this.touchStartTime > 250;
+  };
+
+  handleTouchMove = (event) => {
+    this.touchEnd = event.touches[0];
+  };
+
+  handleTouchEnd = () => {
+    if (this.isLongPress()) {
+      this.touchStartTime = null;
+      return;
+    }
+
+    this.touchStartTime = null;
+
+    if (!this.touchEnd) {
+      // tap
+      this.rotatePiece();
+      return;
+    }
+
+    const delta = this.touchStart.clientX - this.touchEnd.clientX;
+    if (Math.abs(delta) > 10) {
+      const numOfMoves = Math.min(Math.floor(Math.abs(delta) / 50) + 1, 4);
+      if (delta < 0) {
+        // swipe right
+        for (let i = 0; i < numOfMoves; i++) {
+          this.movePieceRight();
+        }
+      } else {
+        // swipe left
+        for (let i = 0; i < numOfMoves; i++) {
+          this.movePieceLeft();
+        }
+      }
+    } else {
+      // tap
+      this.rotatePiece();
+    }
+
+    this.touchEnd = null;
+  };
+
+  handleTouchCancel = (event) => {};
 
   handleKeyDown = (event) => {
     switch (event.code) {
@@ -292,8 +354,15 @@ class Sketch {
     this.renderer.getSize(size);
     const width = size.x;
     const height = size.y;
-    const nextWidth = this.container.clientWidth * this.pixelRatio;
-    const nextHeight = this.container.clientHeight * this.pixelRatio;
+
+    let delta = 0;
+    if (this.board.totalWidth > window.innerWidth) {
+      delta = this.board.totalWidth - window.innerWidth;
+    }
+
+    const nextWidth = window.innerWidth * this.pixelRatio + delta * 2;
+    const nextHeight = window.innerHeight * this.pixelRatio;
+
     const needResize = width !== nextWidth || height !== nextHeight;
     if (needResize) {
       this.renderer.setSize(nextWidth, nextHeight, false);
@@ -312,6 +381,7 @@ class Sketch {
   render = () => {
     this.resizeRendererToDisplaySize();
     this.checkGameEnd();
+    this.handleLongPress();
 
     this.board.render(this.piece.x, this.piece.y, this.piece.width);
     this.score.render();

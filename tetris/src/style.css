@@ -4,11 +4,19 @@ body {
   background-color: #181819;
 }
 
-:root {
-  /* --color-light: #cbcbcb;
-  --color: #9b9b9b;
-  --color-dark: #9b9b9b; */
+* {
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
 
+body {
+  min-height: 100%;
+  touch-action: pan-x pan-y;
+  overflow: hidden;
+}
+
+:root {
   --color-light: #94c7dd;
   --color: #7ba5b7;
   --color-dark: #577683;
@@ -17,7 +25,7 @@ body {
 #container {
   display: block;
   width: 100vw;
-  height: 100vh;
+  height: 100%;
 }
 
 canvas {

@@ -12,6 +12,7 @@ export class Board extends THREE.Object3D {
     this.boxSize = boxSize;
     this.viewHeight = viewHeight;
     viewWidth = viewWidth + boxSize;
+    this.viewWidth = viewWidth;
     this.yOffset = -viewHeight / 2;
     this.xOffset = -viewWidth / 2 + boxSize * 0.5;
     this.time = time;
@@ -91,4 +92,10 @@ export class Board extends THREE.Object3D {
     this.material.uniforms.uPw.value = pw;
     this.material.uniforms.uTime.value = this.time.elapsed;
   };
+
+  get totalWidth() {
+    const totalWidth = (this.cols + 7 * 2) * this.boxSize + this.boxSize;
+    const pxRatio = window.innerHeight / this.viewHeight;
+    return pxRatio * totalWidth;
+  }
 }

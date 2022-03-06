@@ -78,6 +78,7 @@ export class Box extends THREE.Object3D {
   setPosition = (x, y, delay = 0) => {
     if (this.animation && this.animation.progress() < 1) {
       this.animation.progress(1).kill();
+      this.roundPositions();
     }
     this.x = x;
     this.y = y;
@@ -87,6 +88,9 @@ export class Box extends THREE.Object3D {
       x: this.xOffset + this.x * this.size,
       y: this.yOffset + this.y * this.size,
       ease: 'power2.inOut',
+      onComplete: () => {
+        this.roundPositions();
+      },
     });
     return this.animation;
   };
@@ -96,6 +100,22 @@ export class Box extends THREE.Object3D {
     this.y = y;
     this.position.x = this.xOffset + this.x * this.size;
     this.position.y = this.yOffset + this.y * this.size;
+  };
+
+  roundPositions = () => {
+    this.y = Math.ceil(this.y);
+    this.position.y = this.yOffset + this.y * this.size;
+  };
+
+  getPosition = () => {
+    return {
+      x: this.x,
+      y: this.y,
+    };
+  };
+
+  getNextSmallMoveDown = () => {
+    return { y: this.y - 0.5, x: this.x };
   };
 
   removeBox = () => {

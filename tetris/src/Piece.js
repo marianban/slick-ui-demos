@@ -67,11 +67,33 @@ export class Piece extends THREE.Object3D {
     return positions;
   };
 
+  getNextSmallMovesDown = () => {
+    const positions = [];
+    for (const box of this.boxes) {
+      positions.push(box.getNextSmallMoveDown());
+    }
+    return positions;
+  };
+
   applyPositions = (positions) => {
     for (let i = 0; i < positions.length; i++) {
       const position = positions[i];
       const box = this.boxes[i];
       box.setPosition(position.x, position.y);
+    }
+  };
+
+  applyPositions2 = (positions) => {
+    for (let i = 0; i < positions.length; i++) {
+      const position = positions[i];
+      const box = this.boxes[i];
+      box.setPosition2(position.x, position.y);
+    }
+  };
+
+  roundPositions = () => {
+    for (const box of this.boxes) {
+      box.roundPositions();
     }
   };
 

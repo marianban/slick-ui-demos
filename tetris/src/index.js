@@ -15,6 +15,7 @@ class Sketch {
     this.container = container;
     this.boxes = new Set();
     this.time = new Time();
+    this.movingDown = false;
 
     this.initGameState();
     this.initScene();
@@ -28,6 +29,7 @@ class Sketch {
     this.render();
 
     window.addEventListener('keydown', this.handleKeyDown);
+    window.addEventListener('keyup', this.handleKeyUp);
 
     window.addEventListener('touchstart', this.handleTouchStart, false);
     window.addEventListener('touchmove', this.handleTouchMove, false);
@@ -203,13 +205,22 @@ class Sketch {
         this.rotatePiece();
         break;
       case 'ArrowDown':
-        this.movePieceDown();
+        this.movingDown = true;
         break;
       case 'ArrowLeft':
         this.movePieceLeft();
         break;
       case 'ArrowRight':
         this.movePieceRight();
+        break;
+    }
+  };
+
+  handleKeyUp = (event) => {
+    switch (event.code) {
+      case 'ArrowDown':
+        this.movingDown = false;
+        this.piece.roundPositions();
         break;
     }
   };
@@ -226,12 +237,25 @@ class Sketch {
   movePieceDown = () => {
     const nextPositions = this.piece.nextMoveDown();
     if (this.isValidMove(nextPositions)) {
-      this.piece.applyPositions(nextPositions);
+      if (!this.movingDown) {
+        this.piece.applyPositions(nextPositions);
+      }
     } else {
       for (const box of this.piece.boxes) {
         this.boxes.add(box);
       }
       this.addPiece();
+    }
+  };
+
+  handlePieceMoveDown = () => {
+    const positions = this.piece.getNextSmallMovesDown();
+    if (this.movingDown) {
+      if (this.isValidMove(positions)) {
+        this.piece.applyPositions2(positions);
+      } else {
+        this.piece.roundPositions();
+      }
     }
   };
 
@@ -339,7 +363,7 @@ class Sketch {
       }
 
       for (const box of this.boxes) {
-        if (box.x === position.x && box.y === position.y) {
+        if (box.x === position.x && box.y === Math.floor(position.y)) {
           isValid = false;
           break loop;
         }
@@ -382,6 +406,7 @@ class Sketch {
     this.resizeRendererToDisplaySize();
     this.checkGameEnd();
     this.handleLongPress();
+    this.handlePieceMoveDown();
 
     this.board.render(this.piece.x, this.piece.y, this.piece.width);
     this.score.render();

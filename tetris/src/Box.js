@@ -5,6 +5,8 @@ import matcap from './matcap6.png';
 const textureLoader = new THREE.TextureLoader();
 const matcapTexture = textureLoader.load(`static/${matcap}`);
 
+const materials = {};
+
 export class Box extends THREE.Object3D {
   static geometry;
 
@@ -51,11 +53,17 @@ export class Box extends THREE.Object3D {
   };
 
   initMesh = () => {
-    const color = new THREE.Color(this.color);
-    color.convertLinearToSRGB();
+    let material;
 
-    let material = new THREE.MeshMatcapMaterial({ color });
-    material.matcap = matcapTexture;
+    if (!materials[this.color]) {
+      const color = new THREE.Color(this.color);
+      color.convertLinearToSRGB();
+      material = new THREE.MeshMatcapMaterial({ color });
+      material.matcap = matcapTexture;
+      materials[this.color] = material;
+    } else {
+      material = materials[this.color];
+    }
 
     this.mesh = new THREE.Mesh(Box.geometry, material);
     this.mesh.position.y = +this.size * 0.5;
@@ -64,7 +72,11 @@ export class Box extends THREE.Object3D {
   };
 
   nextMoveDown = () => {
-    return { y: this.y - 1, x: this.x };
+    if (Math.floor(this.y) !== Math.ceil(this.y)) {
+      return { y: this.y - 0.5, x: this.x };
+    } else {
+      return { y: this.y - 1, x: this.x };
+    }
   };
 
   nextMoveLeft = () => {
@@ -78,7 +90,7 @@ export class Box extends THREE.Object3D {
   setPosition = (x, y, delay = 0) => {
     if (this.animation && this.animation.progress() < 1) {
       this.animation.progress(1).kill();
-      this.roundPositions();
+      // this.roundPositions();
     }
     this.x = x;
     this.y = y;
@@ -89,7 +101,7 @@ export class Box extends THREE.Object3D {
       y: this.yOffset + this.y * this.size,
       ease: 'power2.inOut',
       onComplete: () => {
-        this.roundPositions();
+        // this.roundPositions();
       },
     });
     return this.animation;

@@ -220,7 +220,7 @@ class Sketch {
     switch (event.code) {
       case 'ArrowDown':
         this.movingDown = false;
-        this.piece.roundPositions();
+        // this.piece.roundPositions();
         break;
     }
   };
@@ -229,7 +229,6 @@ class Sketch {
     if (this.gameState.isPaused()) {
       return;
     }
-
     this.movePieceDown();
     this.clearCompletedRows();
   };
@@ -241,6 +240,7 @@ class Sketch {
         this.piece.applyPositions(nextPositions);
       }
     } else {
+      this.piece.roundPositions();
       for (const box of this.piece.boxes) {
         this.boxes.add(box);
       }

@@ -1,5 +1,13 @@
 # Slick 😎 UI demos
 
+## Tetris
+
+[![Tetris](tetris.gif)](https://demos.closure.sk/tetris/build/)
+
+Live Demo: [link](https://demos.closure.sk/tetris/build/)
+
+Uses: JS, Three.js
+
 ## Viking Ship
 
 [![Viking Ship](vikingShip.gif)](http://marianban.github.io/sea/index.html)

@@ -1,0 +1,21 @@
+{
+  "name": "gallery",
+  "version": "1.0.0",
+  "description": "",
+  "source": "src/index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@parcel/transformer-glsl": "^2.5.0",
+    "parcel": "^2.5.0"
+  },
+  "dependencies": {
+    "three": "^0.139.2",
+    "tweakpane": "^3.0.8"
+  }
+}

@@ -21,6 +21,8 @@ const camera = new THREE.PerspectiveCamera(fov, cameraAspect, 0.1, 1000);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
+const pixelRatio = window.devicePixelRatio;
+renderer.setPixelRatio(pixelRatio);
 document.body.appendChild(renderer.domElement);
 
 const texture1 = new THREE.TextureLoader().load(
@@ -30,13 +32,20 @@ const texture2 = new THREE.TextureLoader().load(
   'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80'
 );
 
-const geometry = new THREE.PlaneGeometry(400, 400, 400, 400);
+const geometry = new THREE.PlaneGeometry(
+  400,
+  400,
+  400 * pixelRatio,
+  400 * pixelRatio
+);
 
 let material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 material = new THREE.ShaderMaterial({
   vertexShader: vertex,
   fragmentShader: fragment,
   uniforms: {
+    uTime: { value: 0 },
+    uPixelRatio: { value: pixelRatio },
     uTexture1: { value: texture1 },
     uTexture2: { value: texture2 },
     uProgress: { value: params.progress },
@@ -77,6 +86,8 @@ function setScale() {
   //   scaleY = imageAspect;
   // }
 
+  // console.log(scaleX);
+
   mesh.scale.setX(scaleX);
   // mesh.scale.setY(scaleY);
 
@@ -93,11 +104,22 @@ scene.add(mesh);
 
 camera.position.z = 600;
 
+let time = 0;
+let lastTime = Date.now();
+
 function animate() {
   mesh.material.uniforms.uProgress.value = params.progress;
+  mesh.material.uniforms.uTime.value = time;
+
+  const now = Date.now();
+  const delta = (lastTime - now) / 1000;
+  time += delta;
+
   setScale();
 
   requestAnimationFrame(animate);
+
   renderer.render(scene, camera);
+  lastTime = now;
 }
 animate();

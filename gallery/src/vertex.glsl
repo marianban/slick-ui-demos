@@ -137,6 +137,7 @@ return 49.0 * ( dot(m0*m0, vec3( dot( p0, x0 ), dot( p1, x1 ), dot( p2, x2 )))
 
 float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
 
+uniform float uPixelRatio;
 
 void main()
 {
@@ -153,7 +154,7 @@ void main()
     // pos.y = pos.y + mix(0., 300. * snoise(vec4(sin(vUv.x * 100.) * 1000., vUv.y * 1000., uProgress * 10., 0.)), uProgress);
     // pos.x = pos.x + mix(0., 300. * snoise(vec4(sin(vUv.x * 500.) * 300., vUv.y * 100., uProgress * 10., 0.)), uProgress);
 
-    gl_PointSize = 1.;
+    gl_PointSize = uPixelRatio;
 
     vec4 mPosition = modelMatrix * vec4(pos, 1.0);
 

@@ -138,6 +138,25 @@ return 49.0 * ( dot(m0*m0, vec3( dot( p0, x0 ), dot( p1, x1 ), dot( p2, x2 )))
 float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
 
 uniform float uPixelRatio;
+uniform float uAspectRatio;
+uniform float uPixelSize;
+
+mat4 rotationMatrix(vec3 axis, float angle) {
+    axis = normalize(axis);
+    float s = sin(angle);
+    float c = cos(angle);
+    float oc = 1.0 - c;
+
+    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+                0.0,                                0.0,                                0.0,                                1.0);
+}
+
+vec3 rotate(vec3 v, vec3 axis, float angle) {
+  mat4 m = rotationMatrix(axis, angle);
+  return (m * vec4(v, 1.0)).xyz;
+}
 
 void main()
 {
@@ -145,20 +164,17 @@ void main()
 
     vec3 pos = position;
 
+    pos = rotate(pos, vec3(0.,0.,1.), step(0.1, uProgress) * (uProgress - 0.1) * PI * 2.);
+
     float angle = PI * 2. * hash(vUv * 100.);
 
     vec2 dir = vec2(cos(angle), sin(angle));
 
-    pos.xy += dir * mix(0., 1000., uProgress);
+    pos.xy += dir * mix(0., 1500. + (10000. * hash(vUv * 200.)), uProgress / clamp(hash(vUv * 200.), 0.3, 0.9) * 0.06 );
 
-    // pos.y = pos.y + mix(0., 300. * snoise(vec4(sin(vUv.x * 100.) * 1000., vUv.y * 1000., uProgress * 10., 0.)), uProgress);
-    // pos.x = pos.x + mix(0., 300. * snoise(vec4(sin(vUv.x * 500.) * 300., vUv.y * 100., uProgress * 10., 0.)), uProgress);
-
-    gl_PointSize = uPixelRatio;
+    gl_PointSize = uPixelRatio * uPixelSize;
 
     vec4 mPosition = modelMatrix * vec4(pos, 1.0);
-
-
 
     gl_Position = projectionMatrix * viewMatrix * mPosition;
 }

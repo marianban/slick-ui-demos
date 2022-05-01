@@ -15,6 +15,8 @@
     "parcel": "^2.5.0"
   },
   "dependencies": {
+    "gsap": "^3.10.4",
+    "image-preloader": "^1.1.1",
     "three": "^0.139.2",
     "tweakpane": "^3.0.8"
   }

@@ -37,11 +37,12 @@ function scene() {
 
   const renderer = new THREE.WebGLRenderer({
     powerPreference: 'high-performance',
-    precision: 'lowp',
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  let pixelRatio = Math.min(1.5, window.devicePixelRatio);
+  // for better performance
+  let pixelRatio = 1.1;
   renderer.setPixelRatio(pixelRatio);
+  renderer.setClearColor('#111111');
   document.body.appendChild(renderer.domElement);
 
   let texture1 = new THREE.Texture(images[imageIndex - 1]);
@@ -50,7 +51,7 @@ function scene() {
   texture2.needsUpdate = true;
 
   const uPixelSize = 1;
-  const size = 350;
+  const size = 400;
   const geometry = new THREE.PlaneGeometry(
     size,
     size,
@@ -132,11 +133,15 @@ function scene() {
 
   let animation;
 
-  window.addEventListener('click', () => {
+  window.addEventListener('click', handleClick.bind(this));
+  window.addEventListener('touchend', handleClick.bind(this));
+
+  function handleClick() {
     imageIndex++;
 
     if (animation && animation.progress() < 1) {
       animation.progress(1).kill();
+      imageIndex++;
     }
 
     animation = gsap.to(params, {
@@ -158,7 +163,7 @@ function scene() {
         params.progress = 0;
       },
     });
-  });
+  }
 
   window.addEventListener('resize', () => {
     const cameraAspect = window.innerWidth / window.innerHeight;
@@ -169,7 +174,6 @@ function scene() {
     camera.updateProjectionMatrix();
 
     renderer.setSize(window.innerWidth, window.innerHeight);
-    pixelRatio = Math.min(2, window.devicePixelRatio);
     renderer.setPixelRatio(pixelRatio);
   });
 }

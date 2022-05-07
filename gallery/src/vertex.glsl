@@ -1,14 +1,16 @@
+uniform float uProgress;
+uniform float uPixelRatio;
+uniform float uAspectRatio;
+uniform float uPixelSize;
+uniform float uProgressMix;
+
 varying vec2 vUv;
 
-uniform float uProgress;
 
 #define PI 3.1415926538
 
 float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
 
-uniform float uPixelRatio;
-uniform float uAspectRatio;
-uniform float uPixelSize;
 
 mat4 rotationMatrix(vec3 axis, float angle) {
     axis = normalize(axis);
@@ -42,7 +44,7 @@ void main()
     float hValue = hash(vUv * 200.);
     pos.xy += dir * mix(0., 1500. + (10000. * hValue), uProgress / clamp(hValue, 0.3, 0.9) * 0.06 );
 
-    gl_PointSize = uPixelRatio * uPixelSize;
+    gl_PointSize = uPixelRatio * uPixelSize * clamp(uProgress * (8. * hash(vUv)), 1., 6.);
 
     vec4 mPosition = modelMatrix * vec4(pos, 1.0);
 

@@ -1,12 +1,21 @@
 # Slick 😎 UI demos
 
+## Fireworks image tranistion
+
+[![Fireworks image tranistion
+](fireworks-optimized.gif)](https://demos.closure.sk/gallery/dist/)
+
+Live Demo: [link](https://demos.closure.sk/gallery/dist/)
+
+Uses: JS, Three.js, GSAP
+
 ## Tetris
 
 [![Tetris](tetris.gif)](https://demos.closure.sk/tetris/build/)
 
 Live Demo: [link](https://demos.closure.sk/tetris/build/)
 
-Uses: JS, Three.js
+Uses: JS, Three.js, GSAP
 
 ## Viking Ship
 

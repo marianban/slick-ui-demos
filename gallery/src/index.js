@@ -6,6 +6,8 @@ import { imageUrls } from './images';
 import ImagePreloader from 'image-preloader';
 import { gsap } from 'gsap';
 
+const loaderContainer = document.querySelector('.loader-container');
+
 let images = [];
 var preloader = new ImagePreloader();
 preloader.preload(...imageUrls).then(function (loadedImages) {
@@ -14,6 +16,7 @@ preloader.preload(...imageUrls).then(function (loadedImages) {
     return x.value;
   });
   scene();
+  loaderContainer.remove();
 });
 
 function scene() {
@@ -30,11 +33,14 @@ function scene() {
   const cameraAspect = window.innerWidth / window.innerHeight;
   const halfHeight = window.innerHeight / 2;
   const fov = Math.atan(halfHeight / 600) * (360 / (Math.PI * 2)) * 2;
-  const camera = new THREE.PerspectiveCamera(fov, cameraAspect, 0.1, 1000);
+  const camera = new THREE.PerspectiveCamera(fov, cameraAspect, 590, 610);
 
-  const renderer = new THREE.WebGLRenderer();
+  const renderer = new THREE.WebGLRenderer({
+    powerPreference: 'high-performance',
+    precision: 'lowp',
+  });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  let pixelRatio = Math.min(2, window.devicePixelRatio);
+  let pixelRatio = Math.min(1.5, window.devicePixelRatio);
   renderer.setPixelRatio(pixelRatio);
   document.body.appendChild(renderer.domElement);
 
@@ -44,7 +50,7 @@ function scene() {
   texture2.needsUpdate = true;
 
   const uPixelSize = 1;
-  const size = 400;
+  const size = 350;
   const geometry = new THREE.PlaneGeometry(
     size,
     size,

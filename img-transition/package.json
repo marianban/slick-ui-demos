@@ -1,0 +1,28 @@
+{
+  "name": "img-transition",
+  "version": "1.0.0",
+  "description": "",
+  "source": "src/index.html",
+  "type": "module",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build --public-url ./",
+    "test": "cross-env node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@parcel/transformer-glsl": "^2.5.0",
+    "@types/jest": "^27.5.1",
+    "cross-env": "^7.0.3",
+    "jest": "^28.1.0",
+    "parcel": "^2.5.0"
+  },
+  "dependencies": {
+    "gsap": "^3.10.4",
+    "image-preloader": "^1.1.1",
+    "three": "^0.139.2",
+    "tweakpane": "^3.0.8"
+  }
+}

@@ -65,3 +65,11 @@ export const computeScale = ({
     scaleY: aScaleY * scale,
   };
 };
+
+export const mix = (value1, value2, t) => {
+  const min = Math.min(value1, value2);
+  const max = Math.max(value1, value2);
+  const delta = max - min;
+  const newT = min === value1 ? t : 1 - t;
+  return delta * newT + min;
+};

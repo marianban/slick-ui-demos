@@ -1,8 +1,13 @@
 # Slick 😎 UI demos
 
-## Fireworks image tranistion
+## Color distance image transition
 
-[![Fireworks image tranistion
+[![Color distance image transition
+](imageTransition.gif)](https://demos.closure.sk/img-transition/dist/)
+
+## Fireworks image transition
+
+[![Fireworks image transition
 ](fireworks-optimized.gif)](https://demos.closure.sk/gallery/dist/)
 
 Live Demo: [link](https://demos.closure.sk/gallery/dist/)

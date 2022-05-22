@@ -115,81 +115,8 @@ function scene() {
       initialTextureHeight: textureHeight,
     });
 
-    // console.log({ scaleX, scaleY });
-
     mesh.scale.setX(scaleX);
     mesh.scale.setY(scaleY);
-
-    // const textureAspect1 =
-    //   texture1.source.data.width / texture1.source.data.height;
-
-    // if (!textureAspect1) {
-    //   return;
-    // }
-
-    // let textureAspect = textureAspect1;
-
-    // const cameraAspect = camera.aspect;
-
-    // console.log({ cameraAspect, textureAspect });
-
-    // mesh.material.uniforms.uAspectRatio.value = textureAspect;
-
-    // const initialTextureWidth = Math.min(
-    //   initialVMin,
-    //   texture1.source.data.width
-    // );
-    // const initialTextureHeight = Math.min(
-    //   initialVMin,
-    //   texture1.source.data.height
-    // );
-
-    // const vmin = Math.min(window.innerWidth, window.innerHeight);
-
-    // const scaleX = window.innerWidth / initialTextureWidth;
-
-    // const textureWidth = initialTextureWidth * scaleX;
-    // const textureHeight = initialTextureHeight * scaleX;
-
-    // if (textureWidth > vmin) {
-    //   // mesh.scale.setY(scaleX * (vmin / textureWidth));
-    //   // mesh.scale.setX(scaleX * (vmin / textureWidth));
-    // } else {
-    //   // mesh.scale.setX(scaleX);
-    //   // mesh.scale.setY(scaleX);
-    // }
-
-    // if (textureAspect <= cameraAspect) {
-    //   // mesh.scale.setY(textureAspect / cameraAspect);
-    //   // mesh.scale.setY(1 / textureAspect / cameraAspect);
-    // } else {
-    //   // console.log('hello');
-    //   // mesh.scale.setX(1 / textureAspect / cameraAspect);
-    // }
-
-    // mesh.scale.setX(aspect);
-
-    // mesh.scale.setX(aspect);
-    // mesh.geometry.width = window.innerWidth;
-    // mesh.geometry.height = window.innerHeight;
-    // mesh.updateMatrix();
-
-    // const textureAspect1 =
-    //   texture1.source.data.width / texture1.source.data.height;
-    // const textureAspect2 =
-    //   texture2.source.data.width / texture2.source.data.height;
-
-    // let aspect = mix(textureAspect1, textureAspect2, progress);
-
-    // let viewportAspectRatio = window.innerWidth / window.innerHeight;
-
-    // aspect /= viewportAspectRatio;
-
-    // mesh.material.uniforms.uAspectRatio.value = aspect;
-
-    // console.log(aspect);
-
-    // mesh.scale.setY(1 / aspect);
   }
 
   scene.add(mesh);

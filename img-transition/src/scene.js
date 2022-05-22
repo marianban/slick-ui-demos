@@ -14,7 +14,7 @@ export class Scene {
     this.imageIndex = 1;
     this.params = {
       progress: 0,
-      effect: 'left slide in',
+      effect: effects[0].name,
     };
     this.time = 0;
     this.lastTime = Date.now();
@@ -40,10 +40,13 @@ export class Scene {
     pane.addInput(this.params, 'progress', { min: 0, max: 1, step: 0.01 });
     pane
       .addInput(this.params, 'effect', {
-        options: {
-          'color distance': 'color distance',
-          'left slide in': 'left slide in',
-        },
+        options: effects.reduce(
+          (acc, effect) => ({
+            ...acc,
+            [effect.name]: effect.name,
+          }),
+          {}
+        ),
       })
       .on('change', (event) => {
         this.mesh.material.dispose();
@@ -58,7 +61,7 @@ export class Scene {
     this.initialHeight = window.innerHeight;
     const halfHeight = window.innerHeight / 2;
     const fov = Math.atan(halfHeight / 600) * (360 / (Math.PI * 2)) * 2;
-    this.camera = new THREE.PerspectiveCamera(fov, cameraAspect, 590, 610);
+    this.camera = new THREE.PerspectiveCamera(fov, cameraAspect, 290, 1010);
     this.camera.position.z = 600;
 
     this.renderer = new THREE.WebGLRenderer({

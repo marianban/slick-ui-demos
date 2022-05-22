@@ -12,6 +12,8 @@ void main()
 
     vec3 pos = position;
 
+    pos.z += (uProgress * 30.);
+
     gl_PointSize = uPixelRatio * uPixelSize;
 
     vec4 mPosition = modelMatrix * vec4(pos, 1.0);

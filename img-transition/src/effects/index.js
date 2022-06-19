@@ -7,14 +7,26 @@ import vertex2 from './left-slide-in/vertex.glsl';
 import fragment3 from './circle/fragment.glsl';
 import vertex3 from './circle/vertex.glsl';
 
-const effect = (name, fragment, vertex) => ({
+import fragment4 from './dots/fragment.glsl';
+import vertex4 from './dots/vertex.glsl';
+
+const effect = (
   name,
   fragment,
   vertex,
+  ease = 'slow(0.7,0.7, false)',
+  duration = 0.75
+) => ({
+  name,
+  fragment,
+  vertex,
+  ease,
+  duration,
 });
 
 export const effects = [
   effect('color distance', fragment, vertex),
   effect('left slide in', fragment2, vertex2),
   effect('circle', fragment3, vertex3),
+  effect('dots', fragment4, vertex4, 'sin.in', 0.75),
 ];

@@ -14,7 +14,7 @@ export class Scene {
     this.imageIndex = 1;
     this.params = {
       progress: 0,
-      effect: effects[2].name,
+      effect: effects.at(-1).name,
     };
     this.time = 0;
     this.lastTime = Date.now();
@@ -171,10 +171,12 @@ export class Scene {
       this.imageIndex++;
     }
 
+    const selectedEffect = findEffect(this.params.effect);
+
     this.animation = gsap.to(this.params, {
       progress: 1,
-      ease: 'slow(0.7,0.7, false)',
-      duration: 0.75,
+      ease: selectedEffect.ease,
+      duration: selectedEffect.duration,
       onComplete: () => {
         const prevTexture = new THREE.Texture(this.texture2.source.data);
         prevTexture.needsUpdate = true;

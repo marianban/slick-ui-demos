@@ -14,7 +14,7 @@ export class Scene {
     this.imageIndex = 1;
     this.params = {
       progress: 0,
-      effect: effects.at(-1).name,
+      effect: effects[effects.length - 1].name,
     };
     this.time = 0;
     this.lastTime = Date.now();

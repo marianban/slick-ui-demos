@@ -10,6 +10,9 @@ import vertex3 from './circle/vertex.glsl';
 import fragment4 from './dots/fragment.glsl';
 import vertex4 from './dots/vertex.glsl';
 
+import fragment5 from './zoom/fragment.glsl';
+import vertex5 from './zoom/vertex.glsl';
+
 const effect = (
   name,
   fragment,
@@ -29,4 +32,5 @@ export const effects = [
   effect('left slide in', fragment2, vertex2),
   effect('circle', fragment3, vertex3),
   effect('dots', fragment4, vertex4, 'sin.in', 0.75),
+  effect('zoom', fragment5, vertex5, 'power2.out'),
 ];

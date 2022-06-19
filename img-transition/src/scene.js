@@ -145,6 +145,9 @@ export class Scene {
 
     this.mesh.material.uniforms.uProgress.value = progress;
     this.mesh.material.uniforms.uProgressMix.value = this.params.progress;
+
+    // console.log({ progress, progressMix: this.params.progress });
+
     this.mesh.material.uniforms.uTime.value = this.time;
 
     const now = Date.now();

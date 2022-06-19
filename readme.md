@@ -1,9 +1,18 @@
 # Slick 😎 UI demos
 
+## Zoom image transition
+
+[![Zoom image transition
+](zoomTransition.gif)](https://demos.closure.sk/img-transition/dist/)
+
+Uses: JS, Three.js, GSAP
+
 ## Color distance image transition
 
 [![Color distance image transition
 ](imageTransition.gif)](https://demos.closure.sk/img-transition/dist/)
+
+Uses: JS, Three.js, GSAP
 
 ## Fireworks image transition
 

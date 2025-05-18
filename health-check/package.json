@@ -8,10 +8,11 @@
     "@testing-library/user-event": "^7.2.1",
     "classnames": "^2.2.6",
     "i": "^0.3.6",
-    "npm": "^6.14.4",
+    "npm": "^11.4.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "react-scripts": "3.3.1",
+    "react-scripts": "5.0.1",
+    "sass": "^1.89.0",
     "uuid": "^7.0.2",
     "web-animations-js": "^2.3.2"
   },
@@ -34,8 +35,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "node-sass": "^4.13.1"
   }
 }

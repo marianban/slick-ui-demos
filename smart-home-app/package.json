@@ -10,8 +10,9 @@
     "d3": "^5.15.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "react-scripts": "3.3.0",
+    "react-scripts": "5.0.1",
     "resize-observer-polyfill": "^1.5.1",
+    "sass": "^1.89.0",
     "uuid": "^3.4.0"
   },
   "scripts": {
@@ -34,8 +35,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "node-sass": "^4.13.1"
   }
 }
